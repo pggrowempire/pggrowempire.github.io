@@ -1,0 +1,11 @@
+const V='pg-202610200905';
+const CORE=['./','index.html','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png'], ASSETS=["a/three.min-7a7802bf4f.js", "a/CopyShader-1e6d12aceb.js", "a/LuminosityHighPassShader-fca824d83f.js", "a/EffectComposer-66eb32d17c.js", "a/RenderPass-846d5c59e6.js", "a/ShaderPass-c6b08d36b3.js", "a/UnrealBloomPass-23cc7af21b.js", "a/GLTFLoader-bb74c52af0.js", "a/meshopt-4cff9da555.js", "a/pgassets-c8647cf6c3.js", "a/pgart-560420e9f1.js", "a/pghd-7f72bb111b.js", "a/RGBELoader-feb9b85a87.js", "a/SAOShader-f395cb707e.js", "a/DepthLimitedBlurShader-09ed97e5e8.js", "a/UnpackDepthRGBAShader-fa73fa481c.js", "a/SAOPass-f47e7868b6.js", "a/HorizontalTiltShiftShader-94d2e88d01.js", "a/VerticalTiltShiftShader-a812e7b39f.js", "a/pgmodels-3c9d5da9fc.js", "a/pgmodels2-66ff80d73b.js", "a/pgpeople-4aba8a1cab.js"];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE).then(()=>Promise.all(ASSETS.map(a=>caches.match(a).then(h=>h||c.add(a)).catch(()=>{}))))).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.open(k).then(old=>old.keys().then(rs=>Promise.all(rs.filter(r=>/\/a\//.test(r.url)).map(r=>old.match(r).then(res=>caches.open(V).then(c=>c.put(r,res)))))).then(()=>caches.delete(k))))))));});
+self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET')return;
+ const cdn=/cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|fonts\.(googleapis|gstatic)\.com/.test(u.host);
+ if(u.origin===location.origin&&(e.request.mode==='navigate'||u.pathname.endsWith('/')||u.pathname.endsWith('index.html'))){
+  e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(V).then(c=>c.put(e.request,cp));return r;}).catch(()=>caches.match(e.request).then(r=>r||caches.match('index.html'))));return;}
+ if(u.origin===location.origin||cdn){e.respondWith(caches.match(e.request).then(hit=>{const net=fetch(e.request).then(r=>{if(r.ok||r.type==='opaque'){const cp=r.clone();caches.open(V).then(c=>c.put(e.request,cp));}return r;}).catch(()=>hit);return hit||net;}));}
+});
