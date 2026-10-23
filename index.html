@@ -732,7 +732,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       <div class="board"><div class="tabs"><button id="tabMonth" class="on">This month</button><button id="tabWeek">This week</button><button id="tabAll">All time</button></div><ol id="boardList"></ol><p class="note" id="boardNote">Loading the board…</p></div>
       <div class="row codes"><input id="codeIn" maxlength="16" placeholder="Secret code" autocomplete="off"><button class="pill" id="codeBtn">Redeem</button></div>
       <label class="field" id="nickRow" hidden>Your tag <input id="nick" maxlength="14" autocomplete="nickname" placeholder="Your tag"></label>
-      <div class="row"><div class="vols"><label>Music <input type="range" id="volM" min="0" max="100" step="5"></label><label>Sound <input type="range" id="volS" min="0" max="100" step="5"></label></div><button class="pill" id="musicBtn">Music: on</button><button class="pill" id="dbgBtn">Perf log: off</button><button class="pill" id="sfxBtn">Sound: on</button><button class="pill" id="mapBtn">Mini-map: on</button><button class="pill" id="radioBtn">Radio: Boom Bap</button><button class="pill" id="gfxBtn">Graphics: Auto</button><button class="pill" id="themeBtn">Style: Luxe</button><button class="pill" id="textBtn">Text: Normal</button><button class="pill" id="calmBtn">Motion: Full</button><button class="pill" id="cbBtn">Color-blind: Off</button><button class="pill" id="buzzBtn" hidden>Vibrate: on</button><button class="pill" id="photoBtn">Photo mode</button><button class="pill" id="shareBtn">Share my shop</button><button class="pill" id="moveBtn">Move my save</button><button class="pill" id="bakBtn">Restore backup</button><button class="pill" id="repBtn">Playtest report</button><button class="pill" id="bugBtn">Report a bug</button><button class="pill" id="wipeBtn">Start over</button></div>
+      <div class="row"><div class="vols"><label>Music <input type="range" id="volM" min="0" max="100" step="5"></label><label>Sound <input type="range" id="volS" min="0" max="100" step="5"></label></div><button class="pill" id="musicBtn">Music: on</button><button class="pill" id="dbgBtn">Perf log: off</button><button class="pill" id="sfxBtn">Sound: on</button><button class="pill" id="mapBtn">Mini-map: on</button><button class="pill" id="radioBtn">Radio: Boom Bap</button><button class="pill" id="gfxBtn">Graphics: Auto</button><button class="pill" id="camBtn">Camera: Street level</button><button class="pill" id="moodBtn">Time: Night</button><button class="pill" id="themeBtn">Style: Luxe</button><button class="pill" id="textBtn">Text: Normal</button><button class="pill" id="calmBtn">Motion: Full</button><button class="pill" id="cbBtn">Color-blind: Off</button><button class="pill" id="buzzBtn" hidden>Vibrate: on</button><button class="pill" id="photoBtn">Photo mode</button><button class="pill" id="shareBtn">Share my shop</button><button class="pill" id="moveBtn">Move my save</button><button class="pill" id="bakBtn">Restore backup</button><button class="pill" id="repBtn">Playtest report</button><button class="pill" id="bugBtn">Report a bug</button><button class="pill" id="wipeBtn">Start over</button></div>
       <p class="artcred">3D models: Glam Velvet Sofa, Chair Damask Purplegold and Specular Silk Pouf by Eric Chadwick / Wayfair; Diffuse Transmission Plant by Eric Chadwick / Darmstadt Graphics Group; Materials Variants Shoe by Shopify (all CC BY 4.0, via the Khronos glTF Sample Assets). Glass Vase Flowers and BoomBox are CC0. Scanned props, floor and wall materials and room lighting by Poly Haven (polyhaven.com, CC0). Characters and animations from Adobe Mixamo (mixamo.com). Music from Pixabay (Pixabay Content License): Lofi Hip Hop by Sub_Clair, Caliente Flow by White_Records, Chillhop: Favours by Ornave, Boom Bap by SoundSurfer, California by TouchProRecords, Jazz Lounge by AtlasAudio, Neon Drive Horizon by alex-morgan, Jazz Casino by ElectroAnimals. Leaf, bud and wall-art photographs from Unsplash (unsplash.com). Sound effects by Kenney (kenney.nl, CC0). Built with three.js (MIT).</p>
       <p class="cloud" id="cloudNote"><i></i><span>Checking your online save…</span></p>
       <p class="note" id="stats"></p>
@@ -983,7 +983,15 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   S.active = Math.max(0, Math.min(S.active || 0, S.strains.length - 1));
   let THEME = 'luxe'; try { THEME = localStorage.getItem('pgTheme') || 'luxe'; } catch {}
   const LUXE = THEME === 'luxe'; if (LUXE) document.documentElement.classList.add('luxe');
-  try { ['40px Anton', '40px "Sedgwick Ave Display"', '40px "Permanent Marker"'].forEach(f => document.fonts.load(f)); } catch (e) {}
+  const HYPE = LUXE && document.documentElement.classList.contains('hype'), FONT_RD = []; let fontsIn = false;
+  const onFonts = fn => { FONT_RD.push(fn); if (fontsIn) try { fn(); } catch (e) {} };
+  try { Promise.all(['40px Anton', '40px "Sedgwick Ave Display"', '40px "Permanent Marker"'].map(f => document.fonts.load(f))).then(() => { fontsIn = true; FONT_RD.forEach(fn => { try { fn(); } catch (e) {} }); }); } catch (e) {}
+  const NEON_COLS = ['#ff3d7a', '#3de0ff', '#ffe14a', '#4dff8a', '#c77dff'];
+  const neonCol = t => NEON_COLS[[...String(t)].reduce((a, ch) => a + ch.charCodeAt(0), 0) % NEON_COLS.length];
+  // neon tube lettering: wide colored glow, colored tube, white-hot core
+  function neonLine(x, t, cx, cy, font, col, size) { x.save(); x.font = font; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
+    x.shadowColor = col; x.shadowBlur = size * .45; x.strokeStyle = col; x.lineWidth = Math.max(3, size * .09); x.strokeText(t, cx, cy); x.shadowBlur = size * .22; x.strokeText(t, cx, cy);
+    x.shadowBlur = size * .12; x.shadowColor = col; x.fillStyle = '#fff6fb'; x.fillText(t, cx, cy); x.restore(); }
   // the empire's road: start at home in Broward (the 954), then Miami, Denver, New York, LA, Milan and finally Mars
   const LOCS = [
     { name: 'Broward County', short: 'Broward', code: '954', wall: '#2c4a3a', a: '#22f07c', b: '#3de0ff' }, { name: 'Miami', short: 'Miami', code: '305', wall: '#245a58', a: '#ff6ad5', b: '#3de0ff' },
@@ -1058,9 +1066,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   let tiltH = null, tiltV = null, grade = null;
   // final color grade: gentle contrast + saturation, purple shadows, warm highlights, soft vignette
   const GRADE = {
-    uniforms: { tDiffuse: { value: null }, asp: { value: 1 }, gt: { value: 0 }, hq: { value: 1 }, eve: { value: 0 } },
+    uniforms: { tDiffuse: { value: null }, asp: { value: 1 }, gt: { value: 0 }, hq: { value: 1 }, eve: { value: 0 }, nite: { value: 0 } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: `uniform sampler2D tDiffuse; uniform float asp; uniform float gt; uniform float hq; uniform float eve; varying vec2 vUv;
+    fragmentShader: `uniform sampler2D tDiffuse; uniform float asp; uniform float gt; uniform float hq; uniform float eve; uniform float nite; varying vec2 vUv;
       float h12(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
       void main(){
         vec2 cd = vUv - .5; float ca = 0.0;
@@ -1074,6 +1082,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
         vec2 d = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0));
         c *= 1.0 - ${LUXE ? '.14' : '.46'} * smoothstep(.35, 1.0, length(d) * 1.15);
         c *= mix(vec3(1.0), vec3(1.12, .98, .82), eve * smoothstep(.1, .8, l)); c *= 1.0 - .12 * eve * smoothstep(.35, 1.0, length(vUv - .5) * 1.4); c += vec3(-.004, .012, .009) * eve * (1.0 - smoothstep(0.0, .4, l)); c = mix(c, c * c * (3.0 - 2.0 * c), .12 * eve);
+        if (nite > 0.0) { float L = dot(c, vec3(.299, .587, .114)); float keep = smoothstep(.42, .95, L); vec3 dark = c * vec3(.5, .53, .7) + vec3(.004, .006, .022); vec3 lit = c * mix(vec3(1.0), vec3(1.03, 1.0, .97), keep);
+          c = mix(c, mix(dark, lit, keep), nite); float sat = dot(c, vec3(.299, .587, .114)); c = mix(vec3(sat), c, 1.0 + .25 * nite); vec2 dd = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0)); c *= 1.0 - .22 * nite * smoothstep(.3, .95, length(dd) * 1.2); }
         c *= .965; c = c / (1.0 + max(c - .74, 0.0) * .75);
         c += hq * (h12(vUv * 913.0 + gt) - .5) * .012;
         gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
@@ -1233,8 +1243,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     return root;
   }
   const shadowify = root => { root.traverse(m => { if (m.isMesh && !m.userData.isOutline) { m.castShadow = !m.material.transparent; m.receiveShadow = true; } }); return root; };
-  function tag(x, text, cx, cy, size, rot, fill, line) {
-    if (LUXE) { // gold-leaf lettering instead of spray paint (one per surface, so walls stay clean)
+  function tag(x, text, cx, cy, size, rot, fill, line, spray) {
+    if (LUXE && !spray) { // gold-leaf lettering instead of spray paint (one per surface, so walls stay clean)
       if (x.canvas.__lt) return; x.canvas.__lt = 1;
       x.save(); x.translate(cx, cy); const sz = size * .82; x.font = `italic 600 ${sz}px "Playfair Display", Georgia, serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
       const w = x.measureText(text).width, g = x.createLinearGradient(0, -sz * .5, 0, sz * .5); g.addColorStop(0, '#fff1c9'); g.addColorStop(.45, '#e9c77c'); g.addColorStop(.7, '#b88a3e'); g.addColorStop(1, '#e6c27a');
@@ -1679,6 +1689,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   for (const sx of [-8.86, 8.86]) scene.add(box(.07, .07, 13.4, trimB, sx, 4.15, .05, .03));
   // neon sign + neon leaf
   const signC = mk(512, 128); (x => { x.font = '84px "Sedgwick Ave Display", cursive'; x.textAlign = 'center'; x.textBaseline = 'middle'; if (LUXE) { x.font = 'italic 600 76px "Playfair Display", Georgia, serif'; x.shadowColor = 'rgba(255,200,110,.9)'; x.shadowBlur = 16; const sg = x.createLinearGradient(0, 20, 0, 92); sg.addColorStop(0, '#fff4d6'); sg.addColorStop(.55, '#f0cf86'); sg.addColorStop(1, '#c99a48'); x.fillStyle = sg; } else { x.shadowColor = '#22f07c'; x.shadowBlur = 14; x.fillStyle = '#ffd6ea'; } x.fillText("Philly G's", 256, 56); x.fillText("Philly G's", 256, 56); x.font = FNT(22); x.shadowColor = LOC().b; x.fillStyle = '#ffffff'; x.fillText(LOC().name.toUpperCase(), 256, 110); })(signC.getContext('2d'));
+  const signHype = () => { if (!HYPE) return; const x = signC.getContext('2d'); x.clearRect(0, 0, 512, 128); neonLine(x, "Philly G's", 256, 54, '400 78px "Sedgwick Ave Display", cursive', '#ff3d7a', 78); neonLine(x, LOC().name.toUpperCase(), 256, 110, '400 22px Anton, Impact, sans-serif', '#3de0ff', 22); try { sign.material.map.needsUpdate = true; } catch (e) {} }; signHype(); onFonts(signHype);
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 1.3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(signC), transparent: true })); sign.position.set(.2, 3.5, -5.68); scene.add(sign);
   const leafC = mk(256, 256); (x => {
     x.translate(128, 150); x.strokeStyle = '#9dff8a'; x.shadowColor = '#7dff6a'; x.shadowBlur = 14; x.lineWidth = 7; x.lineJoin = 'round';
@@ -3398,7 +3409,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (!composer || gfxLow) { const v = c.createRadialGradient(cssW / 2, cssH / 2, Math.min(cssW, cssH) * .45, cssW / 2, cssH / 2, Math.max(cssW, cssH) * .8); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.35)'); c.fillStyle = v; c.fillRect(0, 0, cssW, cssH); }
   }
   let camX = -4, camZ = 1.8, camTX = 0, camTZ = 0;
-  let camYaw = 0, yawT = 0, camPunch = 0;
+  let camYaw = 0, yawT = 0, camPunch = 0, idleCam = 0;
   let camZoom = 1, userZoom = 1, zoomT = 1; try { userZoom = zoomT = Math.max(.7, Math.min(1.35, +localStorage.getItem('pgZoom') || 1)); } catch {}
   let shakeA = 0, hitT = 0, coinStreak = 0, coinLast = 0, cashPrev = S.cash;
   const shake = a => { if (!reduceMotion && !calm) shakeA = Math.max(shakeA, a); }, hitStop = s => { hitT = Math.max(hitT, s); };
@@ -3420,7 +3431,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     { const RZ = remoteZ(player.x); if (RZ) { const lo = RZ.x0 + wantW / 2 - 1, hi = RZ.x1 - wantW / 2 + 1; tx = lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, player.x)); tz = Math.max(RZ.z0 + 2.6, Math.min(port ? RZ.z1 - 6.6 : RZ.z1 - 5.2, player.z)); } }
     camTX = tx; camTZ = tz;
     camX += (tx - camX) * Math.min(1, dt * 4); camZ += (tz - camZ) * Math.min(1, dt * 5);
-    const syw = Math.sin(camYaw), cyw = Math.cos(camYaw); camera.position.set(camX + syw * dist * .5, dist * .866, camZ + cyw * dist * .5); camera.lookAt(camX - syw * .6, 0, camZ - cyw * .6); camLook.set(camX - syw * .6, 0, camZ - cyw * .6);
+    idleCam = Math.hypot(player.vx, player.vz) < .2 && !calm ? Math.min(1, idleCam + dt * .25) : Math.max(0, idleCam - dt * 2); const drift = idleCam * .045 * Math.sin(T * .25);
+    const syw = Math.sin(camYaw + drift), cyw = Math.cos(camYaw + drift), cEl = (window.__camEl || (camMode === 'street' ? 46 : 60)) * Math.PI / 180, cSE = Math.sin(cEl), cCE = Math.cos(cEl); camera.position.set(camX + syw * dist * cCE, dist * cSE, camZ + cyw * dist * cCE); camera.lookAt(camX - syw * .6, 0, camZ - cyw * .6); camLook.set(camX - syw * .6, 0, camZ - cyw * .6);
     if (shakeA > .002) { camera.position.x += (Math.random() - .5) * shakeA; camera.position.y += (Math.random() - .5) * shakeA * .6; shakeA *= Math.pow(.0005, dt); } else shakeA = 0;
     sun.position.set(camX + 6, 16, camZ + 9); sun.target.position.set(camX, 0, camZ - 1);
   }
@@ -3454,7 +3466,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   window.addEventListener('resize', resize);
 
-  let idleN = 0, bootHold = true, linN = 0;
+  let idleN = 0, bootHold = true, linN = 0, phLvl = 0; // phLvl: how much the Phone setting has trimmed (shadows first, sharpness last)
   let last = performance.now(), perfN = 0, perfT = 0, running = false;
   // ---- light manager: the renderer always sees the same number of lights, so buying gear or walking into a room never forces every shader to rebuild (that froze iPhones for seconds). Phones light only the nearest few. ----
   var LMG = { dirty: 1, n: 0, pts: [], dirs: [], dumP: [], dumD: [], KP: 0, KD: 0 };
@@ -3495,11 +3507,11 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (grade) grade.uniforms.gt.value = (now % 10000) / 37;
     ++linN; if (!booted || (SCENE_DIRTY && !(linN & 3)) || !(linN % 120)) { SCENE_DIRTY = 0; linScene(); } renderRefl();
     itemSync(); _pt = plSeg('lin', _pt);
-    if ((gfxMode !== 'ultra' || PHONE) && !gfxLow) { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = !(linN & 1) || !booted; }
+    if ((gfxMode !== 'ultra' || PHONE) && !gfxLow) { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = (gfxMode === 'phone' && phLvl >= 1 ? !(linN & (phLvl >= 3 ? 15 : 3)) : !(linN & 1)) || !booted; }
     lightPick(); if (composer && !gfxLow) composer.render(); else renderer.render(scene, camera); _pt = plSeg('ren', _pt);
     drawFx(); drawTrim(); plFrame(plSeg('fx', _pt));
     perfT += dt; perfN++;
-    if (perfN >= 90) { const avg = perfT / perfN, perfSpan = (now - (perfW0 || now)) / 1000; perfW0 = now; perfN = 0; perfT = 0; if (PHONE && gfxMode === 'ultra' && running && !bootHold && !document.hidden) { if (avg > 1 / 24) { if ((ultraBad += perfSpan) >= 30) { ultraBad = 0; setGfx('phone'); toast('Switched to Phone graphics (smooth 30) to keep it smooth'); } } else ultraBad = Math.max(0, ultraBad - perfSpan); } if (gfxMode === 'phone') { if (running && !bootHold) { if (avg > 1 / 27 && prScale > .62) { prScale = Math.max(.62, prScale - .06); resize(); } else if (avg < 1 / 29.5 && prScale < 1) { prScale = Math.min(1, prScale + .03); resize(); } } } else if (gfxMode === 'high' || gfxMode === 'ultra') { if (running && !gfxLow && !bootHold) { if (avg > 1 / 45 && prScale > .6) { prScale = Math.max(.6, prScale - .07); resize(); } else if (avg < 1 / 57 && prScale < 1) { prScale = Math.min(1, prScale + .04); resize(); } } } else if (gfxLow || !running) {} else if (avg > 1 / 40) { if (bloom && bloom.enabled) bloom.enabled = false; else if (tiltH && tiltH.enabled) tiltH.enabled = tiltV.enabled = false; else if (sun.shadow.mapSize.x > 1024) { sun.shadow.mapSize.set(1024, 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } } else if (prScale > .75) { prCap = prScale; prScale -= .12; resize(); } else if (sun.castShadow) { sun.castShadow = false; } else if (prScale > .55) { prCap = prScale; prScale -= .15; resize(); } else if (gfxMode === 'auto') setGfx('low', true); perfSave(); } else if (avg < 1 / 57 && prScale + .1 < prCap) { prScale = Math.min(1, prScale + .1); resize(); perfSave(); } }
+    if (perfN >= 90) { const avg = perfT / perfN, perfSpan = (now - (perfW0 || now)) / 1000; perfW0 = now; perfN = 0; perfT = 0; if (PHONE && gfxMode === 'ultra' && running && !bootHold && !document.hidden) { if (avg > 1 / 24) { if ((ultraBad += perfSpan) >= 30) { ultraBad = 0; setGfx('phone'); toast('Switched to Phone graphics (smooth 30) to keep it smooth'); } } else ultraBad = Math.max(0, ultraBad - perfSpan); } if (gfxMode === 'phone') { if (running && !bootHold) { if (avg > 1 / 27 && phLvl < 3) { phLvl++; if (phLvl === 2) { sun.shadow.mapSize.set(512, 512); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } } } else if (avg > 1 / 27 && prScale > .8) { prScale = Math.max(.8, prScale - .05); resize(); } else if (avg < 1 / 29.5 && prScale < 1) { prScale = Math.min(1, prScale + .03); resize(); } } } else if (gfxMode === 'high' || gfxMode === 'ultra') { if (running && !gfxLow && !bootHold) { if (avg > 1 / 45 && prScale > .6) { prScale = Math.max(.6, prScale - .07); resize(); } else if (avg < 1 / 57 && prScale < 1) { prScale = Math.min(1, prScale + .04); resize(); } } } else if (gfxLow || !running) {} else if (avg > 1 / 40) { if (bloom && bloom.enabled) bloom.enabled = false; else if (tiltH && tiltH.enabled) tiltH.enabled = tiltV.enabled = false; else if (sun.shadow.mapSize.x > 1024) { sun.shadow.mapSize.set(1024, 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } } else if (prScale > .75) { prCap = prScale; prScale -= .12; resize(); } else if (sun.castShadow) { sun.castShadow = false; } else if (prScale > .55) { prCap = prScale; prScale -= .15; resize(); } else if (gfxMode === 'auto') setGfx('low', true); perfSave(); } else if (avg < 1 / 57 && prScale + .1 < prCap) { prScale = Math.min(1, prScale + .1); resize(); perfSave(); } }
     requestAnimationFrame(frame);
   }
 
@@ -3857,10 +3869,10 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     const rnd = (a, b) => { sd = (sd * 1103515245 + 12345) & 0x7fffffff; return a + (sd / 0x7fffffff) * (b - a); };
     const draw = () => {
       sd = seed; x.clearRect(0, 0, w, h);
-      if (LUXE) { c.__lt = 0; tag(x, text, w / 2, h * .42, Math.min(h * .6, w * 1.5 / Math.max(4, text.length)), 0, fill, line); t.needsUpdate = true; return; }
+      if (LUXE && !HYPE) { c.__lt = 0; tag(x, text, w / 2, h * .42, Math.min(h * .6, w * 1.5 / Math.max(4, text.length)), 0, fill, line); t.needsUpdate = true; return; }
       x.globalAlpha = .16; for (let i = 0; i < 70; i++) { x.fillStyle = rnd(0, 1) < .5 ? fill : line; x.beginPath(); x.arc(rnd(w * .08, w * .92), rnd(h * .2, h * .8), rnd(3, h * .07), 0, TAU); x.fill(); } x.globalAlpha = 1;
       const sz = Math.min(h * .6, w * 1.5 / Math.max(4, text.length));
-      tag(x, text, w / 2, h * .46, sz, -.04, fill, line);
+      tag(x, text, w / 2, h * .46, sz, -.04, fill, line, HYPE);
       for (let i = 0; i < 22; i++) { const dx = rnd(w * .14, w * .86), dy = h * .46 + sz * .18 + rnd(-6, 6), L = rnd(8, h * .32); x.fillStyle = rnd(0, 1) < .65 ? fill : line; x.fillRect(dx, dy, 3, L); x.beginPath(); x.arc(dx + 1.5, dy + L, 3.2, 0, TAU); x.fill(); }
       x.fillStyle = '#ffffff'; for (let i = 0; i < 7; i++) { const sx = rnd(w * .15, w * .85), sy = rnd(h * .25, h * .6); x.globalAlpha = .9; x.fillRect(sx - 1, sy - 7, 2, 14); x.fillRect(sx - 7, sy - 1, 14, 2); } x.globalAlpha = 1;
       t.needsUpdate = true;
@@ -4070,16 +4082,26 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const lampGlow = glowSprite('#ffe9a8', 3.2, .5); lampGlow.position.set(-8.7, 3.7, 9.6); scene.add(lampGlow);
   const lampPool = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ map: SOFT, color: '#ffd98a', transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false })); lampPool.rotation.x = -Math.PI / 2; lampPool.position.set(-8.7, .02, 9.6); scene.add(lampPool);
   const C = h => LIN(new THREE.Color(h)), HEMI_N = C(LUXE ? '#ffe6c8' : '#fff0f4'), HEMI_D = C(LUXE ? '#fff1de' : '#ffffff'), SUN_N = C(LUXE ? '#ffdcae' : '#fff2dc'), SUN_D = C(LUXE ? '#ffe9cc' : '#fff8ec'), SUN_K = C('#ffa060'), BG_N = C(LUXE ? '#07110d' : '#0a130e'), BG_D = C(CITY().sky || '#6c7fb0'), DUSK_T = C('#ffb27a'), BG_IN = C('#0b0d0c');
+  let camMode = 'street', moodMode = 'night'; try { camMode = localStorage.getItem('pgCam') || 'street'; moodMode = localStorage.getItem('pgMood') || 'night'; } catch (e) {}
+  const HEMI_G = hemi.groundColor.clone();
+  // fake light pools under every lamp so the night has bright spots to play in (cheap: one soft additive quad each)
+  let NG = null; function nightGlow(on) { if (!on) { if (NG) NG.visible = false; return; } if (!NG) { NG = new THREE.Group(); NG.userData.noOutline = true; scene.add(NG); const seen = [];
+      scene.traverse(o => { if (!(o.isPointLight || o.isSpotLight) || o.userData.lmDummy) return; const p = new THREE.Vector3(); o.getWorldPosition(p); if (p.y < .5 || p.y > 9 || seen.some(q => q.distanceTo(p) < 1.6)) return; seen.push(p);
+        const sz = Math.min(7, Math.max(2.6, (o.distance || 6) * .55)), m = new THREE.Mesh(new THREE.PlaneGeometry(sz, sz), new THREE.MeshBasicMaterial({ map: SOFT, color: new THREE.Color(o.color).lerp(new THREE.Color('#ffd9a0'), .35), transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+        m.rotation.x = -Math.PI / 2; m.position.set(p.x, .03, p.z); m.renderOrder = 1; m.userData.noMerge = true; NG.add(m); }); }
+    NG.visible = true; }
+  const MOON_C = C('#8fa6ff'), NIGHT_BG = C('#05060b'), NEON_P = C('#ff3d7a');
   let dayP = .12, eveRush = false; const DAY_LEN = 480, tmpC = new THREE.Color();
   function updateDay(dt) {
-    dayP = (dayP + dt / DAY_LEN) % 1;
+    dayP = moodMode === 'night' ? .79 : moodMode === 'day' ? .2 : (dayP + dt / DAY_LEN) % 1;
     const sn = Math.sin(dayP * TAU) + .5, day = Math.min(1, Math.max(0, (sn + .1) / .45)), dusk = Math.max(0, 1 - Math.abs(sn + .05) / .25);
     skyD.material.opacity = day; skyD.material.color.copy(tmpC.setRGB(1, 1, 1).lerp(DUSK_T, dusk));
     hemi.color.copy(HEMI_N).lerp(HEMI_D, day); hemi.intensity = (.48 + .13 * day - .08 * rainA) * (LUXE ? 1.3 : 1) * (PBR ? 1.45 : 1) * (gfxMode === 'phone' ? 1.16 : 1);
     sun.color.copy(SUN_N).lerp(SUN_D, day).lerp(SUN_K, dusk * .55); sun.intensity = ((LUXE ? .14 : 0) + .84 + .16 * day - .1 * rainA) * (PBR ? 1.32 : 1);
     scene.background.copy(BG_N).lerp(BG_D, day * (1 - .4 * rainA)); if (awayX(player.x)) scene.background.copy(BG_IN); scene.fog.color.copy(scene.background); if (ALLEY) ALLEY.night(1 - day); if (SKYT) SKYT(day);
+    if (moodMode === 'night') { hemi.intensity *= .6; hemi.groundColor.copy(HEMI_G).lerp(NEON_P, .25).multiplyScalar(.7); sun.intensity *= .5; sun.color.lerp(MOON_C, .55); if (!awayX(player.x)) scene.background.copy(NIGHT_BG); scene.fog.color.copy(scene.background); nightGlow(true); } else { hemi.groundColor.copy(HEMI_G); nightGlow(false); }
     lampGlow.material.opacity = .55 * (1 - day); lampPool.material.opacity = .3 * (1 - day);
-    if (bloom && !gfxLow) bloom.strength = .22 + .16 * (1 - day); if (typeof grade !== 'undefined' && grade && grade.uniforms.eve) grade.uniforms.eve.value = LUXE ? Math.min(1, (1 - day) * .9 + dusk * .5) : 0;
+    if (bloom && !gfxLow) bloom.strength = .22 + .16 * (1 - day) + (moodMode === 'night' ? .18 : 0); if (typeof grade !== 'undefined' && grade && grade.uniforms.nite) grade.uniforms.nite.value += ((moodMode === 'night' ? 1 : moodMode === 'cycle' ? (1 - day) * .8 : 0) - grade.uniforms.nite.value) * Math.min(1, dt * 2); if (typeof grade !== 'undefined' && grade && grade.uniforms.eve) grade.uniforms.eve.value = LUXE ? Math.min(1, (1 - day) * .9 + dusk * .5) : 0;
     if (sn < 0 && dusk > .85 && !eveRush && shelvesBuilt().filter(Boolean).length >= 2) { eveRush = true; if (!rushOn()) { rushT = 0; toast('Evening rush: the block just got off work'); } } if (day > .95) eveRush = false;
     if (typeof blackA !== 'undefined' && blackA > .01) { hemi.intensity *= 1 - .72 * blackA; sun.intensity *= 1 - .8 * blackA; }
     if (typeof blackA !== 'undefined') { neonL1.intensity = .85 * (1 - .9 * blackA); neonL2.intensity = .72 * (1 - .9 * blackA); regL.intensity = .5 * (1 - .9 * blackA); }
@@ -5025,6 +5047,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   function setGfx(m, fromAuto) { if (fromAuto) { gfxLow = true; sun.castShadow = false; motes.visible = false; resize(); perfSave(); gfxLabel(); return; } gfxMode = m; gfxLow = m === 'low'; try { localStorage.setItem('pgGfx', m); if (m === 'auto') localStorage.removeItem('pgPerf'); } catch {} applyGfx(); }
   $('themeBtn').textContent = 'Style: ' + (LUXE ? 'Luxe' : 'Street');
+  { const camL = () => { $('camBtn').textContent = 'Camera: ' + (camMode === 'street' ? 'Street level' : 'Classic top'); }, MOOD_N = { night: 'Night', day: 'Day', cycle: 'Day and night' }, moodL = () => { $('moodBtn').textContent = 'Time: ' + MOOD_N[moodMode]; }; camL(); moodL();
+    $('camBtn').addEventListener('click', () => { camMode = camMode === 'street' ? 'top' : 'street'; try { localStorage.setItem('pgCam', camMode); } catch (e) {} camL(); });
+    $('moodBtn').addEventListener('click', () => { moodMode = moodMode === 'night' ? 'day' : moodMode === 'day' ? 'cycle' : 'night'; if (moodMode === 'cycle') dayP = .12; try { localStorage.setItem('pgMood', moodMode); } catch (e) {} moodL(); }); }
   $('themeBtn').addEventListener('click', () => { if (visit) { toast('Head home first'); return; } save(); try { localStorage.setItem('pgTheme', LUXE ? 'street' : 'luxe'); } catch {} toast(LUXE ? 'Switching to the Street look…' : 'Switching to the Luxe look…'); setTimeout(() => location.reload(), 350); });
   $('gfxBtn').addEventListener('click', () => setGfx({ auto: 'phone', phone: 'high', high: 'ultra', ultra: 'low', low: 'auto' }[gfxMode] || 'auto'));
   applyGfx();
@@ -5417,8 +5442,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   const setPref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} applyComfort(); };
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 80;
+  const GAME_VER = 81;
   const NEWS = [
+    ['After Dark', 'The block now lives at night: a moody neon look with glowing light pools, neon tube signs on every storefront, spray-painted lettering, a concrete skate park wall, steam rising off the road, locals posted up on the sidewalk and signs that flicker. The camera sits lower at street level so you see walls, signs and cars, and drifts a little when you stand still. Settings has Camera (Street level or Classic top) and Time (Night, Day, or Day and night). On iPhone the Phone setting now trims shadows before it ever lowers sharpness, so the picture stays crisp.'],
     ['More street style', 'Every remaining icon got the graffiti street look: daily drops, boosts, legacy perks, casino games, event art, rival crews and all nine strains. The sneaker collection is redrawn as original designs, and spray-painted street pieces now cover the road, the sidewalks and the skate park floor.'],
     ['The Street Style drop', 'The whole game got a graffiti streetwear makeover: new menus, buttons and top bar with sticker labels and bold street type, upgrade bubbles that show the real art of what you are buying, and a louder unlock reveal with spinning rays, a STARTER / CUSTOM / LEGENDARY tag and a gold storm for legendary gear. New street-style art for every story chapter, achievement, collectible and city, plus spray-painted murals on the Motorwerks and basement walls.'],
     ['PG Records + smooth 30', 'NEW BUSINESS: PG Records, a studio and showcase club up the purple door in the warehouse wall (opens at LV 15 after the casino). Artists pay for sessions in glass booths, fans pay cover on the LED dance floor, and you can step on the Beat Lab ring to make beats yourself: a clean take pays and a hit single starts a release party. Five new gear pads and Season 4 of the story. NEW Phone graphics setting (now the default on phones): a steady 30 frames a second with lighter lighting and effects. Tap the floor to walk there, or tap a station to walk up to it (tap yourself for a trick). A ring now shows under your thumb while you steer. Music and Sound volume sliders in the menu. Thanksgiving and New Year holidays with their own decor, fits, events and special tips.'],
@@ -5599,7 +5625,19 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     }
     shadowify(g); outline(g); g.rotation.y = dir > 0 ? 0 : Math.PI; g.position.set(dir > 0 ? -34 : 34, -.2, dir > 0 ? 13.6 : 16.4); scene.add(g); return g;
   }
-  function updateLife(dt) {
+  const VENTS = [[-6.5, 15.2], [17.5, 18.4], [-27, 17.2]], puffs = []; let puffT = 0, flickT = 3, hangers = null;
+  function nightLife(dt) {
+    if (calm || gfxLow) return;
+    // steam rising out of the road
+    if ((puffT -= dt) <= 0 && Math.abs(player.x) < 40) { puffT = .32; const [vx, vz] = pick(VENTS); if (puffs.length < 14) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: SOFT, color: '#dfe6f2', transparent: true, opacity: 0, depthWrite: false })); sp.position.set(vx + rand(-.2, .2), -.1, vz + rand(-.2, .2)); sp.userData.noMerge = true; scene.add(sp); puffs.push({ sp, t: 0, life: rand(2.2, 3.2), dx: rand(.1, .35) }); } }
+    for (let k = puffs.length - 1; k >= 0; k--) { const p = puffs[k]; p.t += dt; const f = p.t / p.life; p.sp.position.y += dt * .7; p.sp.position.x += dt * p.dx; const sc = .8 + f * 2.4; p.sp.scale.set(sc, sc, 1); p.sp.material.opacity = Math.sin(Math.min(1, f) * Math.PI) * (moodMode === 'night' ? .2 : .12); if (f >= 1) { scene.remove(p.sp); p.sp.material.dispose(); puffs.splice(k, 1); } }
+    // a couple of locals posted up on the sidewalk by the shop
+    if (!hangers && locsReady) { hangers = []; for (const [x, z, fx, an] of [[-6.3, 10.85, 1, null], [-5.55, 10.95, -1, null], [12.6, 10.9, -1, null]]) { const P = person(randomLook(), false); P.root.position.set(x, 0, z); faceTo(P, fx, -.25); P.forceAnim = an; scene.add(P.root); hangers.push(P); } }
+    if (hangers && Math.abs(player.x) < 30) hangers.forEach((P, i) => animPerson(P, T + i * 2.3, false, false));
+    // now and then a neon sign stutters
+    if ((flickT -= dt) <= 0) { flickT = rand(2.5, 7); const m = NEON_SIGNS.length && pick(NEON_SIGNS); if (m) { let n = 0; const tick = () => { m.material.opacity = n % 2 ? 1 : .35; if (++n < 4 + Math.floor(Math.random() * 3)) setTimeout(tick, 50 + Math.random() * 70); else m.material.opacity = 1; }; tick(); } }
+  }
+  function updateLife(dt) { try { nightLife(dt); } catch (e) {}
     if (locsReady && (LOC2.soldQ != null || LOC2.custOut) && carT > 1.2) carT = 1.2;
     if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if (cars.length < (PHONE || !TRAF ? 4 : TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4)) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
     for (let k = cars.length - 1; k >= 0; k--) { const c = cars[k]; c.g.position.x += c.dir * c.sp * dt; if (c.g.userData.rider) animPerson(c.g.userData.rider, T, false, false); if (c.g.userData.hl) c.g.userData.hl.material.opacity = .08 + .3 * (1 - (typeof skyD !== 'undefined' ? skyD.material.opacity : 0)); if (c.g.userData.beam) c.g.userData.beam.material.opacity = .32 * (1 - skyD.material.opacity); if (Math.abs(c.g.position.x) > 36) { scene.remove(c.g); if (c.g.userData.rivTag) c.g.userData.rivTag.material.dispose(); cars.splice(k, 1); } }
@@ -5760,7 +5798,11 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     // graffiti-bombed walls
     const gwc = mk(1024, 192), g2 = gwc.getContext('2d'); R(g2, '#34303c', 0, 0, 1024, 192); for (let i = 0; i < 300; i++) R(g2, `rgba(255,255,255,${Math.random() * .05})`, Math.random() * 1024, Math.random() * 192, 4 + Math.random() * 30, 2 + Math.random() * 8);
     const words = ['BONER CHAMP', 'SUCK YO MUDDA', 'PHILLY G', 'PG', AREA(), 'SKATE OR DIE', 'KUSH KING', 'LIL SPOOK', 'STAY LIFTED', 'UNDERGROUND', 'PG CREW'], cols = [['#22f07c', '#ffe23d'], ['#7dff6a', '#22f07c'], ['#3de0ff', '#22f07c'], ['#ffe23d', '#3de0ff'], ['#ff8a3d', '#ffe23d'], ['#c77dff', '#7dff6a']];
-    if (LUXE) { R(g2, lxTone()[0], 0, 0, 1024, 192); for (let c = 0; c < 8; c++) { const x0 = c * 128; R(g2, lxTone()[2], x0 + 8, 12, 112, 160); g2.strokeStyle = '#d9b46a'; g2.lineWidth = 2; g2.strokeRect(x0 + 8, 12, 112, 160); } R(g2, '#d9b46a', 0, 178, 1024, 3); g2.clearRect(300, 40, 424, 100); R(g2, lxTone()[0], 300, 40, 424, 100); g2.strokeStyle = '#d9b46a'; g2.lineWidth = 3; g2.strokeRect(306, 46, 412, 88); tag(g2, 'PG Underground', 512, 86, 54, 0); }
+    if (HYPE) { R(g2, '#3b3b40', 0, 0, 1024, 192); for (let i = 0; i < 260; i++) { g2.fillStyle = Math.random() < .5 ? `rgba(255,255,255,${(Math.random() * .05).toFixed(3)})` : `rgba(0,0,0,${(Math.random() * .12).toFixed(3)})`; g2.fillRect(Math.random() * 1024, Math.random() * 192, 4 + Math.random() * 60, 2 + Math.random() * 20); }
+      for (let c = 1; c < 4; c++) { R(g2, 'rgba(0,0,0,.35)', c * 256, 0, 2, 192); } R(g2, 'rgba(0,0,0,.3)', 0, 96, 1024, 2); for (let c = 0; c < 4; c++) for (const ty of [24, 168]) for (const tx of [32, 224]) { g2.fillStyle = 'rgba(0,0,0,.45)'; g2.beginPath(); g2.arc(c * 256 + tx, ty, 4, 0, TAU); g2.fill(); }
+      for (let i = 0; i < 9; i++) { const dx = 120 + Math.random() * 780, L = 12 + Math.random() * 40; g2.fillStyle = Math.random() < .5 ? '#ff2b3a' : '#ffe14a'; g2.globalAlpha = .7; g2.fillRect(dx, 112, 3, L); g2.globalAlpha = 1; }
+      tag(g2, 'PG Underground', 512, 88, 74, -.03, '#ffffff', '#ff2b3a', true); }
+    else if (LUXE) { R(g2, lxTone()[0], 0, 0, 1024, 192); for (let c = 0; c < 8; c++) { const x0 = c * 128; R(g2, lxTone()[2], x0 + 8, 12, 112, 160); g2.strokeStyle = '#d9b46a'; g2.lineWidth = 2; g2.strokeRect(x0 + 8, 12, 112, 160); } R(g2, '#d9b46a', 0, 178, 1024, 3); g2.clearRect(300, 40, 424, 100); R(g2, lxTone()[0], 300, 40, 424, 100); g2.strokeStyle = '#d9b46a'; g2.lineWidth = 3; g2.strokeRect(306, 46, 412, 88); tag(g2, 'PG Underground', 512, 86, 54, 0); }
     else {
     for (let i = 0; i < 16; i++) { const [f, l] = cols[i % cols.length]; tag(g2, words[i % words.length], 40 + (i * 131) % 960, 40 + ((i * 53) % 120), 26 + (i % 4) * 9, (i % 3 - 1) * .08, f, l); }
     for (let d = 0; d < 70; d++) R(g2, pick(['#22f07c', '#7dff6a', '#ffe23d', '#3de0ff']), Math.random() * 1024, 120 + Math.random() * 40, 2, 6 + Math.random() * 20);
@@ -6861,7 +6903,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     hdSet(CONC_M, 'conc', 1, 1, { ns: 1, rough: .95 }); if (ALLEY) ALLEY.hd(HDT, hdSet); if (HDT.espresso) hdSet(PLY_M, 'espresso', .7, .7, { ns: .35, rough: .38, env: .7, col: '#6e5a4c' }); if (SB.userData.roofM && HDT.conc) hdSet(SB.userData.roofM, 'conc', 4, 4.8, { ns: 1, rough: .95, env: .2, col: '#7f8287' });
     // the warehouse front becomes real brick, keeping the painted PG UNDERGROUND lettering
     if (HDT.brick && wh.userData.walls) { const c = mk(1024, 384), x = c.getContext('2d'); for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) x.drawImage(HDT.brick.d, i * 192, j * 192, 192, 192); x.fillStyle = 'rgba(10,8,6,.25)'; x.fillRect(0, 0, 1024, 384);
-      RAWC(() => { x.save(); x.translate(512, 120); x.font = "italic 600 64px 'Playfair Display', Georgia, serif"; x.textAlign = 'center'; x.fillStyle = '#e9c77c'; x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 6; x.fillText('PG Underground', 0, 0); x.restore(); });
+      RAWC(() => { x.save(); x.translate(512, 120); x.font = HYPE ? '400 70px "Sedgwick Ave Display", cursive' : "italic 600 64px 'Playfair Display', Georgia, serif"; x.textAlign = 'center'; x.fillStyle = HYPE ? '#ffffff' : '#e9c77c'; x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 6; if (HYPE) { x.lineWidth = 7; x.strokeStyle = '#ff2b3a'; x.strokeText('PG Underground', 0, 0); } x.fillText('PG Underground', 0, 0); x.restore(); });
       [...wh.userData.walls, wh.userData.lintel].forEach(m => { const mm = m && m.material && m.material[4]; if (!mm || !mm.map) return; mm.map.image = c; mm.map.needsUpdate = true; const nt = hdTex(HDT.brick.n, false, mm.map.repeat.x * 6, mm.map.repeat.y * 2); nt.offset.copy(mm.map.offset).multiply(new THREE.Vector2(6, 2)); if (mm.isMeshStandardMaterial) { mm.normalMap = nt; mm.roughness = .95; mm.needsUpdate = true; } }); }
   }
   // ambient occlusion: soft contact shadows where things meet (Ultra graphics only, it costs a full extra render)
@@ -7248,7 +7290,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     q.fillStyle = '#0d1410'; q.fillRect(0, 0, 512, 320); q.strokeStyle = '#d4a64a'; q.lineWidth = 10; q.strokeRect(14, 14, 484, 292);
     for (let i = 0; i < 26; i++) { const t = i / 26; for (const [bx, by] of [[30 + t * 452, 30], [30 + t * 452, 290]]) { q.fillStyle = '#ffe9b0'; q.beginPath(); q.arc(bx, by, 6, 0, TAU); q.fill(); } }
     for (let i = 1; i < 15; i++) { const t = i / 15; for (const [bx, by] of [[30, 30 + t * 260], [482, 30 + t * 260]]) { q.fillStyle = '#ffe9b0'; q.beginPath(); q.arc(bx, by, 6, 0, TAU); q.fill(); } }
-    q.textAlign = 'center'; q.font = "italic 800 150px 'Playfair Display', Georgia, serif"; q.shadowColor = '#ffcf6a'; q.shadowBlur = 22; const gr = q.createLinearGradient(0, 70, 0, 210); gr.addColorStop(0, '#fff1c4'); gr.addColorStop(1, '#d9a443'); q.fillStyle = gr; q.fillText('PG', 256, 200);
+    q.textAlign = 'center'; q.font = "italic 800 150px 'Playfair Display', Georgia, serif"; q.shadowColor = '#ffcf6a'; q.shadowBlur = 22; const gr = q.createLinearGradient(0, 70, 0, 210); gr.addColorStop(0, '#fff1c4'); gr.addColorStop(1, '#d9a443'); q.fillStyle = gr; if (HYPE) neonLine(q, 'PG', 256, 160, '400 150px "Permanent Marker", cursive', '#4dff8a', 150); else q.fillText('PG', 256, 200);
     q.shadowBlur = 8; q.font = "700 34px Outfit, sans-serif"; q.fillStyle = '#7dffb0'; q.fillText('SKATE  CLUB', 256, 258);
     const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; tx.anisotropy = MAXANI;
     const frame = new THREE.Mesh(rbox(W + .12, H + .12, .14, .03), M0.gold); frame.position.y = 1.35; frame.castShadow = true; frame.userData.noMerge = true; g.add(frame);
@@ -7318,12 +7360,16 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const lb = (w, h, d, mat, x, y, z, r) => { const m = new THREE.Mesh(rbox(w, h, d, r === undefined ? Math.min(.05, Math.min(w, h, d) * .25) : r), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; m.userData.noOutline = true; return m; };
   const lc = (r, h, mat, x, y, z, seg = 24) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; m.userData.noOutline = true; return m; };
   const nsign = (text, col, w, h, x, y, z, ry = 0, px = 512, py = 128, sz = 70) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: neonText(text, col, px, py, sz), transparent: true, depthWrite: false })); m.position.set(x, y, z); m.rotation.y = ry; m.userData.noOutline = true; return m; };
-  function serifTex(lines, w = 1024, h = 256, bg = null) { // gold serif lettering for storefronts
+  var NEON_SIGNS = [];
+  function serifTex(lines, w = 1024, h = 256, bg = null) { // gold serif lettering for storefronts (neon tubes on the street skin)
+    if (HYPE) { const c = mk(w, h), x = c.getContext('2d'), col = neonCol(lines[0][0]), t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = MAXANI;
+      const paint = () => { x.clearRect(0, 0, w, h); if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); } lines.forEach(([tx, size, y], n) => { const fs = n ? Math.round(size * .9) : size, f = n ? `400 ${fs}px Anton, Impact, sans-serif` : `400 ${Math.round(size * .92)}px "Permanent Marker", cursive`; x.font = f; let k = 1; while (x.measureText(tx).width > w * .92 && k > .5) { k -= .05; x.font = n ? `400 ${Math.round(fs * k)}px Anton, Impact, sans-serif` : `400 ${Math.round(size * .92 * k)}px "Permanent Marker", cursive`; } if (n) { x.save(); x.textAlign = 'center'; x.textBaseline = 'middle'; x.shadowColor = col; x.shadowBlur = 10; x.fillStyle = '#ffffff'; x.fillText(tx, w / 2, y); x.restore(); } else neonLine(x, tx, w / 2, y, x.font, col, size * k); }); t.needsUpdate = true; };
+      paint(); onFonts(paint); t.pgNeon = 1; return t; }
     const c = mk(w, h), x = c.getContext('2d'); if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
     const gr = x.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#fff1c4'); gr.addColorStop(.5, '#e2b85c'); gr.addColorStop(1, '#b8862f');
     lines.forEach(([t, size, y, font]) => { x.font = font || `italic 700 ${size}px 'Playfair Display', Georgia, serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.shadowColor = 'rgba(255,214,140,.55)'; x.shadowBlur = size * .2; x.fillStyle = gr; x.fillText(t, w / 2, y); });
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = MAXANI; return t; }
-  const signPlate = (tex, w, h, x, y, z, ry = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false })); m.position.set(x, y, z); m.rotation.y = ry; m.userData.noOutline = true; return m; };
+  const signPlate = (tex, w, h, x, y, z, ry = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false })); m.position.set(x, y, z); m.rotation.y = ry; m.userData.noOutline = true; if (tex.pgNeon) NEON_SIGNS.push(m); return m; };
 
   // ---- small luxury objects ----
   const DIAL = {};
@@ -8657,7 +8703,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     const n = Math.max(1, PL.n), s = PL.seg, ri = renderer.info.render, mem = performance.memory, m = document.querySelector('.modal:not([hidden])');
     PL.samples.push({ t: Math.round((Date.now() - PL.t0) / 1000), fps: +(1000 * PL.n / PL.wT).toFixed(1), avg: +(PL.ft / n).toFixed(1), worst: Math.round(PL.worst), slow: PL.slow,
       js: { upd: +(s.upd / n).toFixed(1), cam: +(s.cam / n).toFixed(1), hud: +(s.hud / n).toFixed(1), lin: +(s.lin / n).toFixed(1), ren: +(s.ren / n).toFixed(1), fx: +(s.fx / n).toFixed(1) }, sub: Object.fromEntries(Object.entries(PL.sub).filter(e => e[1] / n > .2).map(e => [e[0], +(e[1] / n).toFixed(1)])),
-      area: plArea(), gfx: gfxMode + (gfxLow ? '/low' : ''), pr: +prScale.toFixed(2), calls: ri.calls, tris: ri.triangles, tex: renderer.info.memory.textures, geo: renderer.info.memory.geometries,
+      area: plArea(), gfx: gfxMode + (gfxLow ? '/low' : '') + (phLvl ? '/p' + phLvl : ''), pr: +prScale.toFixed(2), calls: ri.calls, tris: ri.triangles, tex: renderer.info.memory.textures, geo: renderer.info.memory.geometries,
       cash: Math.round(S.cash), tot: Math.round(S.total), lv: S.level, ppl: typeof PPL !== 'undefined' ? PPL.list.length : 0, vis: typeof PPL !== 'undefined' ? PPL.vis || 0 : 0, modal: m ? m.id : '', run: running ? 1 : 0, heap: mem ? Math.round(mem.usedJSHeapSize / 1048576) : null });
     if (PL.samples.length > 240) PL.samples.shift();
     PL.n = 0; PL.ft = 0; PL.worst = 0; PL.slow = 0; PL.wT = 0; for (const k in s) s[k] = 0; PL.sub = {}; PL.fseg = null; PL.fsub = null;
