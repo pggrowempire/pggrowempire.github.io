@@ -732,7 +732,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
         <li><b>Tap</b> anywhere to pull a skate trick. Chain them for combos and street cred.</li>
         <li><b>Stand on a price pad</b> to build stations, buy grow gear (lights, plant food, hydro) and store upgrades. <b>Hire staff</b> from the Hire tab at the bottom.</li>
       </ol>
-      <p class="note age">18+ only. A made-up game: nothing here is real or for sale.</p><button class="btn" id="startBtn">I'm 18+ · Open the shop</button>
+      <p class="note age" style="font-size:.74em;line-height:1.35;opacity:.8">18+ only. This is a work of fiction: a made-up shop in a made-up city. Nothing in the game is real, for sale, or shipped, and it doesn’t promote or help anyone buy or use cannabis. Every brand, product and character is invented, and any resemblance to real ones is a coincidence.</p><button class="btn" id="startBtn">I'm 18+ · Open the shop</button>
     </div>
   </div>
 
@@ -754,7 +754,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       <div class="board"><div class="tabs"><button id="tabMonth" class="on">This month</button><button id="tabWeek">This week</button><button id="tabAll">All time</button></div><ol id="boardList"></ol><p class="note" id="boardNote">Loading the board…</p></div>
       <div class="row codes"><input id="codeIn" maxlength="16" placeholder="Secret code" autocomplete="off"><button class="pill" id="codeBtn">Redeem</button></div>
       <label class="field" id="nickRow" hidden>Your tag <input id="nick" maxlength="14" autocomplete="nickname" placeholder="Your tag"></label>
-      <div class="row"><div class="vols"><label>Music <input type="range" id="volM" min="0" max="100" step="5"></label><label>Sound <input type="range" id="volS" min="0" max="100" step="5"></label></div><button class="pill" id="musicBtn">Music: on</button><button class="pill" id="dbgBtn">Perf log: off</button><button class="pill" id="sfxBtn">Sound: on</button><button class="pill" id="mapBtn">Mini-map: on</button><button class="pill" id="radioBtn">Radio: Boom Bap</button><button class="pill" id="gfxBtn">Graphics: Auto</button><button class="pill" id="camBtn">Camera: Street level</button><button class="pill" id="moodBtn">Time: Night</button><button class="pill" id="themeBtn">Style: Luxe</button><button class="pill" id="textBtn">Text: Normal</button><button class="pill" id="calmBtn">Motion: Full</button><button class="pill" id="cbBtn">Color-blind: Off</button><button class="pill" id="buzzBtn" hidden>Vibrate: on</button><button class="pill" id="photoBtn">Photo mode</button><button class="pill" id="shareBtn">Share my shop</button><button class="pill" id="moveBtn">Move my save</button><button class="pill" id="bakBtn">Restore backup</button><button class="pill" id="repBtn">Playtest report</button><button class="pill" id="bugBtn">Report a bug</button><button class="pill" id="wipeBtn">Start over</button></div>
+      <div class="row"><div class="vols"><label>Music <input type="range" id="volM" min="0" max="100" step="5"></label><label>Sound <input type="range" id="volS" min="0" max="100" step="5"></label></div><button class="pill" id="musicBtn">Music: on</button><button class="pill" id="dbgBtn">Perf log: off</button><button class="pill" id="sfxBtn">Sound: on</button><button class="pill" id="mapBtn">Mini-map: on</button><button class="pill" id="radioBtn">Radio: Boom Bap</button><button class="pill" id="gfxBtn">Graphics: Auto</button><button class="pill" id="camBtn">Camera: Street level</button><button class="pill" id="moodBtn">Time: Night</button><button class="pill" id="themeBtn">Style: Luxe</button><button class="pill" id="textBtn">Text: Normal</button><button class="pill" id="calmBtn">Motion: Full</button><button class="pill" id="cbBtn">Color-blind: Off</button><button class="pill" id="cleanBtn">Language: Street</button><button class="pill" id="buzzBtn" hidden>Vibrate: on</button><button class="pill" id="photoBtn">Photo mode</button><button class="pill" id="shareBtn">Share my shop</button><button class="pill" id="moveBtn">Move my save</button><button class="pill" id="bakBtn">Restore backup</button><button class="pill" id="repBtn">Playtest report</button><button class="pill" id="bugBtn">Report a bug</button><button class="pill" id="wipeBtn">Start over</button></div>
       <p class="artcred">3D models: Glam Velvet Sofa, Chair Damask Purplegold and Specular Silk Pouf by Eric Chadwick / Wayfair; Diffuse Transmission Plant by Eric Chadwick / Darmstadt Graphics Group; Materials Variants Shoe by Shopify (all CC BY 4.0, via the Khronos glTF Sample Assets). Glass Vase Flowers and BoomBox are CC0. Scanned props, floor and wall materials and room lighting by Poly Haven (polyhaven.com, CC0). Characters and animations from Adobe Mixamo (mixamo.com). Music from Pixabay (Pixabay Content License): Lofi Hip Hop by Sub_Clair, Caliente Flow by White_Records, Chillhop: Favours by Ornave, Boom Bap by SoundSurfer, California by TouchProRecords, Jazz Lounge by AtlasAudio, Neon Drive Horizon by alex-morgan, Jazz Casino by ElectroAnimals. Leaf, bud and wall-art photographs from Unsplash (unsplash.com). Sound effects by Kenney (kenney.nl, CC0). Built with three.js (MIT).</p>
       <p class="cloud" id="cloudNote"><i></i><span>Checking your online save…</span></p>
       <p class="note" id="stats"></p>
@@ -1006,6 +1006,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   let THEME = 'luxe'; try { THEME = localStorage.getItem('pgTheme') || 'luxe'; } catch {}
   const LUXE = THEME === 'luxe'; if (LUXE) document.documentElement.classList.add('luxe');
   const HYPE = LUXE && document.documentElement.classList.contains('hype'), FONT_RD = []; let fontsIn = false;
+  const CLEAN = (() => { try { return localStorage.getItem('pgClean') === '1'; } catch (e) { return false; } })();
+  const CLEAN_MAP = [['SUCK YO MUDDA', 'PHILLY PROUD'], ['BONER CHAMP', 'BLOCK CHAMP'], ['LIL SPOOK', 'LIL G'], ['Mudda Special', 'Mom’s Special']];
+  const CW = t => { if (!CLEAN || typeof t !== 'string') return t; CLEAN_MAP.forEach(([a, b]) => { t = t.split(a).join(b); }); return t; };
   const onFonts = fn => { FONT_RD.push(fn); if (fontsIn) try { fn(); } catch (e) {} };
   try { Promise.all(['40px Anton', '40px "Sedgwick Ave Display"', '40px "Permanent Marker"'].map(f => document.fonts.load(f))).then(() => { fontsIn = true; FONT_RD.forEach(fn => { try { fn(); } catch (e) {} }); }); } catch (e) {}
   const NEON_COLS = ['#ff3d7a', '#3de0ff', '#ffe14a', '#4dff8a', '#c77dff'];
@@ -1265,7 +1268,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     return root;
   }
   const shadowify = root => { root.traverse(m => { if (m.isMesh && !m.userData.isOutline) { m.castShadow = !m.material.transparent; m.receiveShadow = true; } }); return root; };
-  function tag(x, text, cx, cy, size, rot, fill, line, spray) {
+  function tag(x, text, cx, cy, size, rot, fill, line, spray) { text = CW(text);
     if (LUXE && !spray) { // gold-leaf lettering instead of spray paint (one per surface, so walls stay clean)
       if (x.canvas.__lt) return; x.canvas.__lt = 1;
       x.save(); x.translate(cx, cy); const sz = size * .82; x.font = `italic 600 ${sz}px "Playfair Display", Georgia, serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
@@ -3201,8 +3204,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (p.id === 'bartender') { makeBartender(); toast('Bartender on deck. The lounge bar restocks itself from your shelves'); }
     if (p.id === 'grower') { makeGrower(); toast('Grower on the crew. Beds stay watered, bugs get sprayed, plants grow 10% faster'); }
     if (p.id === 'manager' && kicksReady) { makeManager(); toast('Manager on the floor. Every till comes to you now'); }
-    if (p.id === 'jeweler') { if (locsReady) syncLocs(); banner('PG ICE IS OPEN', 'ROLEX · PATEK · AP · CUSTOM GRILLZ · WALK IN THE GOLD DOORS'); fireworks(5); }
-    if (p.id === 'motorwerks') { if (locsReady) syncLocs(); banner('PG MOTORWERKS IS OPEN', 'BRABUS · RWB · MANSORY · CUSTOM JOBS'); fireworks(6); }
+    if (p.id === 'jeweler') { if (locsReady) syncLocs(); banner('PG ICE IS OPEN', 'CROWNLINE · PAVANE · AUREL · CUSTOM GRILLZ · WALK IN THE GOLD DOORS'); fireworks(5); }
+    if (p.id === 'motorwerks') { if (locsReady) syncLocs(); banner('PG MOTORWERKS IS OPEN', 'BRAWLER · WIDEBODY WORKS · MONARCH · CUSTOM JOBS'); fireworks(6); }
     if (p.id === 'studio') { if (!S.eq.booth) S.eq.booth = 1; if (locsReady) syncLocs(); banner('PG RECORDS IS OPEN', 'TAKE THE PURPLE DOOR IN THE WAREHOUSE WALL UP TO THE STUDIO'); fireworks(8); }
     if (p.id === 'casino') { if (!S.eq.slots) S.eq.slots = 1; if (locsReady) syncLocs(); banner('PG CASINO IS OPEN', 'SLOTS · BLACKJACK · ROULETTE · CRAPS · POKER · WALK UNDER THE MARQUEE'); fireworks(8); }
     if (p.kind === 'zone' || ['basement', 'jeweler', 'motorwerks', 'studio', 'casino'].includes(p.id)) grandOpen(true, 3.8);
@@ -3921,7 +3924,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
 
   // ---------- graffiti: BONER CHAMP pieces + tag spots you spray yourself ----------
   const graffitiRedraw = [];
-  function graffitiTex(text, fill, line, w = 1024, h = 256) {
+  function graffitiTex(text, fill, line, w = 1024, h = 256) { text = CW(text);
     const c = mk(w, h), x = c.getContext('2d'), t = new THREE.CanvasTexture(c); t.anisotropy = MAXANI;
     const seed = [...text].reduce((a, ch) => a * 31 + ch.charCodeAt(0) | 0, 7); let sd = seed;
     const rnd = (a, b) => { sd = (sd * 1103515245 + 12345) & 0x7fffffff; return a + (sd / 0x7fffffff) * (b - a); };
@@ -4083,7 +4086,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   for (const tx of [-7.0, -3.95, .2, 3.2, 6.2]) { const h = new THREE.Group(); h.position.set(tx, 3.92, -5.25); h.add(cyl(.1, .22, '#0d0b12', 0, 0, 0)); h.add(cyl(.08, .02, glowM('#fff4e0'), 0, -.12, 0)); h.rotation.x = .5; scene.add(h);
     const wash = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.6), new THREE.MeshBasicMaterial({ map: SOFT, color: '#fff1d6', transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false })); wash.position.set(tx, 2.9, -5.64); scene.add(wash); }
   // sticker bomb on the right wall
-  { const sc = mk(512, 512), x = sc.getContext('2d'); const words = ['PG', 'STAY LIFTED', AREA(), 'BONER CHAMP', 'SUCK YO MUDDA', 'PHILLY G', 'GROW EMPIRE', 'KUSH KING', '420', 'SKATE OR DIE', 'EST. 215', 'LIL G'];
+  { const sc = mk(512, 512), x = sc.getContext('2d'); const words = ['PG', 'STAY LIFTED', AREA(), 'BONER CHAMP', 'SUCK YO MUDDA', 'PHILLY G', 'GROW EMPIRE', 'KUSH KING', '420', 'SKATE OR DIE', 'EST. 215', 'LIL G'].map(CW);
     const cols = [['#22f07c', '#fff'], ['#0d0b12', '#ffe23d'], ['#ffe23d', '#0d0b12'], ['#3de0ff', '#0d0b12'], ['#f4f1ff', '#22f07c'], ['#7dff6a', '#0d0b12'], ['#0a9e5a', '#fff']];
     for (let i = 0; i < 46; i++) { const [bg, fg] = pick(cols), w0 = rand(90, 190), h0 = rand(44, 80); x.save(); x.translate(rand(30, 482), rand(30, 482)); x.rotate(rand(-.5, .5));
       if (Math.random() < .2) { x.drawImage(crestC0, -45, -45, 90, 90); } else { x.fillStyle = '#ffffff'; x.fillRect(-w0 / 2 - 4, -h0 / 2 - 4, w0 + 8, h0 + 8); x.fillStyle = bg; x.fillRect(-w0 / 2, -h0 / 2, w0, h0); x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'middle'; const wd = pick(words); x.font = `${Math.min(34, w0 / wd.length * 1.7)}px Anton, Impact, sans-serif`; x.fillText(wd, 0, 2); }
@@ -4484,7 +4487,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     { id: 'nye', t: 'Midnight Gold', cost: 20, cap: '#e9c77c', hood: '#0d0b12', board: '#e9c77c', pants: '#0d0b12', season: 'newyear' },
     { id: 'fest', t: '420 Fest', cost: 20, cap: '#2fae45', hood: '#7dff6a', board: '#2fae45', pants: '#1d1a24', season: '420' },
     { id: 'og215', t: 'Secret: OG 215', cost: 0, cap: '#0d0b12', hood: '#22f07c', board: '#ffe23d', pants: '#0d0b12', drop: true },
-    { id: 'mudda', t: 'Secret: Mudda Special', cost: 0, cap: '#ff6ad5', hood: '#ffe23d', board: '#ff6ad5', pants: '#3557a8', drop: true },
+    { id: 'mudda', t: CW('Secret: Mudda Special'), cost: 0, cap: '#ff6ad5', hood: '#ffe23d', board: '#ff6ad5', pants: '#3557a8', drop: true },
     { id: 'crew215', t: 'Crew 215', cost: 0, cap: '#22f07c', hood: '#0d0b12', board: '#22f07c', pants: '#22f07c', drop: true },
     { id: 'drop_camo', t: 'Weekly Drop: Green Camo', cost: 0, cap: '#4a6b3a', hood: '#7a9a5a', board: '#22f07c', pants: '#3a4a2a', drop: true },
     { id: 'drop_jersey', t: 'Weekly Drop: 215 Jersey', cost: 0, cap: '#004c54', hood: '#a5acaf', board: '#004c54', pants: '#1d1a24', drop: true },
@@ -4855,8 +4858,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
 
   // ---------- genetics lab ----------
-  const NAMES_A = ['Philly', 'Purple', 'Gelato', 'Lemon', 'Cosmic', 'Blue', 'Gorilla', 'Mango', 'Wedding', 'Sour', 'Cherry', 'Grape', 'Platinum', 'Ice', 'Banana', 'Rainbow', 'Midnight', 'Pink', 'Golden', 'Jersey', 'Kensington', 'Fishtown', 'Broad St', 'Wawa'];
-  const NAMES_B = ['Haze', 'Dream', 'Kush', 'Cookies', 'Runtz', 'Diesel', 'Glue', 'Cake', 'Breath', 'Punch', 'Zkittlez', 'Sherbet', 'OG', 'Widow', 'Skunk', 'Mints', 'Fumes', 'Candy', 'Wreck', 'Express', 'Jawn', 'Hoagie'];
+  const NAMES_A = ['Philly', 'Purple', 'Gelato', 'Lemon', 'Cosmic', 'Blue', 'Silverback', 'Mango', 'Wedding', 'Sour', 'Cherry', 'Grape', 'Platinum', 'Ice', 'Banana', 'Rainbow', 'Midnight', 'Pink', 'Golden', 'Jersey', 'Kensington', 'Fishtown', 'Broad St', 'Corner Store'];
+  const NAMES_B = ['Haze', 'Dream', 'Kush', 'Biscotti', 'Gummiez', 'Diesel', 'Gloss', 'Cake', 'Breath', 'Punch', 'Sprinkles', 'Sherbet', 'OG', 'Widow', 'Skunk', 'Mints', 'Fumes', 'Candy', 'Wreck', 'Express', 'Jawn', 'Hoagie'];
   const RAR = [{ n: 'Common', c: '#c9c5d6', b: 0, g: 0 }, { n: 'Rare', c: '#3de0ff', b: .15, g: 2 }, { n: 'Epic', c: '#c77dff', b: .35, g: 5 }, { n: 'Legendary', c: '#ffcc3d', b: .7, g: 15 }];
   const SV_H = [[.38, .55], [.25, .7], [.78, .55], [.5, .6], [.07, .7], [.9, .7], [.99, .6], [.14, .7], [0, .05]];
   function strainIk(col) { const c = new THREE.Color(col), h = {}; c.getHSL(h); if (h.s < .18) return 'sv:8'; let best = 0, bd = 9; SV_H.forEach(([hh, ss], i) => { if (i === 8) return; const dh = Math.min(Math.abs(h.h - hh), 1 - Math.abs(h.h - hh)), d = dh + Math.abs(h.s - ss) * .15; if (d < bd) { bd = d; best = i; } }); return 'sv:' + best; }
@@ -5291,7 +5294,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     PHILLYG: { t: 'OG 215 fit unlocked', fn: () => { if (!S.skins.includes('og215')) S.skins.push('og215'); } },
     '215LIFTED': { t: 'Lifted bonus', fn: () => { const c = Math.round(2000 * locMult()); S.cash += c; return '+' + money(c); } },
     BONERCHAMP: { t: 'Champ bonus', fn: () => { S.gems += 10; return '+10 gold leaves'; } },
-    SUCKYOMUDDA: { t: 'Mudda Special fit unlocked', fn: () => { if (!S.skins.includes('mudda')) S.skins.push('mudda'); } },
+    SUCKYOMUDDA: { t: CW('Mudda Special fit unlocked'), fn: () => { if (!S.skins.includes('mudda')) S.skins.push('mudda'); } },
   };
   function redeemCode(raw) {
     const k = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); const c = CODES[k];
@@ -5586,9 +5589,11 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     $('textBtn').textContent = 'Text: ' + (bigText ? 'Large' : 'Normal'); $('calmBtn').textContent = 'Motion: ' + (calm ? 'Calm' : 'Full'); $('cbBtn').textContent = 'Color-blind: ' + (cbMode ? 'On' : 'Off');
   }
   const setPref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} applyComfort(); };
+  try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 85;
+  const GAME_VER = 86;
   const NEWS = [
+    ['House brands', 'Every watch, car and sneaker in the game now carries our own house brands: Crownline, Pavane and Aurel on the wrist, Brawler, Widebody Works and Monarch in the garage, and fresh PG grails on the kicks wall. NEW in Settings: Language: Clean swaps the rougher wall tags and fit names for tame ones (the game reloads to repaint the walls).'],
     ['Mix it up', 'NEW MIX STATION in the Genetics Lab: drop in ingredients like Mango, Cold Brew, Honey or Gold Flakes, each one adds an effect and can flip the effects already in the mix. More effects = higher price. Name your mix and discover recipes for gold leaves. NEW PHONE: your regulars text you orders (accept and they pull up and pay 1.6×), each regular is into a certain effect and gets hooked if you grow it, and loyal ones bring their friends. The phone also has the STREET PASS: 30 free tiers each month, and gift codes for friends. Plus: the camera now peeks at your next unlock, impatient shoppers show a timer, and you can train your crew and swap their traits in Hire.'],
     ['The crew comes alive', 'You are now a head taller than the crowd so you always stand out as the boss. Tap anyone in the shop or on the sidewalk for a quick close-up: they react, dance or hype you up. Shoppers now have moves of their own (dancing to the radio, daps, checking out the drip), the whole store cheers when you land a trick nearby, and VIPs get a camera moment when they walk the red carpet.'],
     ['Grand openings', 'Opening a new store is now an event: the screen goes widescreen, the camera swoops low around you, a flash goes off and the block comes out to cheer and dance. Maxing out gear gets a quick swoop too. The shop and PG Kicks got real street walls (painted brick, sticker-bombed trim, neon strip lights) and the grow lab front is cinder block with a spray tag. The crew is a bit bigger and gets a soft rim light at night so people pop in the dark.'],
@@ -5623,13 +5628,13 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     ['Baked lighting everywhere', 'The main shop and PG Kicks now have Blender-baked lighting too, joining PG Ice and Motorwerks: soft shadows fall behind the display cases, shelves, counters and benches, and every room gets warm pools of light under its downlights, chandeliers, case lights and bay lamps.'],
     ['Baked lighting', 'PG Ice and PG Motorwerks were rebuilt in Blender and lit with real path-traced light (Cycles), and that lighting is now baked into their floors: soft shadows under the watch counters, cases and lifted cars, light that falls off naturally toward the walls and corners.'],
     ['Real materials + new moves', 'New Mixamo animations: the PG Ice jeweler counts cash at the till, the guard leans by the door, shoppers browse the watch cases, the Motorwerks mechanic kneels to inspect the cars and clients wait chatting on the sofa. Plus real photo-scanned materials (ambientCG, free for any use) throughout: black Nero marble with white veins on every counter top, real white marble shelves, deep espresso wood on the cases and counters, a polished black-and-gold onyx floor in PG Ice, black leather watch trays, brushed steel walls in Motorwerks and true woven carbon fiber on the cars.'],
-    ['True-to-life car shapes', 'The cars were re-sculpted to their real proportions: the RWB 911 now has its upright frog-eye headlamps, low front lid between the fender humps, bubble roof and engine out back, with chrome window trim and bolted over-fenders. The hypercars got their own bodies: a rounded Chiron-style car with a horseshoe grille, long-tail teardrops for the Speedtail and Codalunga, and a 5-metre Boat Tail with an upright grille and wooden deck. Wings and splitters are now real woven carbon fiber.'],
-    ['Real 3D cars + watches', 'Every car was rebuilt as a real 3D model in Blender: curved bodies, proper glass, lamps, wide fender flares, wings and detailed wheels with brake calipers, for the RWB 911, the Brabus G-Wagon, the Mansory supercar and the hypercars, out on the street too. Watches are now real 3D models with bezels, crowns and link bracelets. Staff and VIPs dress the part, PG Ice and Motorwerks have soft baked shadows and a polished concrete shop floor, the new block has lamp posts, planters and a bench, rain makes the street shine with neon reflections, and December brings snow on the roofs.'],
-    ['Glare fixed + Private Garage', 'The checkout desk glare is gone: every counter top (register, pickup counters, bar, PG Kicks and PG Ice tills) is now polished black Nero Marquina marble with ivory and gold veins. The light over the register is softer, light-colored surfaces have a satin finish, and floating glows are toned down everywhere. PG Ice has a glossy black marble floor. New at Motorwerks: the Private Garage. Buy six hypercars (McLaren Speedtail up to the Rolls-Royce Boat Tail); the newest sits on the plinth and out front, scale models fill a case, and each one adds 6% to luxury sales. Photo mode can now rotate, zoom and add film looks.'],
-    ['The Grail Case', 'PG Ice has a new round glass vitrine for Philly G\'s personal collection. Step on the gold ring by the sofa to buy six legendary grails: the Patek Nautilus 5711 Tiffany, Rolex Daytona "Paul Newman", AP Royal Oak Concept Tourbillon, Richard Mille RM 56 Sapphire, Patek Grandmaster Chime and the Jacob & Co. Billionaire. Each one turns slowly on velvet in the case and makes PG Ice and Motorwerks pay 6% more, for good.'],
+    ['True-to-life car shapes', 'The cars were re-sculpted to their real proportions: the WBW P9 now has its upright frog-eye headlamps, low front lid between the fender humps, bubble roof and engine out back, with chrome window trim and bolted over-fenders. The hypercars got their own bodies: a rounded Chiron-style car with a horseshoe grille, long-tail teardrops for the Speedtail and Codalunga, and a 5-metre Boat Tail with an upright grille and wooden deck. Wings and splitters are now real woven carbon fiber.'],
+    ['Real 3D cars + watches', 'Every car was rebuilt as a real 3D model in Blender: curved bodies, proper glass, lamps, wide fender flares, wings and detailed wheels with brake calipers, for the WBW P9, the Brawler G-Box, the Monarch supercar and the hypercars, out on the street too. Watches are now real 3D models with bezels, crowns and link bracelets. Staff and VIPs dress the part, PG Ice and Motorwerks have soft baked shadows and a polished concrete shop floor, the new block has lamp posts, planters and a bench, rain makes the street shine with neon reflections, and December brings snow on the roofs.'],
+    ['Glare fixed + Private Garage', 'The checkout desk glare is gone: every counter top (register, pickup counters, bar, PG Kicks and PG Ice tills) is now polished black Nero Marquina marble with ivory and gold veins. The light over the register is softer, light-colored surfaces have a satin finish, and floating glows are toned down everywhere. PG Ice has a glossy black marble floor. New at Motorwerks: the Private Garage. Buy six hypercars (Mach Speedtail up to the Regent Boat Tail); the newest sits on the plinth and out front, scale models fill a case, and each one adds 6% to luxury sales. Photo mode can now rotate, zoom and add film looks.'],
+    ['The Grail Case', 'PG Ice has a new round glass vitrine for Philly G\'s personal collection. Step on the gold ring by the sofa to buy six legendary grails: the Pavane Harbor Teal Dial, Crownline Speedway Panda, Aurel Royal Octagon Tourbillon, Richter Milano RM Sapphire, Pavane Grand Chime and the Jakob & Sons Billionaire. Each one turns slowly on velvet in the case and makes PG Ice and Motorwerks pay 6% more, for good.'],
     ['Less glare, client requests', 'White and light surfaces (checkered tiles, marble, cream walls, white counters) no longer blow out: they have a softer satin finish and calmer reflections, and the brightest highlights roll off smoothly. Custom Build clients now ask for a specific body, paint and wheels: match it for a +60% bonus. Grillz fittings at PG Ice end with an iced-out sparkle.'],
-    ['Custom builds', 'PG Motorwerks now has a Custom Build station (needs Custom Bays). Step on the gold ring, pick the body (RWB 911, Brabus G-Wagon or Mansory Lambo), paint, wheels and stripes, and watch it change on the lift before you build it. VIP clients pay double, and every finished build drives off down the block. The new block glows after dark, luxury cars light the road with their headlights, and street traffic is now real exotics.'],
-    ['PG Ice + PG Motorwerks', 'Two new locations on the block. PG Ice (LV 9) sells Rolex, Patek Philippe and AP watches and custom grillz, with glass cases, watch walls, a grillz lab, crystal chandeliers and a private vault. PG Motorwerks (LV 11) sells and customizes Brabus, RWB Porsche and Mansory builds: turntables, lift bays, a hex-lit detailing floor, a wheel wall and neon. Both have their own tills, VIP clients and collections. Also new: PG Kicks got the walnut, marble and gold makeover, four new regulars who tip extra for "the usual", shoppers in PG colors, and a while-you-were-away breakdown with a once-a-day 2x bonus.'],
+    ['Custom builds', 'PG Motorwerks now has a Custom Build station (needs Custom Bays). Step on the gold ring, pick the body (WBW P9, Brawler G-Box or Monarch Toro), paint, wheels and stripes, and watch it change on the lift before you build it. VIP clients pay double, and every finished build drives off down the block. The new block glows after dark, luxury cars light the road with their headlights, and street traffic is now real exotics.'],
+    ['PG Ice + PG Motorwerks', 'Two new locations on the block. PG Ice (LV 9) sells Crownline, Pavane and AP watches and custom grillz, with glass cases, watch walls, a grillz lab, crystal chandeliers and a private vault. PG Motorwerks (LV 11) sells and customizes Brawler, WBW P9 and Monarch builds: turntables, lift bays, a hex-lit detailing floor, a wheel wall and neon. Both have their own tills, VIP clients and collections. Also new: PG Kicks got the walnut, marble and gold makeover, four new regulars who tip extra for "the usual", shoppers in PG colors, and a while-you-were-away breakdown with a once-a-day 2x bonus.'],
     ['After hours', 'Every station now sits on a black plinth with a gold edge, pickup counters are walnut and marble, and the harvest bin matches. Characters cast real shadows on High and Ultra with richer clothing colors, and evenings glow warm amber like a lounge after dark.'],
     ['Boutique cases', 'Every display case was rebuilt as a boutique fixture: dark walnut, white marble shelves with gold lips, an emerald suede back and warm LED strips under each shelf. The walls got a subtle gold damask pattern.'],
     ['Grand opening polish', 'A new PG Reserve loading screen with a live progress bar and tips. The sidewalk planters are now full of real ferns, the grow beds are walnut with gold trim, and warm downlights glow across the shop and PG Kicks floors.'],
@@ -5947,7 +5952,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     aoLine(BZ.cx, BZ.z0 + .05, BZ.x1 - BZ.x0, 0, 1.1, base); aoLine(BZ.x0 + .05, 0, BZ.z1 - BZ.z0, Math.PI / 2, 1.1, base); aoLine(BZ.x1 - .05, 0, BZ.z1 - BZ.z0, -Math.PI / 2, 1.1, base); aoCorner(BZ.x0 + .05, BZ.z0 + .05, 0, 1.8, base); aoCorner(BZ.x1 - .05, BZ.z0 + .05, -Math.PI / 2, 1.8, base);
     // graffiti-bombed walls
     const gwc = mk(1024, 192), g2 = gwc.getContext('2d'); R(g2, '#34303c', 0, 0, 1024, 192); for (let i = 0; i < 300; i++) R(g2, `rgba(255,255,255,${Math.random() * .05})`, Math.random() * 1024, Math.random() * 192, 4 + Math.random() * 30, 2 + Math.random() * 8);
-    const words = ['BONER CHAMP', 'SUCK YO MUDDA', 'PHILLY G', 'PG', AREA(), 'SKATE OR DIE', 'KUSH KING', 'LIL SPOOK', 'STAY LIFTED', 'UNDERGROUND', 'PG CREW'], cols = [['#22f07c', '#ffe23d'], ['#7dff6a', '#22f07c'], ['#3de0ff', '#22f07c'], ['#ffe23d', '#3de0ff'], ['#ff8a3d', '#ffe23d'], ['#c77dff', '#7dff6a']];
+    const words = ['BONER CHAMP', 'SUCK YO MUDDA', 'PHILLY G', 'PG', AREA(), 'SKATE OR DIE', 'KUSH KING', 'LIL SPOOK', 'STAY LIFTED', 'UNDERGROUND', 'PG CREW'].map(CW), cols = [['#22f07c', '#ffe23d'], ['#7dff6a', '#22f07c'], ['#3de0ff', '#22f07c'], ['#ffe23d', '#3de0ff'], ['#ff8a3d', '#ffe23d'], ['#c77dff', '#7dff6a']];
     if (HYPE) { R(g2, '#3b3b40', 0, 0, 1024, 192); for (let i = 0; i < 260; i++) { g2.fillStyle = Math.random() < .5 ? `rgba(255,255,255,${(Math.random() * .05).toFixed(3)})` : `rgba(0,0,0,${(Math.random() * .12).toFixed(3)})`; g2.fillRect(Math.random() * 1024, Math.random() * 192, 4 + Math.random() * 60, 2 + Math.random() * 20); }
       for (let c = 1; c < 4; c++) { R(g2, 'rgba(0,0,0,.35)', c * 256, 0, 2, 192); } R(g2, 'rgba(0,0,0,.3)', 0, 96, 1024, 2); for (let c = 0; c < 4; c++) for (const ty of [24, 168]) for (const tx of [32, 224]) { g2.fillStyle = 'rgba(0,0,0,.45)'; g2.beginPath(); g2.arc(c * 256 + tx, ty, 4, 0, TAU); g2.fill(); }
       for (let i = 0; i < 9; i++) { const dx = 120 + Math.random() * 780, L = 12 + Math.random() * 40; g2.fillStyle = Math.random() < .5 ? '#ff2b3a' : '#ffe14a'; g2.globalAlpha = .7; g2.fillRect(dx, 112, 3, L); g2.globalAlpha = 1; }
@@ -6536,7 +6541,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     else if (contest.t <= 0 || !inBase(player.x)) { toast(contest.t <= 0 ? `Contest over: ${contest.n}/${contest.goal}. Next one in 5 minutes` : 'You left the contest. Next one in 5 minutes'); contest = null; contestCD = 300; }
   }
   // ---- collection: strains, fits, grails, decks, trophies ----
-  const GRAILS = ['Philly Lows "Wawa"', 'PG Retro 1 "Emerald"', 'Kush Runner OG', 'Schuylkill Hi "Navy"', 'Liberty Bell 4', 'Gold Leaf Dunk', 'Broad St Boost', 'Fishtown Foam "Glow"'];
+  const GRAILS = ['Philly Lows "Hoagie"', 'PG Hi-Top "Emerald"', 'Kush Runner OG', 'Schuylkill Hi "Navy"', 'Liberty Bell 4', 'Gold Leaf Low', 'Broad St Bounce', 'Fishtown Float "Glow"'];
   const DECK_NAMES = ['PG Classic', '215 Stripe', 'Liberty Red', 'Skate Blue', 'Cream OG', 'PHL Burgundy'];
   const TROPHIES = [['First 100 customers', () => S.stats.served >= 100], ['50 VIPs served', () => S.stats.vip >= 50], ['Selfie with Lil Lifted', () => (S.celebPics || 0) >= 1], ['Won a skate contest', () => (S.contestWins || 0) >= 1], ['Beat Kush Korner 5×', () => (S.rivalWins || 0) >= 5], ['$1M lifetime sales', () => S.total >= 1e6], ['3 block parties', () => (S.parties || 0) >= 3], ['Every station Pro', () => PRODUCTS.every((_, i) => !i || S.st[i] >= 5)]];
   function grailChance(p) { S.grails = S.grails || []; if (S.grails.length >= GRAILS.length || Math.random() > p) return; const left = GRAILS.map((_, k) => k).filter(k => !S.grails.includes(k)); const k = pick(left); S.grails.push(k); banner('GRAIL FOUND', `${GRAILS[k].toUpperCase()} · ${S.grails.length}/${GRAILS.length} IN YOUR COLLECTION`); fireworks(2); SFX.reveal && SFX.reveal(); save(); }
@@ -6555,7 +6560,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     st.cat.forEach(([n, h, a]) => { const sec = document.createElement('div'); sec.className = 'sec'; sec.textContent = `${n} · ${Math.min(h, a)}/${a}${h >= a ? ' · COMPLETE · +3%' : ''}`; L.append(sec);
       if (n === 'GRAILS') GRAILS.forEach((g0, k) => L.append(itemRow((S.grails || []).includes(k) ? g0 : '???', (S.grails || []).includes(k) ? 'On display in the PG Kicks grail case' : 'Drops during Hype Drops at PG Kicks', null, (S.grails || []).includes(k) ? '✓' : '—', () => {}, true, (S.grails || []).includes(k), 'gr:' + k, (S.grails || []).includes(k) ? false : 'm')));
       else if (n === 'DECKS') DECK_NAMES.forEach((d, k) => L.append(itemRow((S.decksC || []).includes(k) ? d : '???', (S.decksC || []).includes(k) ? 'Hanging in the basement' : 'Win a skate contest in the basement', null, (S.decksC || []).includes(k) ? '✓' : '—', () => {}, true, (S.decksC || []).includes(k), 'dk:' + k, (S.decksC || []).includes(k) ? false : 'm')));
-      else if (n === 'WATCHES' || n === 'GRILLZ' || n === 'WHIPS') { const key = { WATCHES: 'watchC', GRILLZ: 'grillC', WHIPS: 'whipC' }[n], names = { WATCHES: ['Rolex Submariner', 'Rolex Day-Date President', 'AP Royal Oak', 'Patek Philippe Nautilus', 'Patek Grand Complication', 'Rolex Daytona Everose', 'Richard Mille Skeleton', 'Patek Tourbillon'], GRILLZ: ['Gold Fangs', 'Diamond Fronts', 'Rose Gold Bottoms', 'Iced Top Eight', 'Emerald PG Set', 'Full Mouth Platinum'], WHIPS: ['RWB Porsche 911', 'Brabus G-Wagon 800', 'Mansory Lamborghini', 'RWB Gold Wrap 911', 'Brabus 4x4 Squared', 'Mansory Ferrari', 'RWB 964 Track Spec', 'Mansory Rolls-Royce Cullinan'] }[n], hint = { WATCHES: 'Sell watches at PG Ice (VIP collectors find more)', GRILLZ: 'Fit custom grillz in the PG Ice grillz lab', WHIPS: 'Sell cars and run custom jobs at PG Motorwerks' }[n];
+      else if (n === 'WATCHES' || n === 'GRILLZ' || n === 'WHIPS') { const key = { WATCHES: 'watchC', GRILLZ: 'grillC', WHIPS: 'whipC' }[n], names = { WATCHES: ['Crownline Deep Diver', 'Crownline Day-Date Presidente', 'Aurel Royal Octagon', 'Pavane Harbor', 'Pavane Grand Complication', 'Crownline Speedway Rose Gold', 'Richter Milano Skeleton', 'Pavane Tourbillon'], GRILLZ: ['Gold Fangs', 'Diamond Fronts', 'Rose Gold Bottoms', 'Iced Top Eight', 'Emerald PG Set', 'Full Mouth Platinum'], WHIPS: ['WBW P9 Coupe', 'Brawler G-Box 800', 'Monarch Toro', 'WBW Gold Wrap P9', 'Brawler 4x4 Squared', 'Monarch Fervore', 'WBW P9 Track Spec', 'Monarch Regent Colossus'] }[n], hint = { WATCHES: 'Sell watches at PG Ice (VIP collectors find more)', GRILLZ: 'Fit custom grillz in the PG Ice grillz lab', WHIPS: 'Sell cars and run custom jobs at PG Motorwerks' }[n];
         const pre = { WATCHES: 'wt:', GRILLZ: 'gz:', WHIPS: 'wh:' }[n]; names.forEach((t, k) => { const own = (S[key] || []).includes(k); L.append(itemRow(own ? t : '???', own ? 'In your collection' : hint, null, own ? '✓' : '—', () => {}, true, own, pre + k, own ? false : 'm')); }); }
       else if (n === 'TROPHIES') TROPHIES.forEach(([t, f], k) => L.append(itemRow(t, f() ? 'On the trophy shelf at PG Kicks' : 'Not yet', null, f() ? '🏆' : '—', () => {}, true, f(), 'tr:' + k, f() ? false : true)));
       else L.append(itemRow(n === 'STRAINS' ? 'Genetics' : 'Closet', n === 'STRAINS' ? 'Breed new strains in the Genetics Lab' : 'Outfits from the Style tab and weekly drops', Math.min(1, h / a), `${Math.min(h, a)}/${a}`, () => {}, true, h >= a)); });
@@ -7492,9 +7497,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const eqL = k => S.eq[k] || 0;
   const LOC_SOLIDS = []; window.__locSolids = LOC_SOLIDS;
   const solidAt = (key, x, z, hx, hz) => { if (LOC2.built['s_' + key]) return; LOC2.built['s_' + key] = 1; LOC_SOLIDS.push([x, z, hx, hz]); };
-  const WATCH_NAMES = ['Rolex Submariner', 'Rolex Day-Date President', 'AP Royal Oak', 'Patek Philippe Nautilus', 'Patek Grand Complication', 'Rolex Daytona Everose', 'Richard Mille Skeleton', 'Patek Tourbillon'];
+  const WATCH_NAMES = ['Crownline Deep Diver', 'Crownline Day-Date Presidente', 'Aurel Royal Octagon', 'Pavane Harbor', 'Pavane Grand Complication', 'Crownline Speedway Rose Gold', 'Richter Milano Skeleton', 'Pavane Tourbillon'];
   const GRILL_NAMES = ['Gold Fangs', 'Diamond Fronts', 'Rose Gold Bottoms', 'Iced Top Eight', 'Emerald PG Set', 'Full Mouth Platinum'];
-  const WHIP_NAMES = ['RWB Porsche 911', 'Brabus G-Wagon 800', 'Mansory Lamborghini', 'RWB Gold Wrap 911', 'Brabus 4x4 Squared', 'Mansory Ferrari', 'RWB 964 Track Spec', 'Mansory Rolls-Royce Cullinan'];
+  const WHIP_NAMES = ['WBW P9 Coupe', 'Brawler G-Box 800', 'Monarch Toro', 'WBW Gold Wrap P9', 'Brawler 4x4 Squared', 'Monarch Fervore', 'WBW P9 Track Spec', 'Monarch Regent Colossus'];
   const WHIP_SPEC = [['coupe', '#ecebe6', 0, 'gold', '#c8322a'], ['suv', '#141414', 1, 'black'], ['super', '#0f5a3a', 0, 'carbon', '#d4a64a'], ['coupe', '#c9a24e', 0, 'black', '#141414'], ['suv', '#4c5a3c', 1, 'black'], ['super', '#151a2c', 0, 'gold'], ['coupe', '#c8322a', 0, 'black', '#f4f1ea'], ['suv', '#efece4', 0, 'chrome']];
   const collAdd = (key, n, k, label, where) => { const a = S[key] = S[key] || []; if (a.includes(k) || k >= n.length) return false; a.push(k); toast(`New in your collection: ${n[k]} (${label})`); try { HAP(15); } catch (e) {} return true; };
   const collNext = (key, n) => { const a = S[key] || []; for (let k = 0; k < n.length; k++) if (!a.includes(k)) return k; return -1; };
@@ -7601,13 +7606,13 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     const head = basicM('#f4faff'), tail = basicM('#ff2a2a');
     if (kind === 'coupe') {
       const top = [[2.22, .46], [2.02, .63], [1.45, .72], [.62, .8], [.2, .86], [-.8, .92], [-1.6, .88], [-2.08, .78], [-2.22, .52]]; g.add(extr(top, -2.15, 2.15, .3, 1.86, P));
-      if (stripe) { const sm = paintM(stripe, false); for (const sz of [-.2, .2]) { const st = extr(top.map(([x, y]) => [x * .995, y + .058]), -2.12, 2.12, .5, .2, sm, .01); st.position.z = sz; g.add(st); } } // RWB-style twin stripes
+      if (stripe) { const sm = paintM(stripe, false); for (const sz of [-.2, .2]) { const st = extr(top.map(([x, y]) => [x * .995, y + .058]), -2.12, 2.12, .5, .2, sm, .01); st.position.z = sz; g.add(st); } } // WBW-style twin stripes
       for (const sz of [-1, 1]) { g.add(lb(.5, .03, .22, CARBM(), 1.6, .69, sz * .5, .01)); } // hood vents
       g.add(extr([[.1, 1.1], [-.45, 1.23], [-1.05, 1.21], [-1.55, .97], [-1.62, .86]], .46, .46, .84, 1.42, GLASSM(), .03));
       g.add(lb(.95, .05, 1.34, P, -.52, 1.24, 0, .02));
       for (const wx of [-1.33, 1.33]) for (const sz of [-1, 1]) g.add(lb(1.02, .3, .2, P, wx, .62, sz * 1.0, .08));
       for (const sz of [-1, 1]) { g.add(lb(.06, .24, .06, CARBM(), -1.95, 1.0, sz * .52, .02)); g.add(lb(.12, .06, .14, P, .45, .97, sz * .98, .02)); }
-      g.add(lb(.55, .05, 2.1, CARBM(), -1.98, 1.17, 0, .015)); for (const sz of [-1, 1]) g.add(lb(.5, .16, .04, CARBM(), -1.98, 1.1, sz * 1.03, .01)); // big RWB wing with end plates g.add(lb(.3, .2, 1.9, CARBM(), -2.18, .38, 0, .03)); g.add(lb(.35, .08, 2.05, CARBM(), 2.18, .3, 0, .02));
+      g.add(lb(.55, .05, 2.1, CARBM(), -1.98, 1.17, 0, .015)); for (const sz of [-1, 1]) g.add(lb(.5, .16, .04, CARBM(), -1.98, 1.1, sz * 1.03, .01)); // big WBW wing with end plates g.add(lb(.3, .2, 1.9, CARBM(), -2.18, .38, 0, .03)); g.add(lb(.35, .08, 2.05, CARBM(), 2.18, .3, 0, .02));
       for (const sz of [-1, 1]) g.add(lb(.08, .1, .3, head, 2.2, .6, sz * .66, .03)); g.add(lb(.04, .06, 1.6, tail, -2.24, .66, 0, .01));
       for (const [wx, wz] of [[-1.33, -1], [-1.33, 1], [1.33, -1], [1.33, 1]]) g.add(wheel(.35, .3, rimM, wx, wz * 1.0));
     } else if (kind === 'suv') {
@@ -7616,7 +7621,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       g.add(lb(.12, .62, 1.6, stdM('#0c0c0c', .5, .3), 2.36, .98, 0, .03)); for (let k = 0; k < 4; k++) g.add(lb(.03, .5, .03, STEELM(), 2.43, .98, -.45 + k * .3, .01));
       for (const sz of [-1, 1]) { const h0 = lc(.13, .05, head, 2.38, 1.12, sz * .72, 16); h0.rotation.z = Math.PI / 2; g.add(h0); g.add(lb(.04, .2, .14, tail, -2.36, 1.1, sz * .8, .02)); }
       g.add(lb(.3, .08, 1.5, basicM('#fff2d0'), .8, 2.1, 0, .02)); for (const sz of [-.75, .75]) g.add(lb(2.6, .05, .05, BLKM(), -.4, 2.12, sz, .02)); for (let k = 0; k < 4; k++) g.add(lb(.05, .05, 1.5, BLKM(), -1.5 + k * .7, 2.13, 0, .02));
-      g.add(lb(.9, .1, .9, CARBM(), 1.75, 1.42, 0, .04)); // Brabus carbon bonnet scoop
+      g.add(lb(.9, .1, .9, CARBM(), 1.75, 1.42, 0, .04)); // Brawler carbon bonnet scoop
       const sp = lc(.42, .3, TIREM(), -2.5, 1.15, 0, 24); sp.rotation.z = Math.PI / 2; g.add(sp); const sc = lc(.3, .32, P, -2.52, 1.15, 0, 24); sc.rotation.z = Math.PI / 2; g.add(sc);
       for (const wx of [-1.52, 1.52]) for (const sz of [-1, 1]) g.add(lb(1.15, .26, .24, BLKM(), wx, .98, sz * 1.0, .08));
       for (const sz of [-1, 1]) g.add(lb(2.2, .07, .22, BLKM(), 0, .42, sz * 1.05, .02));
@@ -7692,7 +7697,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       const aw = lb(2.1, .07, .65, EMERM(), cx, 2.85, fz + .45, .02); aw.rotation.x = .22; SB.add(aw); }
     SB.add(lb(1.5, 2.6, .06, GOLDM(), ICX, 1.3, fz + .15, .02)); SB.add(lb(1.34, 2.46, .03, GLASSM(), ICX, 1.27, fz + .19, .01)); SB.add(lb(.03, 2.46, .04, GOLDM(), ICX, 1.27, fz + .21, .005));
     for (const sx of [-1, 1]) SB.add(lb(.03, .5, .05, GOLDM(), ICX + sx * .1, 1.2, fz + .24, .01)); SB.add(glassSheen(1.34, 2.46, ICX, 1.27, fz + .215, .18));
-    SB.add(signPlate(serifTex([['PG ICE', 150, 105], ['ROLEX  ·  PATEK PHILIPPE  ·  AP  ·  GRILLZ', 34, 200, "600 34px Outfit, sans-serif"]]), 4.2, 1.05, ICX, 3.72, fz + .17));
+    SB.add(signPlate(serifTex([['PG ICE', 150, 105], ['CROWNLINE  ·  PAVANE  ·  AUREL  ·  GRILLZ', 34, 200, "600 34px Outfit, sans-serif"]]), 4.2, 1.05, ICX, 3.72, fz + .17));
     SB.add(lb(1.6, .03, .9, stdM('#0c0c0c', .6), ICX, .015, 7.55, .01));
     SB.add(lb(1.3, .02, 2.1, stdM('#3a060b', .95), ICX, .03, 8.1, .005)); for (const sx of [-1, 1]) SB.add(lb(.04, .022, 2.1, GOLDM(), ICX + sx * .66, .032, 8.1, .004));
     for (const sx of [-1, 1]) { for (const z of [7.3, 8.15, 9.0]) { SB.add(lc(.1, .03, GOLDM(), ICX + sx * .95, .015, z, 16)); SB.add(lc(.025, .85, GOLDM(), ICX + sx * .95, .43, z, 8)); const k0 = new THREE.Mesh(new THREE.SphereGeometry(.05, 12, 8), GOLDM()); k0.position.set(ICX + sx * .95, .88, z); SB.add(k0); }
@@ -7704,7 +7709,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     const gglass = new THREE.Mesh(new THREE.PlaneGeometry(gw, 2.95), new THREE.MeshBasicMaterial({ map: (() => { const c = mk(256, 192), x = c.getContext('2d'); const gr = x.createLinearGradient(0, 0, 0, 192); gr.addColorStop(0, '#2a3036'); gr.addColorStop(1, '#0c0e10'); x.fillStyle = gr; x.fillRect(0, 0, 256, 192); x.fillStyle = 'rgba(255,240,210,.18)'; x.fillRect(0, 150, 256, 42); for (let k = 0; k < 6; k++) { x.fillStyle = 'rgba(255,255,255,.05)'; x.fillRect(0, k * 32, 256, 2); } const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; })() }));
     gglass.position.set(gdx, 1.58, fz + .25); gglass.userData.noOutline = true; SB.add(gglass); SB.add(glassSheen(gw, 2.95, gdx, 1.58, fz + .26, .2)); for (let k = 1; k < 6; k++) SB.add(lb(gw, .03, .03, steel, gdx, .1 + k * .5, fz + .27, .005));
     SB.add(lb(1.0, 2.4, .06, stdM('#111214', .4, .6), MOTO_DOOR.x, 1.2, fz + .2, .02)); SB.add(lb(.86, 2.26, .03, GLASSM(), MOTO_DOOR.x, 1.17, fz + .24, .01));
-    SB.add(signPlate(serifTex([['PG MOTORWERKS', 104, 110, "800 104px Outfit, sans-serif"], ['BRABUS  ·  RWB  ·  MANSORY', 36, 205, "600 32px Outfit, sans-serif"]]), 5.2, 1.3, MCX, 3.85, fz + .2));
+    SB.add(signPlate(serifTex([['PG MOTORWERKS', 104, 110, "800 104px Outfit, sans-serif"], ['BRAWLER  ·  WIDEBODY WORKS  ·  MONARCH', 36, 205, "600 32px Outfit, sans-serif"]]), 5.2, 1.3, MCX, 3.85, fz + .2));
     SB.add(lb(1.3, .03, .9, stdM('#0c0c0c', .6), MOTO_DOOR.x, .015, 7.55, .01));
     for (const x of [ICX - 2.4, ICX + 2.4, MX0 + .5, MX1 - .4]) { SB.add(lc(.03, .5, GOLDM(), x, 3.3, fz + .45, 8)); const gs = glowSprite('#ffe2b0', 1.2, .35); gs.position.set(x, 3.0, fz + .5); SB.add(nightFx(gs, .25, .75)); }
     // after dark: the signs and windows wash the sidewalk in gold and cool white
@@ -7815,7 +7820,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   function syncShowcase() {
     const open = has('motorwerks'), sig = open ? 'open' + hyperN() : 'cover'; if (showcase.userData.sig === sig) return; showcase.userData.sig = sig; while (showcase.children.length) showcase.remove(showcase.children[0]);
     RAWC(() => { showcase.add(lb(4.7, .16, 2.1, stdM('#111214', .3, .6), 0, .08, 0, .04)); showcase.add(lb(4.74, .02, 2.14, GOLDM(), 0, .17, 0, .01));
-      if (open) { const hs = hyperTop(), c = hs ? carMesh(...hs) : whipMesh(0); carShadow(c); c.position.y = .17; showcase.add(plaque(hs ? HYPERS[Math.max(...S.hypers)][0].toUpperCase() : 'RWB PORSCHE 911', 1.8, 0, .45, 1.08, 0, 70)); c.rotation.y = .12; showcase.add(c); for (const sx of [-2.6, 2.6]) { showcase.add(lc(.04, 1.5, BLKM(), sx, .75, -1.2, 8)); const sp = shaft('#fff4dc', .08, SPOT_GEO); sp.position.set(sx * .6, 1.6, 0); sp.rotation.z = sx > 0 ? .4 : -.4; showcase.add(sp); } }
+      if (open) { const hs = hyperTop(), c = hs ? carMesh(...hs) : whipMesh(0); carShadow(c); c.position.y = .17; showcase.add(plaque(hs ? HYPERS[Math.max(...S.hypers)][0].toUpperCase() : 'WBW P9 COUPE', 1.8, 0, .45, 1.08, 0, 70)); c.rotation.y = .12; showcase.add(c); for (const sx of [-2.6, 2.6]) { showcase.add(lc(.04, 1.5, BLKM(), sx, .75, -1.2, 8)); const sp = shaft('#fff4dc', .08, SPOT_GEO); sp.position.set(sx * .6, 1.6, 0); sp.rotation.z = sx > 0 ? .4 : -.4; showcase.add(sp); } }
       else { const cv = lb(4.3, 1.05, 1.95, stdM('#4a4c50', .95), 0, .7, 0, .35); showcase.add(cv); showcase.add(signPlate(serifTex([['COMING SOON', 90, 128, "800 90px Outfit, sans-serif"]], 1024, 256), 2.2, .55, 0, 1.3, 1.0)); } });
     shadowify(showcase); }
 
@@ -7837,7 +7842,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     iceG.userData.coin = new THREE.Group(); iceG.userData.coin.position.set(ICE_TILL.x, 1.9, ICE_TILL.z); iceG.add(iceG.userData.coin); { const cn = lc(.2, .05, GOLDM(), 0, 0, 0, 24); cn.rotation.x = Math.PI / 2; iceG.userData.coin.add(cn); }
     iceG.userData.coin.userData.noMerge = true; solidAt('icetill', ICE_TILL.x, ICE_TILL.z, 1.0, .4);
     // back-wall sign, a velvet sofa on the right, a plant
-    iceG.add(signPlate(serifTex([['PG ICE', 150, 100], ['ROLEX  ·  PATEK PHILIPPE  ·  AUDEMARS PIGUET  ·  CUSTOM GRILLZ', 26, 200, "600 30px Outfit, sans-serif"]]), 3.6, .9, IZ.cx, 3.6, IZ.z0 + .03));
+    iceG.add(signPlate(serifTex([['PG ICE', 150, 100], ['CROWNLINE  ·  PAVANE  ·  AUREL  ·  CUSTOM GRILLZ', 26, 200, "600 30px Outfit, sans-serif"]]), 3.6, .9, IZ.cx, 3.6, IZ.z0 + .03));
     iceG.add(propInst('GlamVelvetSofa', { w: 2.2, x: IZ.x1 - .6, z: -.7, ry: -Math.PI / 2 })); 
     solidAt('icesofa', IZ.x1 - .6, -.7, .45, 1.1); 
     iceG.add(propInst('DiffuseTransmissionPlant', { h: 1.4, x: IZ.x1 - .5, z: 1.9 }));
@@ -7845,7 +7850,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       iceG.add(propInst('PH_brass_vase_01', { h: .62, x: IZ.x1 - .5, z: 3.4 }));
       for (const lx of [73.6, 80.4]) iceG.add(propInst('PH_lion_head', { w: .42, x: lx, y: 2.75, z: IZ.z0 + .14 }));
       for (const [x, z, ry] of [[IZ.x0 + .25, IZ.z0 + .25, Math.PI * .75], [IZ.x1 - .25, IZ.z0 + .25, -Math.PI * .75]]) iceG.add(propInst('PH_security_camera_01', { w: .4, x, y: 3.5, z, ry })); }
-    // hero: a giant Patek Grand Complication on a plinth, under glass, hands sweeping
+    // hero: a giant Pavane Grand Complication on a plinth, under glass, hands sweeping
     const h = new THREE.Group(); h.position.set(ICE_HERO.x, 0, ICE_HERO.z); iceG.add(h);
     h.add(lc(.62, .5, BLKM(), 0, .25, 0, 40)); h.add(lc(.64, .04, GOLDM(), 0, .5, 0, 40)); h.add(lc(.55, .04, VELVM(), 0, .54, 0, 40));
     const face = new THREE.Group(); face.position.y = 1.25; face.userData.noMerge = true; h.add(face);
@@ -7930,7 +7935,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     motoG.add(lb(.4, .28, .05, BLKM(), MOTO_TILL.x - .6, 1.25, MOTO_TILL.z - .15, .02)); motoG.add(lb(.34, .22, .01, basicM('#d8f0ff'), MOTO_TILL.x - .6, 1.25, MOTO_TILL.z - .12, .005));
     motoG.userData.coin = new THREE.Group(); motoG.userData.coin.position.set(MOTO_TILL.x, 1.9, MOTO_TILL.z); motoG.userData.coin.userData.noMerge = true; motoG.add(motoG.userData.coin); { const cn = lc(.2, .05, GOLDM(), 0, 0, 0, 24); cn.rotation.x = Math.PI / 2; motoG.userData.coin.add(cn); }
     solidAt('mdesk', MOTO_TILL.x, MOTO_TILL.z, 1.15, .4);
-    motoG.add(signPlate(serifTex([['PG MOTORWERKS', 110, 105, "800 110px Outfit, sans-serif"], ['BRABUS  ·  RWB  ·  MANSORY  ·  CUSTOM BUILDS', 30, 200, "600 32px Outfit, sans-serif"]]), 6.0, 1.5, MZ.cx, 3.45, MZ.z0 + .03));
+    motoG.add(signPlate(serifTex([['PG MOTORWERKS', 110, 105, "800 110px Outfit, sans-serif"], ['BRAWLER  ·  WIDEBODY WORKS  ·  MONARCH  ·  CUSTOM BUILDS', 30, 200, "600 32px Outfit, sans-serif"]]), 6.0, 1.5, MZ.cx, 3.45, MZ.z0 + .03));
     for (const [x, z] of [[MZ.x0 + .7, MZ.z0 + 1.0], [MZ.x1 - .7, MZ.z0 + 1.0]]) { motoG.add(propInst('PH_metal_toolbox', { w: .9, x, z })); solidAt('tool' + x, x, z, .5, .3); }
     if (!gfxLow) { motoG.add(propInst('PH_tire_pump', { h: .9, x: MZ.x0 + 1.55, z: MZ.z0 + .55, ry: .4 })); motoG.add(propInst('PH_small_oil_can_01', { h: .32, x: MZ.x1 - 1.45, z: MZ.z0 + .55, ry: -.5 }));
       motoG.add(propInst('PH_tool_cart', { w: .9, x: 105.5, z: -4.7, ry: .2 })); motoG.add(propInst('PH_portable_welding_cart', { w: .8, x: 109.7, z: -4.8, ry: -.3 })); motoG.add(propInst('PH_metal_tool_chest', { w: 1.1, x: 113.9, z: -5.4 })); motoG.add(propInst('PH_metal_jerrycan', { h: .45, x: 117.6, z: -5.45, ry: .6 }));
@@ -7966,7 +7971,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     return shadowify(g); }
   function motoPlinth() {
     const g = new THREE.Group(); g.position.set(M_PLINTH.x, 0, M_PLINTH.z); g.userData.noLux = true;
-    RAWC(() => { g.add(lb(2.3, .2, 4.8, stdM('#0e0e10', .2, .6), 0, .1, 0, .04)); g.add(lb(2.34, .02, 4.84, GOLDM(), 0, .21, 0, .01)); const hs = hyperTop(), c = hs ? carMesh(...hs) : whipMesh(7); carShadow(c); c.rotation.y = Math.PI / 2; c.position.y = .22; g.add(c); g.add(plaque(hs ? 'PHILLY G\'S' : 'MANSORY', 1.6, 0, .55, 2.45, 0, 90)); const gs = glowSprite('#ffe9c0', 4, .2); gs.position.y = 1.4; g.add(gs); });
+    RAWC(() => { g.add(lb(2.3, .2, 4.8, stdM('#0e0e10', .2, .6), 0, .1, 0, .04)); g.add(lb(2.34, .02, 4.84, GOLDM(), 0, .21, 0, .01)); const hs = hyperTop(), c = hs ? carMesh(...hs) : whipMesh(7); carShadow(c); c.rotation.y = Math.PI / 2; c.position.y = .22; g.add(c); g.add(plaque(hs ? 'PHILLY G\'S' : 'MONARCH', 1.6, 0, .55, 2.45, 0, 90)); const gs = glowSprite('#ffe9c0', 4, .2); gs.position.y = 1.4; g.add(gs); });
     solidAt('plinth', M_PLINTH.x, M_PLINTH.z, 1.2, 2.4); return shadowify(g); }
   function syncMoto() {
     const open = has('motorwerks'), Sh = eqL('showroom'), B = eqL('bays'), Wh = eqL('wheels'), N = eqL('mneon');
@@ -7974,7 +7979,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     part('tt0', open, () => motoTurntable(0)); part('tt1', open && Sh >= 1, () => motoTurntable(1)); part('plinth', open && (Sh >= 2 || hyperN() > 0), motoPlinth); part('hyCase', open, motoHyperCase);
     part('bay0e', open && B < 1, () => motoBay(0, false)); for (let k = 0; k < 4; k++) part('bay' + k, open && B > k, () => motoBay(k, true));
     part('wh1', open && Wh >= 1 && Wh < 3, () => motoWheels(2)); part('wh2', open && Wh >= 3, () => motoWheels(3)); if (Wh >= 3 && motoParts.wh1) { motoG.remove(motoParts.wh1); delete motoParts.wh1; }
-    part('neon' + Math.min(N, 3), open && N >= 1, () => { const g = new THREE.Group(); RAWC(() => { g.add(nsign('RWB', '#f0d18a', 3.0, .75, MZ.x0 + .05, 2.8, -2.4, Math.PI / 2, 512, 128, 70)); if (N >= 2) g.add(lb(MZ.x1 - MZ.x0, .05, .05, basicM('#f0d18a'), MZ.cx, .05, MZ.z0 + .2, .01)); if (N >= 3) g.add(nsign('BRABUS', '#e8f0ff', 3.0, .75, MZ.x1 - .05, 2.8, -3.6, -Math.PI / 2, 512, 128, 70)); }); return g; }); for (let k = 1; k <= 3; k++) if (k !== Math.min(N, 3)) part('neon' + k, false);
+    part('neon' + Math.min(N, 3), open && N >= 1, () => { const g = new THREE.Group(); RAWC(() => { g.add(nsign('WBW', '#f0d18a', 3.0, .75, MZ.x0 + .05, 2.8, -2.4, Math.PI / 2, 512, 128, 70)); if (N >= 2) g.add(lb(MZ.x1 - MZ.x0, .05, .05, basicM('#f0d18a'), MZ.cx, .05, MZ.z0 + .2, .01)); if (N >= 3) g.add(nsign('BRAWLER', '#e8f0ff', 3.0, .75, MZ.x1 - .05, 2.8, -3.6, -Math.PI / 2, 512, 128, 70)); }); return g; }); for (let k = 1; k <= 3; k++) if (k !== Math.min(N, 3)) part('neon' + k, false);
   }
   // baked contact shadows: a soft ambient-occlusion map under counters, cars and along the walls
   function floorAO(fl, Z, blk) { const W = 512, H = Math.round(512 * (Z.z1 - Z.z0) / (Z.x1 - Z.x0)), c = mk(W, H), x = c.getContext('2d'), sx = W / (Z.x1 - Z.x0), sz = H / (Z.z1 - Z.z0);
@@ -8012,10 +8017,10 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
       LOC2.from = area || null; player.vx = player.vz = 0; PG.root.position.set(player.x, 0, player.z); LOC2.leave = true;
       if (pup) { pup.x = player.x - .8; pup.z = player.z + .4; }
       setAreaLights(area || false); updateCamera(10); camX = camTX; camZ = camTZ; updateCamera(0);
-      if (area === 'ice' && !S.iceSeen) { S.iceSeen = 1; banner('PG ICE', 'ROLEX · PATEK · AP · CUSTOM GRILLZ · GRAB THE TILL'); }
+      if (area === 'ice' && !S.iceSeen) { S.iceSeen = 1; banner('PG ICE', 'CROWNLINE · PAVANE · AUREL · CUSTOM GRILLZ · GRAB THE TILL'); }
       if (area === 'studio' && !S.rsSeen) { S.rsSeen = 1; banner('PG RECORDS', 'ARTISTS RECORD IN THE BOOTHS · STEP ON THE BEAT LAB RING · COLLECT AT THE FRONT DESK'); }
       if (area === 'casino' && !S.csSeen) { S.csSeen = 1; banner('PG CASINO', 'STAND ON A GOLD RING TO PLAY · COLLECT AT THE CAGE'); }
-      if (area === 'motors' && !S.motoSeen) { S.motoSeen = 1; banner('PG MOTORWERKS', 'BRABUS · RWB · MANSORY · CUSTOM JOBS'); }
+      if (area === 'motors' && !S.motoSeen) { S.motoSeen = 1; banner('PG MOTORWERKS', 'BRAWLER · WIDEBODY WORKS · MONARCH · CUSTOM JOBS'); }
       fadeEl.style.opacity = '0'; setTimeout(() => warping = false, 250);
     }, 240);
   }
@@ -8025,7 +8030,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   function clientLook(vip) { const L = randomLook(); L.chain = true; if (!L.brand && Math.random() < .45) L.brand = pick(['#1b2a44', '#2a2622', '#6b0f16', '#e9dfc6', '#141414']); if (vip) { L.brand = pick(['#121212', '#121212', '#0f3d28', '#efe6d2']); L.shades = true; L.hood = pick(['#0d0b12', '#f4f1ff', '#0f3d28']); L.pants = '#1d1a24'; } return L; }
   function spawnClient(arr, P0, vipList, vipChance) { const vip = Math.random() < vipChance ? pick(vipList) : null; const P = person(clientLook(!!vip), false); scene.add(P.root); holidayHat(P); arr.push({ P, x: P0.x, z: P0.z, state: 'in', t: 0, tk: 0, vip }); }
   // ---- custom build station: pick body, paint and wheels for a client's car; it shows up on the first lift ----
-  const CU_BODY = [['coupe', 'RWB 911'], ['suv', 'Brabus G-Wagon'], ['super', 'Mansory Lambo']], CU_PAINT = ['#ecebe6', '#0d0d0f', '#0f3d28', '#c9a24e', '#6b0f16', '#1b2a44', '#9aa0a6', '#e0752a'], CU_RIMS = [['gold', 'Gold forged'], ['black', 'Gloss black'], ['chrome', 'Chrome'], ['carbon', 'Carbon']], CU_STRIPE = [[null, 'None'], ['#141414', 'Black'], ['#f4f1ea', 'White'], ['#d4a64a', 'Gold'], ['#c8322a', 'Red']];
+  const CU_BODY = [['coupe', 'WBW P9'], ['suv', 'Brawler G-Box'], ['super', 'Monarch Toro']], CU_PAINT = ['#ecebe6', '#0d0d0f', '#0f3d28', '#c9a24e', '#6b0f16', '#1b2a44', '#9aa0a6', '#e0752a'], CU_RIMS = [['gold', 'Gold forged'], ['black', 'Gloss black'], ['chrome', 'Chrome'], ['carbon', 'Carbon']], CU_STRIPE = [[null, 'None'], ['#141414', 'Black'], ['#f4f1ea', 'White'], ['#d4a64a', 'Gold'], ['#c8322a', 'Red']];
   let cuSel = null, cuWho = null, cuReq = null;
   const cuReady = () => (S.cuNext || 0) <= Date.now();
   const cuHit = () => cuReq && cuSel && cuSel.b === cuReq.b && cuSel.p === cuReq.p && cuSel.r === cuReq.r;
@@ -8057,7 +8062,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     LOC2.soldQ = null; LOC2.custOut = cuSpec(cuSel); $('p-custom').hidden = true; openP = null; if (!anyModal()) running = true; try { HAP(30); } catch (e) {} save && save(); };
   // ---- the Grail Case: buy legendary watches for Philly G's own collection; each one boosts both luxury shops ----
   const ICE_GRAIL = { x: 82.5, z: 1.2 };
-  const WGRAILS = [['Patek Philippe Nautilus 5711 Tiffany', 250000, 3], ['Rolex Daytona "Paul Newman"', 500000, 1], ['AP Royal Oak Concept Tourbillon', 900000, 2], ['Richard Mille RM 56 Sapphire', 1500000, 6], ['Patek Philippe Grandmaster Chime', 3000000, 4], ['Jacob & Co. Billionaire', 6000000, 7]];
+  const WGRAILS = [['Pavane Harbor 57 Teal Dial', 250000, 3], ['Crownline Speedway Panda', 500000, 1], ['Aurel Royal Octagon Tourbillon', 900000, 2], ['Richter Milano RM Sapphire', 1500000, 6], ['Pavane Grand Chime', 3000000, 4], ['Jakob & Sons Billionaire', 6000000, 7]];
   const grailN = () => (S.grails || []).length, hyperN = () => (S.hypers || []).length, grailMult = () => 1 + .06 * (grailN() + hyperN());
   function grRender() {
     const own = S.grails || []; $('grList').innerHTML = WGRAILS.map(([n, c], i) => { const has0 = own.includes(i), can = S.cash >= c;
@@ -8080,8 +8085,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     solidAt('grailcase', 82.3, -1.0, .55, .55); return shadowify(g); }
   // ---- Private Garage: Philly G's own hypercars ----
   const M_HYPER = { x: 117.3, z: 4.4 };
-  const HYPERS = [['McLaren Speedtail', 2500000, ['tail', '#c9cfd4', 0, 'chrome', '#8a6a2e']], ['Bugatti Chiron Super Sport', 3500000, ['hyper', '#1b3a8c', 0, 'black', '#0d0d0f']], ['Koenigsegg Jesko Absolut', 4500000, ['super', '#e9e9e4', 0, 'carbon', '#c8322a']],
-    ['Ferrari LaFerrari Aperta', 6000000, ['super', '#b5121b', 0, 'black', '#141414']], ['Pagani Huayra Codalunga', 8000000, ['tail', '#0f3d28', 0, 'gold', '#d4a64a']], ['Rolls-Royce Boat Tail', 12000000, ['gt', '#8fb3d9', 0, 'chrome', '#f4f1ea']]];
+  const HYPERS = [['Mach Speedtail', 2500000, ['tail', '#c9cfd4', 0, 'chrome', '#8a6a2e']], ['Bellucci Chimera Super Sport', 3500000, ['hyper', '#1b3a8c', 0, 'black', '#0d0d0f']], ['Kronborg Jesper Absolut', 4500000, ['super', '#e9e9e4', 0, 'carbon', '#c8322a']],
+    ['Fervore La Fervore Aperta', 6000000, ['super', '#b5121b', 0, 'black', '#141414']], ['Palladini Huracana Codalunga', 8000000, ['tail', '#0f3d28', 0, 'gold', '#d4a64a']], ['Regent Boat Tail', 12000000, ['gt', '#8fb3d9', 0, 'chrome', '#f4f1ea']]];
   const hyperTop = () => { const h = S.hypers || []; return h.length ? HYPERS[Math.max(...h)][2] : null; };
   function hyRender() {
     const own = S.hypers || []; $('hyList').innerHTML = HYPERS.map(([n, c], i) => { const has0 = own.includes(i), can = S.cash >= c;
@@ -8196,7 +8201,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const RC_RR = [1.35, .95, .72, .56, .45], RC_AC = [6.9, 5.4, 4.2, 3.3, 2.7], RC_X0 = -19.5, RC_X1 = 30.5;
   let RACE = null;
   const rcTq = r => r > 1.0 ? .25 : r < .2 ? .75 : .75 + .3 * Math.sin(Math.min(1, (r - .2) / .7) * Math.PI / 2);
-  function raceCars() { const L = [['RWB Porsche 911', WHIP_SPEC[0], 1.0], ['Brabus G-Wagon 800', WHIP_SPEC[1], .92]]; if (eqL('showroom') >= 1) L.push(['Mansory Lamborghini', WHIP_SPEC[2], 1.12]);
+  function raceCars() { const L = [['WBW P9 Coupe', WHIP_SPEC[0], 1.0], ['Brawler G-Box 800', WHIP_SPEC[1], .92]]; if (eqL('showroom') >= 1) L.push(['Monarch Toro', WHIP_SPEC[2], 1.12]);
     (S.hypers || []).forEach(i => L.push([HYPERS[i][0], HYPERS[i][2], 1.24 + .05 * i])); return L; }
   const raceFee = () => Math.round(1500 * locMult() / 100) * 100;
   function openRace() { const L = raceCars(), wait = Math.ceil(((S.raceNext || 0) - Date.now()) / 1000), busy = rival || celeb;
