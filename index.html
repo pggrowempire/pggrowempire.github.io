@@ -509,6 +509,20 @@ body.lbox #lbTop, body.lbox #lbBot { transform: none; }
 body.lbox .hud, body.lbox .bar, body.lbox .guide, body.lbox #tapCard, body.lbox .toast, body.lbox #miniMap { opacity: 0; transition: opacity .3s; pointer-events: none; }
 #cineFlash { position: absolute; inset: 0; z-index: 5; pointer-events: none; background: radial-gradient(circle at 50% 55%, rgba(255,246,214,.85), rgba(255,225,74,.25) 45%, rgba(0,0,0,0) 75%); opacity: 0; }
 #cineFlash.go { animation: cflash 1.1s ease-out 1; } @keyframes cflash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+.mixbox { display: grid; gap: 8px; text-align: left; }
+.mixtop .pick { width: 100%; }
+.fxw { display: flex; flex-wrap: wrap; gap: 5px; } .fxp { font: 400 12px/1 var(--street); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px 4px; border-radius: 3px; background: color-mix(in srgb, var(--fc) 22%, #111); color: var(--fc); border: 1px solid var(--fc); }
+.mixval { margin: 0; font-size: 13px; color: #c9c6bf; } .mixval b { color: #ffe14a; }
+.ingr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .ingr button { display: grid; gap: 2px; padding: 7px 4px; border-radius: 4px; background: #18181a; border: 1px solid #3a3a3e; color: #f4f1ea; text-align: center; }
+.ingr button b { font: 400 13px var(--street); letter-spacing: .03em; text-transform: uppercase; } .ingr button span { font-size: 10.5px; color: #a9a6a0; } .ingr button i { font-style: normal; font-size: 11px; color: #ffe14a; } .ingr button:disabled { opacity: .45; }
+.mixname { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 4px; border: 1px solid #3a3a3e; background: #0f0f10; color: #fff; font: 600 14px var(--body); user-select: text; -webkit-user-select: text; }
+.mixbtns { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+.phtabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.txt { display: grid; gap: 4px; text-align: left; padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: #1d1d20; border: 1px solid #333; } .txt.me { background: #123a2a; border-color: #2a6a4a; }
+.txt b { font: 400 13px var(--street); letter-spacing: .05em; color: #ffe14a; } .txt p { margin: 0; color: #f4f1ea; font-size: 14px; } .txt small { color: #8f8c86; font-size: 11px; } .txt .row2 { display: flex; gap: 6px; margin-top: 4px; }
+.pdot { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 3px; background: #ff2b3a; color: #fff; font: 400 11px/18px var(--num); text-align: center; padding: 0 3px; transform: rotate(6deg); }
+.ptrack { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; } .ptier { position: relative; display: grid; gap: 1px; place-items: center; padding: 6px 2px; border-radius: 4px; background: #161618; border: 1px solid #333; color: #8f8c86; font-size: 10px; text-align: center; }
+.ptier b { font: 400 15px var(--num); color: #f4f1ea; } .ptier.on { border-color: #ffe14a; color: #ffe14a; } .ptier.got { opacity: .45; } .ptier.big { background: #241a0a; } .ptier button { margin-top: 2px; font: 400 11px var(--num); padding: 3px 6px; border-radius: 3px; border: 0; background: #ffe14a; color: #111; }
 .goldc { position: absolute; left: 0; top: 0; z-index: 8; pointer-events: none; display: block; border-radius: 1px; will-change: transform, opacity; box-shadow: 0 0 6px rgba(255,225,74,.6); }
 .leafc { position: absolute; left: 0; top: 0; z-index: 8; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 6px rgba(90,255,130,.65)); }
 .reveal { --gl: .5; box-shadow: 0 0 0 4px rgba(0,0,0,.5), 0 18px 50px rgba(0,0,0,.55), 0 0 calc(30px + 50px * var(--gl)) rgba(90,255,130, calc(.25 + .45 * var(--gl))) !important; }
@@ -656,6 +670,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     <div class="btns">
       <span class="chip" id="boostChip" hidden></span><span class="chip rush" id="rushChip" hidden></span><span class="chip ev" id="evChip" hidden></span>
       <button class="ib evb" id="evBtn" aria-label="Weekly event"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg><span id="evTime"></span></button>
+      <button class="ib" id="phoneBtn" aria-label="Phone" style="position:relative"><svg viewBox="0 0 24 24" fill="#f4f1ea"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 3v13h10V5zm4 14.2a1 1 0 1 0 2 0 1 1 0 0 0-2 0z"/></svg><i class="pdot" id="phoneDot" hidden></i></button>
       <button class="ib" id="boardBtn" aria-label="Leaderboard and settings"><svg viewBox="0 0 24 24" fill="#ffe23d"><path d="M4 13h4v8H4zM10 7h4v14h-4zM16 10h4v11h-4z"/></svg></button>
     </div>
   </div>
@@ -689,12 +704,13 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   <div class="modal" id="p-grail" hidden><div class="box"><h2>The Grail Case</h2><p>Philly G's personal collection. Every grail you own goes on the wall and makes PG Ice and Motorwerks pay 6% more, for good.</p><div id="grList"></div><button class="btn ghost" data-close>Back to the floor</button></div></div>
   <div class="modal" id="p-hyper" hidden><div class="box"><h2>Private Garage</h2><p>Philly G's own hypercars. The newest one sits on the plinth and out front on the street, and every car makes PG Ice and Motorwerks pay 6% more, for good.</p><div id="hyList"></div><button class="btn ghost" data-close>Back to the floor</button></div></div>
   <div class="modal" id="p-map" hidden><div class="box"><h2 id="mapTitle">City Map</h2><div class="list" id="mapList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
+  <div class="modal" id="p-phone" hidden><div class="box"><h2>Your Phone</h2><div class="phtabs tabs"><button id="phT1">Texts</button><button id="phT2">Street Pass</button></div><div class="list" id="phList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-coll" hidden><div class="box"><h2>Collection</h2><div class="list" id="cList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-lperk" hidden><div class="box"><h2>Legacy Perk</h2><p>Your chain sold. Pick one perk to keep forever. Perks stack every time you franchise.</p><div class="list" id="lpList"></div></div></div>
   <div class="modal" id="p-empire" hidden><div class="box"><h2>The Empire</h2><div class="list" id="eList"></div><button class="btn" id="prestigeBtn">Open a new spot</button><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-photo" hidden><div class="box"><h2>Snapshot</h2><img id="photoImg" class="snap" alt="Your shop"><p class="note">Press and hold the photo to save or share it.</p><button class="btn" id="photoShare" hidden>Share</button><a class="btn" id="photoDl" download="philly-g-grow-empire.png">Download</a><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-story" hidden><div class="box"><canvas id="storyFace" width="192" height="192" class="face big"></canvas><img id="storyArt" class="storyart" alt="" hidden><h2 id="storyName"></h2><p id="storyTxt" class="storytxt"></p><p class="note" id="storyGoal"></p><button class="btn" id="storyOk">Bet</button></div></div>
-  <div class="modal" id="p-lab" hidden><div class="box"><h2>Genetics Lab</h2><p id="labTxt">Cross two strains to cook up new ones. Rarer strains sell higher and grow faster.</p><div class="breed"><button class="pick" id="labA"></button><span>×</span><button class="pick" id="labB"></button></div><button class="btn" id="labCross">Cross</button><div class="list" id="labList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
+  <div class="modal" id="p-lab" hidden><div class="box"><h2>Genetics Lab</h2><p id="labTxt">Mix ingredients into a strain to stack effects, every effect raises the price. Or cross two strains for new genetics.</p><div id="mixBox" class="mixbox"></div><div class="sec">CROSS TWO STRAINS</div><div class="breed"><button class="pick" id="labA"></button><span>×</span><button class="pick" id="labB"></button></div><button class="btn" id="labCross">Cross</button><div class="list" id="labList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-report" hidden><div class="box"><h2>Playtest Report</h2><p>Where players get to, and where they stop.</p><div class="list" id="repList"></div><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-move" hidden><div class="box"><h2>Move My Save</h2><p>Copy this code and paste it into the game on your other phone or browser.</p><textarea id="moveOut" readonly rows="3"></textarea><button class="btn" id="moveCopy">Copy code</button><div id="moveAcctRow" hidden><p class="note">Online backup</p><input id="moveAcct" readonly style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(233,199,124,.4);background:#14110e;color:#f1e6cf;font:600 12px Outfit,sans-serif"><p class="note" id="moveAcctNote"></p><button class="btn ghost" id="moveAcctCopy">Copy account code</button></div><p class="note">Got a code from another device?</p><textarea id="moveIn" rows="3" placeholder="Paste a save code here"></textarea><button class="btn ghost" id="moveLoad">Load this save</button><button class="btn ghost" data-close>Back to the shop</button></div></div>
   <div class="modal" id="p-credits" hidden><div class="box credits"><div class="roll"><div id="credList"></div></div><button class="btn" id="credOk">Keep stacking</button></div></div>
@@ -2617,7 +2633,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     let want = avail[Math.random() < .45 ? avail.length - 1 : Math.floor(Math.random() * avail.length)];
     if (kind === 'conn') want = avail[avail.length - 1];
     { const sp = specialI(); if (sp >= 0 && avail.includes(sp) && Math.random() < .3) want = sp; }
-    const RG = !vip && !kind ? pickRegular() : null;
+    const RG = forceReg ? REGULARS.find(q => q.id === forceReg.from) : !vip && !kind ? pickRegular() : null;
     const gold = !RG && !vip && !kind && !visit && S.level >= 3 && Math.random() < 1 / 90;
     const P = person(RG ? RG.look : gold ? { cap: '#ffcc3d', hood: '#ffcc3d', pants: '#c9a46a', shoes: '#ffcc3d', chain: true, shades: true, skin: pick(SKINS), hair: '#0d0b12' } : vip ? { cap: '#ffcc3d', capBack: true, chain: true, shades: true, hood: pick(['#f4f1ff', '#1d1a24', '#9b6bff']), pants: '#1d1a24', shoes: '#ffcc3d', skin: pick(SKINS), hair: '#0d0b12' } : kind === 'tour' ? TOUR_LOOK() : kind === 'conn' ? CONN_LOOK() : randomLook(), false); scene.add(P.root); holidayHat(P);
     if (vip || gold) { const gl = glowSprite('#ffcc3d', gold ? 2.6 : 1.8, gold ? .55 : .35); gl.position.y = .7; P.root.add(gl); }
@@ -2626,7 +2642,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     const c = { P, bub, x: rand(-1, 1), z: 11, want, qty, got: 0, state: 'enter', wait: 0, path: [[0, 6.3], [PX[want] + rand(-.5, .5), SHELF_FRONT]], speed: rand(2.2, 2.8), t: Math.random() * 5, bag: null, vip: !!vip, gold, reg: RG ? RG.id : null, conn: kind === 'conn', tour: kind === 'tour' };
     if (kind === 'conn') { c.say = pick(['Top shelf only. I can tell.', 'Let me see what you really got.', 'I’ve heard about this place.']); c.sayT = 4; c.speed = 2.0; }
     if (kind === 'tour') { c.say = pick(['Is this the famous one?', 'Take our picture!', 'We came all the way here!', 'Is that THE Philly G?']); c.sayT = 3.5; c.x = rand(-1.6, 1.6); }
-    if (RG) { c.want = want = RG.fav; c.qty = 2; c.path = [[0, 6.3], [PX[want] + rand(-.5, .5), SHELF_FRONT]]; c.say = regLine(RG, (S.regs || {})[RG.id] || {}); c.sayT = 4.5; }
+    if (RG && forceReg) { c.txt = forceReg.id; }
+    if (RG) { c.want = want = RG.fav; c.qty = forceReg ? forceReg.qty : 2; c.path = [[0, 6.3], [PX[want] + rand(-.5, .5), SHELF_FRONT]]; c.say = regLine(RG, (S.regs || {})[RG.id] || {}); c.sayT = 4.5; }
     c.bub.material.map = bubbleFor(want, c.qty, vip);
     if (vip && T - vipCamT > 150) { vipCamT = T; setTimeout(() => { try { if (customers.includes(c) && !anyModal()) { closeUp(c.x, c.z); c.say = pick(['Heard this is the spot.', 'Show me the best you got.', 'I only shop PG.']); c.sayT = 2.4; } } catch (e) {} }, 1400); }
     if (vip) { toast(`VIP: ${pick(VIP_NAMES)} just walked in. 5× payout`); SFX.build(); SFX.bell(); c.ent = []; for (let k = 0; k < (gfxLow ? 1 : 2); k++) { const L0 = randomLook(); L0.shades = Math.random() < .6; const EP = person(L0, false); scene.add(EP.root); c.ent.push({ P: EP, x: c.x + (k ? .7 : -.7), z: c.z + .8, t: Math.random() * 4, ox: k ? .75 : -.75, oz: .85 }); } }
@@ -2983,6 +3000,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     let amt = priceOf(c.want) * c.qty * (c.vip ? 5 : 1) * (c.gold ? 10 : 1) * (c.conn ? 2.5 : 1) * (c.tour ? 1.3 : 1) * legacyMult() * (hypeOn() ? 2 : 1);
     if (c.conn) { S.stats.conn = (S.stats.conn || 0) + 1; floatAt(x, 3.2, z, 'CONNOISSEUR APPROVED', '#e9c77c'); }
     if (c.tour) S.stats.tour = (S.stats.tour || 0) + 1;
+    try { passXP(1); if (c.txt) { amt *= 1.6; const t = (S.texts || []).find(q => q.id === c.txt); if (t) t.st = 'done'; c.txt = null; passXP(15); floatAt(x, 3.4, z, 'TEXT ORDER 1.6×', '#4dff8a'); const st = (S.regs || {})[c.reg]; if (st) st.n++; phoneBadge(); } } catch (e) {}
     const quick = T - (c.qT || T) < 6 + vibe() / 15;
     if (!auto && !visit) { if (quick) { streak++; S.bestStreak = Math.max(S.bestStreak || 0, streak); amt *= streakMult(); if (streak >= 2) floatAt(x + .6, 2.9, z, 'STREAK ×' + streakMult().toFixed(1), '#ffcc3d');
         if (streak % 5 === 0) { SFX.streak(); burst(x, 2, z, ['#ffcc3d', '#fff1c9', '#ff8a3d'], 36, 4); shake(.12); if (streak === 10) banner('ON FIRE', '10 FAST CHECKOUTS · 1.8× ON EVERY SALE'); else toast(`${streak} in a row! Every sale pays ${streakMult().toFixed(1)}×`); } }
@@ -3163,6 +3181,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (crowd) try { for (let k = 0; k < 6; k++) { const sd = k % 2 ? 1 : -1, P = person(randomLook(), false); P.root.position.set(x + sd * (2.0 + Math.floor(k / 2) * .9), 0, z - .6 + Math.floor(k / 2) * .7 + rand(-.2, .2)); faceTo(P, x - P.root.position.x, z - P.root.position.z); P.forceAnim = k % 3 === 1 ? 'dance' : 'cheer'; scene.add(P.root); CINE2.ppl.push(P); } } catch (e) {}
     try { SFX.build(); } catch (e) {} }
   function closeUp(x, z) { if (calm || RACE || cine || CINE2) return; CINE2 = { t: 0, x, z, dur: 2.4, ppl: [], close: true }; lbOn(); }
+  let peekT = -99;
+  function peekNext(delay) { if (calm || T - peekT < 20) return; const nx = PADS.filter(p => !isStaff(p) && !has(p.id) && p.need.every(has) && (!p.lvl || S.level >= p.lvl) && p.cost > 0).sort((a, b) => a.cost - b.cost)[0]; if (!nx) return; let x, z; try { [x, z] = padPos(nx); } catch (e) { return; } if (!isFinite(x) || Math.hypot(x - player.x, z - player.z) < 4.5) return; peekT = T;
+    setTimeout(() => { try { if (CINE2 || anyModal() || RACE) return; CINE2 = { t: 0, x, z, dur: 2.3, ppl: [], peek: true }; floatAt(x, 2.4, z, 'NEXT UP: ' + nx.label.replace(/^(Unlock |Open the |Build )/, '').toUpperCase(), '#ffe14a'); } catch (e) {} }, delay * 1000); }
   function cineTick(dt) { if (!CINE2) return; const C = CINE2; C.t += dt; C.ppl.forEach((P, i) => animPerson(P, T + i, false, false));
     if (C.t >= C.dur) { C.ppl.forEach(P => scene.remove(P.root)); CINE2 = null; document.body.classList.remove('lbox'); } }
   function build(p) {
@@ -3185,6 +3206,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (p.id === 'studio') { if (!S.eq.booth) S.eq.booth = 1; if (locsReady) syncLocs(); banner('PG RECORDS IS OPEN', 'TAKE THE PURPLE DOOR IN THE WAREHOUSE WALL UP TO THE STUDIO'); fireworks(8); }
     if (p.id === 'casino') { if (!S.eq.slots) S.eq.slots = 1; if (locsReady) syncLocs(); banner('PG CASINO IS OPEN', 'SLOTS · BLACKJACK · ROULETTE · CRAPS · POKER · WALK UNDER THE MARQUEE'); fireworks(8); }
     if (p.kind === 'zone' || ['basement', 'jeweler', 'motorwerks', 'studio', 'casino'].includes(p.id)) grandOpen(true, 3.8);
+    try { peekNext(p.kind === 'zone' || ['basement', 'jeweler', 'motorwerks', 'studio', 'casino'].includes(p.id) ? 4.6 : 1.6); } catch (e) {}
     if (p.id === 'cashier') { makeCashier(); toast('Cashier on the register. Upgrade pads are open by the door'); }
     dropPad(p.id);
     save();
@@ -3468,7 +3490,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     idleCam = Math.hypot(player.vx, player.vz) < .2 && !calm ? Math.min(1, idleCam + dt * .25) : Math.max(0, idleCam - dt * 2); const drift = idleCam * .045 * Math.sin(T * .25);
     const syw = Math.sin(camYaw + drift), cyw = Math.cos(camYaw + drift), cEl = (window.__camEl || (camMode === 'street' ? 46 : 60)) * Math.PI / 180, cSE = Math.sin(cEl), cCE = Math.cos(cEl); camera.position.set(camX + syw * dist * cCE, dist * cSE, camZ + cyw * dist * cCE); camera.lookAt(camX - syw * .6, 0, camZ - cyw * .6); camLook.set(camX - syw * .6, 0, camZ - cyw * .6);
     if (shakeA > .002) { camera.position.x += (Math.random() - .5) * shakeA; camera.position.y += (Math.random() - .5) * shakeA * .6; shakeA *= Math.pow(.0005, dt); } else shakeA = 0;
-    if (CINE2) { const C = CINE2, k = Math.min(1, C.t / C.dur), w = Math.min(1, C.t / (C.close ? .45 : .7), Math.max(0, C.dur - C.t) / (C.close ? .55 : .8)), ws = w * w * (3 - 2 * w), ang = C.close ? -.22 + .44 * k : -.75 + 1.5 * (k * k * (3 - 2 * k)), el = C.close ? .3 : .42, dd = C.close ? 4.4 - .6 * Math.sin(Math.PI * k) : 8.5 - 2.2 * Math.sin(Math.PI * k);
+    if (CINE2) { const C = CINE2, k = Math.min(1, C.t / C.dur), w = Math.min(1, C.t / (C.close ? .45 : .7), Math.max(0, C.dur - C.t) / (C.close ? .55 : .8)), ws = w * w * (3 - 2 * w), ang = C.peek ? 0 : C.close ? -.22 + .44 * k : -.75 + 1.5 * (k * k * (3 - 2 * k)), el = C.peek ? .85 : C.close ? .3 : .42, dd = C.peek ? 12 : C.close ? 4.4 - .6 * Math.sin(Math.PI * k) : 8.5 - 2.2 * Math.sin(Math.PI * k);
       const cp = new THREE.Vector3(C.x + Math.sin(ang) * dd * Math.cos(el), dd * Math.sin(el) + .4, C.z + Math.cos(ang) * dd * Math.cos(el)); camera.position.lerp(cp, ws); const lk = camLook.clone().lerp(new THREE.Vector3(C.x, C.close ? 1.25 : 1.1, C.z), ws); camera.lookAt(lk); }
     sun.position.set(camX + 6, 16, camZ + 9); sun.target.position.set(camX, 0, camZ - 1);
   }
@@ -4392,7 +4414,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     S.cash += m.reward.cash; S.gems += m.reward.gems + (perk('gold') ? 1 : 0); addXP(m.reward.xp); if (!visit) { evState(); S.ev.mc = (S.ev.mc || 0) + 1; evAdd(15); }
     SFX.build(); toast(`Mission done: +${money(m.reward.cash)} and ${m.reward.gems} gold lea${m.reward.gems > 1 ? 'ves' : 'f'}`);
     burst(player.x, 1.5, player.z, ['#7dff6a', '#ffe23d'], 30, 3.5);
-    S.ms.splice(k, 1); fillMissions(); save(); renderPanel();
+    try { passXP(20); } catch (e) {} S.ms.splice(k, 1); fillMissions(); save(); renderPanel();
   }
   fillMissions();
   // VIPs and delivery crates
@@ -4555,7 +4577,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   let panelSig = '';
   function renderPanel(force) {
     if (!openP) return;
-    const sig = openP + '|' + S.gems + '|' + S.ach.length + '|' + (openP === 'lab' ? S.strains.length + ':' + S.active + ':' + labA + ':' + labB + ':' + (S.cash >= crossCost()) : '') + S.pup + S.skin + S.skins.length + '|' + (openP === 'missions' ? S.ms.map(m => mProg(m) + ':' + m.goal).join(',') : '') + '|' + (openP === 'boosts' ? (Date.now() >= S.freeHypeAt) + ':' + Math.ceil((S.freeHypeAt - Date.now()) / 60000) : '') + '|' + S.loc + has('shelf4') + S.level + (openP === 'empire' ? '|' + charter().map(r => Math.floor(Math.min(1, r.v() / r.n) * 40)).join() : '') + (openP === 'brand' ? '|' + brDropOn() + brStock() + Math.ceil((((S.brand && S.brand.dropAt) || 0) - Date.now()) / 6e4) : '');
+    const sig = openP + '|' + S.gems + '|' + S.ach.length + '|' + (openP === 'lab' ? S.strains.length + ':' + S.active + ':' + labA + ':' + labB + ':' + (S.cash >= crossCost()) + ':' + Math.floor(Math.log2(1 + S.cash)) + (MIX ? MIX.add.join() : '') : openP === 'phone' ? phoneSig() : '') + S.pup + S.skin + S.skins.length + '|' + (openP === 'missions' ? S.ms.map(m => mProg(m) + ':' + m.goal).join(',') : '') + '|' + (openP === 'boosts' ? (Date.now() >= S.freeHypeAt) + ':' + Math.ceil((S.freeHypeAt - Date.now()) / 60000) : '') + '|' + S.loc + has('shelf4') + S.level + (openP === 'empire' ? '|' + charter().map(r => Math.floor(Math.min(1, r.v() / r.n) * 40)).join() : '') + (openP === 'brand' ? '|' + brDropOn() + brStock() + Math.ceil((((S.brand && S.brand.dropAt) || 0) - Date.now()) / 6e4) : '');
     const sig2 = sig + (openP === 'style' ? '|' + (S.floor || '') + (S.wallCol || '') + (S.place || []).length + (S.floors || []).length : '') + (openP === 'upgrade' ? '|' + S.st.join() + S.strain + S.decor.join() + S.sprinkler + S.pestCtl + S.strains.length + JSON.stringify(S.eq) + S.lv.grow + upgradeRows().map(r => r.cost <= S.cash).join() : '');
     const sig3 = sig2 + (openP === 'hire' ? '|' + PADS.filter(isStaff).map(p => has(p.id) + ':' + hireOpen(p) + ':' + (S.cash >= hireCost(p))).join() : ''); if (sig3 === panelSig && force !== true) return; panelSig = sig3;
     if (openP === 'event') { const L = $('evList'); L.textContent = ''; evRows(L); hoistClaims(L, 1); }
@@ -4565,6 +4587,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
         if (!done) { const free = Date.now() >= (S.swapAt || 0), sw = document.createElement('button'); sw.className = 'swap'; sw.textContent = free ? '↻ Swap (free)' : '↻ Swap · 2 ◆'; sw.disabled = !free && S.gems < 2; sw.addEventListener('click', () => swapMission(k)); row.firstChild.append(sw); }
         L.append(row); });
       tierRows($('mList')); achRows($('mList')); hoistClaims(L);
+    } else if (openP === 'phone') { phoneRows($('phList'));
     } else if (openP === 'coll') { collRows($('cList'));
     } else if (openP === 'map') { mapRows($('mapList'));
     } else if (openP === 'brand') { brandRows($('brList'));
@@ -4653,12 +4676,12 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     S.cash -= c; S.paid[p.id] = 0; build(p); buzz(20); renderPanel(true);
   }
   function renderHire() {
-    const L = $('hList'); L.textContent = ''; let sec = '';
+    const L = $('hList'); L.textContent = ''; let sec = ''; try { crewRows(L); } catch (e) {}
     PADS.filter(isStaff).forEach(p => {
       const s2 = p.kind === 'runner' ? 'RUNNERS' : p.id === 'bartender' ? 'BASEMENT' : 'SHOP CREW';
       if (s2 !== sec) { sec = s2; const h = document.createElement('div'); h.className = 'sec'; h.textContent = s2; L.append(h); }
       const title = p.label.replace('Hire ', '');
-      if (has(p.id)) { const f = staffInfo(p.id); L.append(itemRow(`${title} · ${f.name}`, `${f.tr.n}: ${f.tr.d}`, null, 'Hired', () => {}, true, true, 'p:' + p.id)); return; }
+      if (has(p.id)) return;
       if (!hireOpen(p)) {
         const miss = p.need.filter(n => !has(n)).map(hireName); const why = [p.lvl && S.level < p.lvl ? 'level ' + p.lvl : '', ...miss].filter(Boolean).join(' + ');
         L.append(itemRow(title, `Needs ${why} first`, null, '🔒 ' + money(p.cost), () => {}, true, false, 'p:' + p.id, true)); return;
@@ -4838,9 +4861,43 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const SV_H = [[.38, .55], [.25, .7], [.78, .55], [.5, .6], [.07, .7], [.9, .7], [.99, .6], [.14, .7], [0, .05]];
   function strainIk(col) { const c = new THREE.Color(col), h = {}; c.getHSL(h); if (h.s < .18) return 'sv:8'; let best = 0, bd = 9; SV_H.forEach(([hh, ss], i) => { if (i === 8) return; const dh = Math.min(Math.abs(h.h - hh), 1 - Math.abs(h.h - hh)), d = dh + Math.abs(h.s - ss) * .15; if (d < bd) { bd = d; best = i; } }); return 'sv:' + best; }
   let labA = 0, labB = 0;
+  // ---- Mix Station: Schedule I style. Each ingredient adds an effect and can flip effects already in the mix ----
+  const FX = { calm: { n: 'Calming', v: .10, c: '#7fd6ff' }, energy: { n: 'Energizing', v: .14, c: '#ffe14a' }, euph: { n: 'Euphoric', v: .24, c: '#ff6ad5' }, giggle: { n: 'Giggly', v: .12, c: '#ffb52b' }, munch: { n: 'Munchies', v: .08, c: '#ff8a3d' }, sleep: { n: 'Sleepy', v: .06, c: '#8f8cff' },
+    focus: { n: 'Focused', v: .16, c: '#4dff8a' }, creative: { n: 'Creative', v: .18, c: '#c77dff' }, glow: { n: 'Glowing', v: .26, c: '#fff1a8' }, tropic: { n: 'Tropical', v: .15, c: '#3dffb0' }, gas: { n: 'Gassy', v: .2, c: '#b7ff3d' }, gold: { n: 'Golden', v: .4, c: '#ffcc3d' } };
+  const INGR = [{ id: 'soda', n: 'Lemon Soda', c: 60, add: 'giggle', sw: { sleep: 'energy' } }, { id: 'mint', n: 'Mint Gum', c: 80, add: 'calm', sw: { energy: 'focus' } }, { id: 'chips', n: 'Hot Chips', c: 90, add: 'munch', sw: { calm: 'giggle' } },
+    { id: 'mango', n: 'Mango', c: 120, add: 'tropic', sw: { munch: 'euph' } }, { id: 'brew', n: 'Cold Brew', c: 150, add: 'energy', sw: { calm: 'focus', sleep: 'creative' } }, { id: 'honey', n: 'Honey', c: 220, add: 'glow', sw: { giggle: 'euph' } },
+    { id: 'lav', n: 'Lavender', c: 260, add: 'sleep', sw: { energy: 'calm', focus: 'creative' } }, { id: 'diesel', n: 'Diesel Terps', c: 400, add: 'gas', sw: { tropic: 'glow' } }, { id: 'gflake', n: 'Gold Flakes', c: 1200, add: 'gold', sw: { glow: 'euph' } }];
+  const BASE_FX = ['calm', 'focus', 'creative', 'sleep', 'energy', 'giggle', 'munch', 'tropic', 'calm'];
+  const fxOf = st => st.fx || [BASE_FX[+strainIk(st.col).slice(3)] || 'calm'];
+  const ingrOpen = () => INGR.filter((g, i) => i < 3 + Math.floor((S.level || 1) / 3));
+  const ingrCost = g => Math.round(g.c * locMult());
+  let MIX = null; // { base, fx, spent, add: [] }
+  function mixStart() { MIX = { base: S.active, fx: fxOf(S.strains[S.active]).slice(), spent: 0, add: [] }; }
+  function mixAdd(g) { if (!MIX) mixStart(); const cost = ingrCost(g); if (!(S.cash >= cost) || MIX.add.length >= 8) return; S.cash -= cost; MIX.spent += cost; MIX.add.push(g.id);
+    MIX.fx = MIX.fx.map(f => g.sw[f] || f).filter((f, i, a) => a.indexOf(f) === i); if (!MIX.fx.includes(g.add) && MIX.fx.length < 6) MIX.fx.push(g.add); SFX.drop(); renderPanel(true); }
+  const mixMult = (base, fx) => +(base.mult * (1 + fx.reduce((a, f) => a + FX[f].v, 0))).toFixed(2);
+  function mixCook() { if (!MIX || !MIX.add.length || visit) return; const base = S.strains[MIX.base] || S.strains[S.active], fx = MIX.fx.slice(), key = fx.slice().sort().join('+');
+    const inp = $('mixName'), auto = FX[fx[fx.length - 1]].n + ' ' + base.n.split(' ').pop(); let n = ((inp && inp.value) || '').trim().slice(0, 22) || auto; let k2 = 2; while (S.strains.some(x => x.n === n)) n = (((inp && inp.value) || auto).trim().slice(0, 19)) + ' ' + k2++;
+    const cc = new THREE.Color(base.col); fx.forEach(f => cc.lerp(new THREE.Color(FX[f].c), .18)); const rr = fx.length >= 6 ? 3 : fx.length >= 5 ? 2 : fx.length >= 3 ? 1 : 0, mult = mixMult(base, fx);
+    S.recipes = S.recipes || {}; const fresh = !S.recipes[key]; if (fresh) S.recipes[key] = n; const gl = fresh ? 1 + rr * 2 : 0; S.gems += gl;
+    if (S.strains.length >= 40) { const lowI = S.strains.map((x, i) => [x.mult, i]).filter(([, i]) => i !== S.active).sort((a, b) => a[0] - b[0])[0]; if (lowI) S.strains.splice(lowI[1], 1); }
+    S.strains.push({ n, col: '#' + cc.getHexString(), mult, sp: base.sp, r: rr, fx, mix: 1 }); S.active = S.strains.length - 1; LINC(BUD_M, BUD_M.color.set(budCol(S.strains[S.active].col))); MIX = null; if (inp) inp.value = '';
+    try { passXP(10); } catch (e) {}
+    $('p-lab').hidden = true; openP = null; running = true; upgradeReveal(player.x, player.z, { t: n, k: fresh ? 'NEW RECIPE DISCOVERED' : 'FRESH BATCH', d: `${fx.map(f => FX[f].n).join(' · ')} · ${mult}× price${gl ? ' · +' + gl + ' gold leaves' : ''}`, ik: strainIk('#' + cc.getHexString()), you: true, objs: [] }); save(); }
+  function renderMix() { const box = $('mixBox'); if (!box) return; box.textContent = ''; if (!MIX) mixStart(); const base = S.strains[MIX.base] || S.strains[S.active];
+    const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'MIX STATION'; box.append(h);
+    const top = document.createElement('div'); top.className = 'mixtop'; const bb = document.createElement('button'); bb.className = 'pick'; bb.textContent = 'Base: ' + base.n; bb.addEventListener('click', () => { if (MIX.add.length) { toast('Finish or reset this mix first'); return; } S.active = (MIX.base + 1) % S.strains.length; mixStart(); renderPanel(true); }); top.append(bb); box.append(top);
+    const fxw = document.createElement('div'); fxw.className = 'fxw'; MIX.fx.forEach(f => { const p = document.createElement('span'); p.className = 'fxp'; p.style.setProperty('--fc', FX[f].c); p.textContent = FX[f].n; fxw.append(p); }); box.append(fxw);
+    const val = document.createElement('p'); val.className = 'mixval'; val.innerHTML = `Sells for <b>${mixMult(base, MIX.fx)}×</b> · ${MIX.fx.length}/6 effects${MIX.spent ? ' · spent ' + money(MIX.spent) : ''}${(S.recipes || {})[MIX.fx.slice().sort().join('+')] ? ' · known recipe' : MIX.add.length ? ' · <b>new recipe!</b>' : ''}`; box.append(val);
+    const g = document.createElement('div'); g.className = 'ingr'; ingrOpen().forEach(it => { const b = document.createElement('button'); b.innerHTML = `<b>${it.n}</b><span>+${FX[it.add].n}</span><i>${money(ingrCost(it))}</i>`; b.disabled = !(S.cash >= ingrCost(it)) || MIX.add.length >= 8; b.addEventListener('click', () => mixAdd(it)); g.append(b); });
+    const nxt = INGR[ingrOpen().length]; if (nxt) { const b = document.createElement('button'); b.disabled = true; b.innerHTML = `<b>${nxt.n}</b><span>Level ${(ingrOpen().length - 2) * 3}</span><i>locked</i>`; g.append(b); } box.append(g);
+    const nm = document.createElement('input'); nm.id = 'mixName'; nm.className = 'mixname'; nm.maxLength = 22; nm.placeholder = 'Name your mix (optional)'; nm.addEventListener('keydown', e => e.stopPropagation()); box.append(nm);
+    const row = document.createElement('div'); row.className = 'mixbtns'; const ck = document.createElement('button'); ck.className = 'btn'; ck.textContent = 'Cook it'; ck.disabled = !MIX.add.length; ck.addEventListener('click', mixCook);
+    const rs = document.createElement('button'); rs.className = 'btn ghost'; rs.textContent = 'Reset'; rs.disabled = !MIX.add.length; rs.addEventListener('click', () => { mixStart(); renderPanel(true); }); row.append(ck, rs); box.append(row);
+    const known = Object.entries(S.recipes || {}); if (known.length) { const kb = document.createElement('p'); kb.className = 'mixval'; kb.textContent = `Recipe book: ${known.length} discovered`; box.append(kb); } }
   const crossCost = () => Math.round(350 * Math.pow(1.55, Math.min(20, S.strains.length - 1)) * locMult());
   function pickLabel(el, i) { const st = S.strains[i]; el.textContent = ''; const d = document.createElement('i'); d.style.background = st.col; el.append(d, st.n); }
-  function renderLab() {
+  function renderLab() { try { renderMix(); } catch (e) {}
     labA = Math.min(labA, S.strains.length - 1); labB = Math.min(labB, S.strains.length - 1);
     pickLabel($('labA'), labA); pickLabel($('labB'), labB);
     const cost = crossCost(), full = S.strains.length >= 30; $('labCross').textContent = full ? 'Lab is full (30 strains)' : 'Cross · ' + money(cost); $('labCross').disabled = full || !(S.cash >= cost);
@@ -4866,15 +4923,16 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   // ---------- staff personalities ----------
   const STAFF_NAMES = ['Dre', 'Lil Peanut', 'Keisha', 'Smoke', 'Rico', 'Nina', 'Junebug', 'Tank', 'Bree', 'Jojo', 'Marcus', 'Tiff', 'Smitty', 'Lani', 'Boogie', 'Nae Nae', 'Cheese', 'Mookie'];
   const TRAITS = [{ n: 'Speedy', d: 'moves 25% faster', sp: 1.25 }, { n: 'Hustler', d: 'moves 15% faster', sp: 1.15 }, { n: 'Chill', d: '+3 vibe, a little slower', sp: .92, vibe: 3 }, { n: 'Charmer', d: 'customers tip 10% more at the register', sp: 1, tip: .1 }, { n: 'Steady', d: 'reliable, 5% faster', sp: 1.05 }, { n: 'Sleepy', d: '10% slower but always shows up', sp: .9 }];
-  function staffInfo(key) { const h = parseInt(hashStr(key + ':' + S.loc), 36) >>> 0; return { name: STAFF_NAMES[h % STAFF_NAMES.length], tr: TRAITS[(h >>> 7) % TRAITS.length] }; }
-  const staffSp = key => has(key) ? staffInfo(key).tr.sp : 1;
+  function staffInfo(key) { const h = parseInt(hashStr(key + ':' + S.loc), 36) >>> 0, ov = (S.staffTr || {})[key]; return { name: STAFF_NAMES[h % STAFF_NAMES.length], tr: TRAITS[ov != null ? ov % TRAITS.length : (h >>> 7) % TRAITS.length], lv: (S.staffLv || {})[key] || 0 }; }
+  const staffSp = key => has(key) ? staffInfo(key).tr.sp * (1 + .06 * ((S.staffLv || {})[key] || 0)) : 1;
   const STAFF_KEYS = () => [...PRODUCTS.map((_, i) => 'run' + i), 'cashier', 'janitor', 'guard', 'grower', 'bartender'].filter(has);
   const crewVibe = () => STAFF_KEYS().reduce((a, k) => a + (staffInfo(k).tr.vibe || 0), 0);
   const roleOf = k => k.startsWith('run') ? PRODUCTS[+k.slice(3)].short + ' Runner' : { cashier: 'Cashier', janitor: 'Janitor', guard: 'Security', grower: 'Grower', bartender: 'Bartender' }[k];
   function crewRows(L) {
     const keys = STAFF_KEYS(); if (!keys.length) return;
     const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'THE CREW'; L.append(h);
-    keys.forEach(k => { const f = staffInfo(k); L.append(itemRow(`${f.name} · ${roleOf(k)}`, `${f.tr.n}: ${f.tr.d}`, null, null, null, false, false, 'p:' + k)); });
+    keys.forEach(k => { const f = staffInfo(k), lc = 6 + f.lv * 6; const row = itemRow(`${f.name} · ${roleOf(k)} · Lv ${f.lv + 1}`, `${f.tr.n}: ${f.tr.d}${f.lv ? ` · trained +${f.lv * 6}% speed` : ''}`, f.lv / 5, f.lv >= 5 ? 'Maxed' : `Train · ${lc} ◆`, () => { if (S.gems < lc || f.lv >= 5) return; S.gems -= lc; S.staffLv = S.staffLv || {}; S.staffLv[k] = f.lv + 1; banner(`${f.name.toUpperCase()} LEVELED UP`, `${roleOf(k).toUpperCase()} · LEVEL ${f.lv + 2}`); SFX.build(); save(); renderPanel(true); }, f.lv >= 5 || S.gems < lc, false, 'p:' + k);
+      const sw = document.createElement('button'); sw.className = 'swap'; sw.textContent = '↻ New trait · 4 ◆'; sw.disabled = S.gems < 4; sw.addEventListener('click', () => { if (S.gems < 4) return; S.gems -= 4; S.staffTr = S.staffTr || {}; const cur = TRAITS.indexOf(staffInfo(k).tr); S.staffTr[k] = (cur + 1 + Math.floor(Math.random() * (TRAITS.length - 1))) % TRAITS.length; toast(`${f.name} is now ${staffInfo(k).tr.n}: ${staffInfo(k).tr.d}`); save(); renderPanel(true); }); row.firstChild.append(sw); L.append(row); });
   }
   function staffSpots() {
     const out = []; runners.forEach(r => out.push(['run' + r.i, r.x, r.z])); if (cashier) out.push(['cashier', REG.sx, REG.sz - .1]);
@@ -5237,6 +5295,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   };
   function redeemCode(raw) {
     const k = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); const c = CODES[k];
+    { const gm = /^PG([A-Z0-9]{4})([A-Z0-9]{4})$/.exec(k); if (gm && hashStr(gm[1] + 'pggift').toUpperCase().slice(0, 4).padEnd(4, '0') === gm[2]) { S.codes = S.codes || []; if ((S.giftsSent || []).includes(k)) { toast('That’s your own gift. Send it to a friend'); return; } if (S.codes.includes(k)) { toast('Gift already claimed'); return; } S.codes.push(k); S.gems += 5; banner('GIFT FROM THE CREW', '+5 GOLD LEAVES'); fireworks(3); SFX.build(); save(); return; } }
     if (!c) { toast('That code ain’t it. Read the walls…'); SFX.angry(); return; }
     S.codes = S.codes || []; if (S.codes.includes(k)) { toast('You already used that one'); return; }
     S.codes.push(k); const extra = c.fn(); banner('CODE UNLOCKED', (c.t + (extra ? ' · ' + extra : '')).toUpperCase()); fireworks(3); SFX.build(); track('code'); save();
@@ -5253,6 +5312,49 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     { id: 'prof', n: 'The Professor', fav: 3, look: { hairStyle: 'long', hair: '#c9c5d6', hood: '#5b3a8a', pants: '#1d1a24', shoes: '#0d0b12', skin: '#e8b58a', shades: true }, hi: ['Ah, the finest concentrates in town.', 'Splendid establishment, young man.'], fan: 'A remarkable terpene profile, truly.' },
   ];
   const regInShop = id => customers.some(c => c.reg === id);
+  const REG_LIKE = { lou: 'gas', dee: 'munch', tony: 'energy', nia: 'creative', rico: 'glow', gran: 'calm', chef: 'tropic', prof: 'focus' };
+  const likesActive = id => { try { return fxOf(S.strains[S.active]).includes(REG_LIKE[id]); } catch (e) { return false; } };
+  let forceReg = null, textT = 60, phTab = 0;
+  const TXT_ASK = [(q, p) => `Yo G, set aside ${q} ${p} for me? I’m pulling up.`, (q, p) => `You got ${q} ${p}? Got people coming over tonight.`, (q, p) => `Need ${q} ${p}, the usual spot. Can you hold it?`, (q, p) => `Hold ${q} ${p} for me, I’ll make it worth it.`];
+  function phoneSig() { const p = passState(); return (S.texts || []).map(t => t.st).join('') + '|' + p.xp + ':' + p.got.length + ':' + phTab + ':' + S.gems; }
+  function phoneCount() { const p = passState(), tiers = Math.min(PASS_N, Math.floor(p.xp / PASS_STEP)); return (S.texts || []).filter(t => t.st === 'new').length + Math.max(0, tiers - p.got.length); }
+  function phoneBadge() { const n = phoneCount(), d = $('phoneDot'); if (!d) return; d.hidden = !n; d.textContent = n; }
+  function phoneTick(dt) { if (visit) return; S.texts = S.texts || []; const now = Date.now();
+    S.texts.forEach(t => { if ((t.st === 'new' || t.st === 'acc') && now > t.exp) t.st = 'miss'; });
+    if (running && S.stats.served >= 20 && (textT -= dt) <= 0) { textT = rand(85, 150); const pool = REGULARS.filter(R => has('shelf' + R.fav) && has('prod' + R.fav));
+      if (pool.length && S.texts.filter(t => t.st === 'new' || t.st === 'acc').length < 3) { const R = pick(pool), qty = 2 + Math.floor(Math.random() * 3) + Math.floor(S.level / 8);
+        S.texts.unshift({ id: now + '' + Math.floor(Math.random() * 99), from: R.id, i: R.fav, qty, st: 'new', exp: now + 5 * 60e3, msg: pick(TXT_ASK)(qty, PRODUCTS[R.fav].name) }); S.texts = S.texts.slice(0, 14); phoneBadge(); try { SFX.bell(); } catch (e) {} toast(`New text from ${R.n}. Check your phone`); } }
+    const acc = S.texts.find(t => t.st === 'acc' && !t.sp); if (acc && running && !regInShop(acc.from) && customers.length < 14) { acc.sp = 1; forceReg = acc; try { spawnCustomer(false); } catch (e) {} forceReg = null; } }
+  function phoneRows(L) { L.textContent = ''; $('phT1').classList.toggle('on', phTab === 0); $('phT2').classList.toggle('on', phTab === 1);
+    if (phTab === 1) { passRows(L); return; }
+    const T0 = (S.texts || []).filter(t => t.st !== 'miss' || Date.now() - t.exp < 30 * 60e3);
+    if (!T0.length) { const p = document.createElement('p'); p.className = 'note'; p.textContent = S.stats.served >= 20 ? 'No new texts. Your regulars hit you up when they need something.' : 'Serve 20 customers and your regulars start texting you orders.'; L.append(p); }
+    T0.forEach(t => { const R = REGULARS.find(q => q.id === t.from) || { n: 'Unknown' }; const st = (S.regs || {})[t.from] || { n: 0 }, like = REG_LIKE[t.from];
+      const b = document.createElement('div'); b.className = 'txt'; b.innerHTML = `<b>${R.n.toUpperCase()}</b><p></p><small>${st.n >= 15 ? 'Day One' : st.n >= 5 ? 'Loyal' : 'Regular'} · into ${FX[like] ? FX[like].n : 'the usual'} mixes${likesActive(t.from) ? ' (you’re growing it now)' : ''}</small>`; b.querySelector('p').textContent = t.msg;
+      if (t.st === 'new') { const r2 = document.createElement('div'); r2.className = 'row2'; const a = document.createElement('button'); a.className = 'sbtn'; a.textContent = 'Bet, I got you'; a.addEventListener('click', () => { t.st = 'acc'; t.exp = Date.now() + 4 * 60e3; phoneBadge(); save(); renderPanel(true); toast(`${R.n} is on the way. Keep ${PRODUCTS[t.i].name} stocked`); });
+        const d = document.createElement('button'); d.className = 'sbtn'; d.style.background = '#2a2a2e'; d.style.color = '#ddd'; d.textContent = 'Can’t today'; d.addEventListener('click', () => { t.st = 'miss'; phoneBadge(); save(); renderPanel(true); }); r2.append(a, d); b.append(r2); }
+      else { const sm = document.createElement('small'); sm.textContent = t.st === 'acc' ? `On the way · pays 1.6× + loyalty` : t.st === 'done' ? 'Picked up. Paid in full' : 'Missed'; b.append(sm); if (t.st === 'done') b.classList.add('me'); }
+      L.append(b); });
+    giftRow(L); }
+  // gift codes: send a friend gold leaves, they type the code in Settings
+  function giftRow(L) { const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'SEND A FRIEND A GIFT'; L.append(h);
+    L.append(itemRow('Gift code · 5 gold leaves', 'Makes a code your friend types in Settings → Codes. They get 5 gold leaves.', null, '5 ◆', () => { if (S.gems < 5 || visit) return; S.gems -= 5; const A = Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, 'X'), B = hashStr(A + 'pggift').toUpperCase().slice(0, 4).padEnd(4, '0'), code = `PG-${A}-${B}`; S.giftsSent = (S.giftsSent || []).concat('PG' + A + B).slice(-30); save();
+      try { navigator.clipboard && navigator.clipboard.writeText(code); } catch (e) {} banner('GIFT CODE', code + ' · COPIED'); toast(`Send this to your friend: ${code}`); renderPanel(true); }, S.gems < 5)); }
+  // ---- Street Pass: a free 30-tier track that resets every month ----
+  const PASS_N = 30, PASS_STEP = 120;
+  function passState() { const k = new Date().toISOString().slice(0, 7); if (!S.pass || S.pass.s !== k) S.pass = { s: k, xp: 0, got: [] }; return S.pass; }
+  function passXP(n) { if (visit) return; const p = passState(), b0 = Math.floor(p.xp / PASS_STEP); p.xp += n; const b1 = Math.floor(p.xp / PASS_STEP); if (b1 > b0 && b1 <= PASS_N) { toast(`Street Pass tier ${b1} unlocked. Claim it on your phone`); phoneBadge(); } }
+  const passCash = t => Math.round(1200 * locMult() * (1 + t * .25));
+  const passRew = t => t === PASS_N ? { g: 60, t: '60 ◆ + Legend' } : t % 5 === 0 ? { g: 15, t: '15 ◆' } : t % 2 === 0 ? { c: passCash(t), t: money(passCash(t)) } : { g: 3, t: '3 ◆' };
+  function passRows(L) { const p = passState(), tier = Math.min(PASS_N, Math.floor(p.xp / PASS_STEP)), into = p.xp % PASS_STEP, days = Math.ceil((new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1) - Date.now()) / 864e5);
+    L.append(itemRow(`Tier ${tier} / ${PASS_N}`, tier >= PASS_N ? 'Maxed out. New season next month' : `${into}/${PASS_STEP} to the next tier · season ends in ${days} day${days === 1 ? '' : 's'} · earn from sales, missions, text orders and new mixes`, tier >= PASS_N ? 1 : into / PASS_STEP));
+    const g = document.createElement('div'); g.className = 'ptrack';
+    for (let t = 1; t <= PASS_N; t++) { const rw = passRew(t), got = p.got.includes(t), ok = t <= tier && !got, el = document.createElement('div'); el.className = 'ptier' + (ok ? ' on' : '') + (got ? ' got' : '') + (t % 5 === 0 ? ' big' : ''); el.innerHTML = `<b>${t}</b><span>${rw.t}</span>`;
+      if (ok) { const b = document.createElement('button'); b.textContent = 'Claim'; b.addEventListener('click', () => { if (p.got.includes(t)) return; p.got.push(t); if (rw.g) S.gems += rw.g; if (rw.c) { S.cash += rw.c; S.total += rw.c; } if (t === PASS_N) { S.legend = 1; banner('STREET LEGEND', 'YOU MAXED THE STREET PASS THIS SEASON'); fireworks(8); } else toast(`Street Pass tier ${t}: ${rw.t}`); SFX.build(); phoneBadge(); save(); renderPanel(true); }); el.append(b); }
+      g.append(el); }
+    L.append(g); }
+  $('phoneBtn').addEventListener('click', () => { if (anyModal()) return; openPanel('phone'); });
+  $('phT1').addEventListener('click', () => { phTab = 0; renderPanel(true); }); $('phT2').addEventListener('click', () => { phTab = 1; renderPanel(true); });
   function regLine(R, st) {
     const lines = [];
     const nb = Object.keys(S.built).length;
@@ -5268,11 +5370,14 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   function pickRegular() {
     if (visit || S.stats.served < 20) return null;
     const pool = REGULARS.filter(R => !regInShop(R.id) && has('shelf' + R.fav) && has('prod' + R.fav));
+    const liked = pool.filter(R => likesActive(R.id)); if (liked.length && Math.random() < .12) return pick(liked);
     return pool.length && Math.random() < .14 ? pick(pool) : null;
   }
   function regularSale(c) {
     S.regs = S.regs || {}; const st = S.regs[c.reg] = S.regs[c.reg] || { n: 0 }; st.n++; st.seen = Object.keys(S.built).length;
     const R = REGULARS.find(r => r.id === c.reg);
+    if (likesActive(c.reg)) { const bt = Math.round(priceOf(R.fav) * .8); S.cash += bt; S.total += bt; floatAt(c.x, 3.2, c.z, 'HOOKED +' + money(bt), '#ff6ad5'); if (Math.random() < .5) { c.say = `This ${FX[REG_LIKE[c.reg]].n.toLowerCase()} mix got me hooked, G.`; c.sayT = 3; } }
+    if (st.n === 5 || st.n === 15) setTimeout(() => { try { toast(`${R.n} put their people on. More customers incoming`); for (let k = 0; k < 3; k++) setTimeout(() => { try { if (running) spawnCustomer(false); } catch (e) {} }, 1200 * k); } catch (e) {} }, 2500);
     if (st.n === 5) { S.gems += 5; const g = Math.round(300 * locMult()); S.cash += g; banner(`${R.n.toUpperCase()} IS LOYAL`, `+${money(g)} · +5 GOLD LEAVES · BIGGER TIPS FROM NOW ON`); fireworks(3); }
     else if (st.n === 15) { S.gems += 10; banner(`${R.n.toUpperCase()}: DAY ONE`, '+10 GOLD LEAVES. A REAL ONE.'); fireworks(4); }
     const tip = Math.round(priceOf(R.fav) * (.4 + .06 * Math.min(st.n, 20)) * (perk('charm') ? 1.5 : 1)); S.cash += tip; S.total += tip; S.stats.earned += tip; floatAt(c.x, 2.9, c.z, 'THE USUAL +' + money(tip), '#ffe23d');
@@ -5284,6 +5389,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   function drawRegulars(c) {
     for (const cu of customers) {
+      if (cu.state === 'shop' && cu.got < cu.qty) { const lim = cu.vip ? 45 : cu.conn ? 17 : 28, f = cu.wait / lim; if (f > .4) { tmpV.set(cu.x, 2.1, cu.z).project(camera); if (tmpV.z <= 1) { const sx = (tmpV.x + 1) / 2 * cssW, sy = (1 - tmpV.y) / 2 * cssH - 4, rr = 9;
+        c.lineWidth = 3.5; c.strokeStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.arc(sx, sy, rr, 0, TAU); c.stroke(); c.strokeStyle = f > .75 ? '#ff2b3a' : '#ffb52b'; c.beginPath(); c.arc(sx, sy, rr, -Math.PI / 2, -Math.PI / 2 + TAU * (1 - Math.min(1, f))); c.stroke();
+        c.fillStyle = f > .75 ? '#ff2b3a' : '#ffb52b'; c.font = '400 12px Anton, Impact, sans-serif'; c.textAlign = 'center'; c.fillText(f > .75 ? '!!' : '!', sx, sy + 4.5); if (f > .75 && !cu.mad) { cu.mad = 1; cu.say = pick(['Hello?? I’m waiting', 'Restock, G!', 'Y’all got any or nah?']); cu.sayT = 2.4; } } } }
       if (!cu.reg && !cu.say) continue; const R = REGULARS.find(r => r.id === cu.reg);
       tmpV.set(cu.x, 2.35, cu.z).project(camera); if (tmpV.z > 1) continue; const sx = (tmpV.x + 1) / 2 * cssW, sy = (1 - tmpV.y) / 2 * cssH;
       c.textAlign = 'center';
@@ -5479,8 +5587,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   const setPref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} applyComfort(); };
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 84;
+  const GAME_VER = 85;
   const NEWS = [
+    ['Mix it up', 'NEW MIX STATION in the Genetics Lab: drop in ingredients like Mango, Cold Brew, Honey or Gold Flakes, each one adds an effect and can flip the effects already in the mix. More effects = higher price. Name your mix and discover recipes for gold leaves. NEW PHONE: your regulars text you orders (accept and they pull up and pay 1.6×), each regular is into a certain effect and gets hooked if you grow it, and loyal ones bring their friends. The phone also has the STREET PASS: 30 free tiers each month, and gift codes for friends. Plus: the camera now peeks at your next unlock, impatient shoppers show a timer, and you can train your crew and swap their traits in Hire.'],
     ['The crew comes alive', 'You are now a head taller than the crowd so you always stand out as the boss. Tap anyone in the shop or on the sidewalk for a quick close-up: they react, dance or hype you up. Shoppers now have moves of their own (dancing to the radio, daps, checking out the drip), the whole store cheers when you land a trick nearby, and VIPs get a camera moment when they walk the red carpet.'],
     ['Grand openings', 'Opening a new store is now an event: the screen goes widescreen, the camera swoops low around you, a flash goes off and the block comes out to cheer and dance. Maxing out gear gets a quick swoop too. The shop and PG Kicks got real street walls (painted brick, sticker-bombed trim, neon strip lights) and the grow lab front is cinder block with a spray tag. The crew is a bit bigger and gets a soft rim light at night so people pop in the dark.'],
     ['Brighter nights', 'Night mode is brighter now so you can see people, products and details, while keeping the neon mood. From your Perf log: the iPhone now runs about 28 frames a second at full sharpness with no freezes.'],
@@ -5677,7 +5786,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     // now and then a neon sign stutters
     if ((flickT -= dt) <= 0) { flickT = rand(2.5, 7); const m = NEON_SIGNS.length && pick(NEON_SIGNS); if (m) { let n = 0; const tick = () => { m.material.opacity = n % 2 ? 1 : .35; if (++n < 4 + Math.floor(Math.random() * 3)) setTimeout(tick, 50 + Math.random() * 70); else m.material.opacity = 1; }; tick(); } }
   }
-  function updateLife(dt) { try { nightLife(dt); } catch (e) {}
+  let phBadgeT = 0;
+  function updateLife(dt) { try { nightLife(dt); } catch (e) {} try { phoneTick(dt); if ((phBadgeT -= dt) <= 0) { phBadgeT = 2; phoneBadge(); } } catch (e) {}
     if (locsReady && (LOC2.soldQ != null || LOC2.custOut) && carT > 1.2) carT = 1.2;
     if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if (cars.length < (PHONE || !TRAF ? 4 : TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4)) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
     for (let k = cars.length - 1; k >= 0; k--) { const c = cars[k]; c.g.position.x += c.dir * c.sp * dt; if (c.g.userData.rider) animPerson(c.g.userData.rider, T, false, false); if (c.g.userData.hl) c.g.userData.hl.material.opacity = .08 + .3 * (1 - (typeof skyD !== 'undefined' ? skyD.material.opacity : 0)); if (c.g.userData.beam) c.g.userData.beam.material.opacity = .32 * (1 - skyD.material.opacity); if (Math.abs(c.g.position.x) > 36) { scene.remove(c.g); if (c.g.userData.rivTag) c.g.userData.rivTag.material.dispose(); cars.splice(k, 1); } }
