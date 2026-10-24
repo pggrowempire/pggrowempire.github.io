@@ -1082,8 +1082,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
         vec2 d = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0));
         c *= 1.0 - ${LUXE ? '.14' : '.46'} * smoothstep(.35, 1.0, length(d) * 1.15);
         c *= mix(vec3(1.0), vec3(1.12, .98, .82), eve * smoothstep(.1, .8, l)); c *= 1.0 - .12 * eve * smoothstep(.35, 1.0, length(vUv - .5) * 1.4); c += vec3(-.004, .012, .009) * eve * (1.0 - smoothstep(0.0, .4, l)); c = mix(c, c * c * (3.0 - 2.0 * c), .12 * eve);
-        if (nite > 0.0) { float L = dot(c, vec3(.299, .587, .114)); float keep = smoothstep(.42, .95, L); vec3 dark = c * vec3(.5, .53, .7) + vec3(.004, .006, .022); vec3 lit = c * mix(vec3(1.0), vec3(1.03, 1.0, .97), keep);
-          c = mix(c, mix(dark, lit, keep), nite); float sat = dot(c, vec3(.299, .587, .114)); c = mix(vec3(sat), c, 1.0 + .25 * nite); vec2 dd = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0)); c *= 1.0 - .22 * nite * smoothstep(.3, .95, length(dd) * 1.2); }
+        if (nite > 0.0) { float L = dot(c, vec3(.299, .587, .114)); float keep = smoothstep(.22, .8, L); vec3 dark = c * vec3(.7, .73, .88) + vec3(.008, .01, .03); vec3 lit = c * mix(vec3(1.0), vec3(1.03, 1.0, .97), keep);
+          c = mix(c, mix(dark, lit, keep), nite); float sat = dot(c, vec3(.299, .587, .114)); c = mix(vec3(sat), c, 1.0 + .25 * nite); vec2 dd = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0)); c *= 1.0 - .16 * nite * smoothstep(.35, 1.0, length(dd) * 1.2); }
         c *= .965; c = c / (1.0 + max(c - .74, 0.0) * .75);
         c += hq * (h12(vUv * 913.0 + gt) - .5) * .012;
         gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
@@ -4099,7 +4099,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     hemi.color.copy(HEMI_N).lerp(HEMI_D, day); hemi.intensity = (.48 + .13 * day - .08 * rainA) * (LUXE ? 1.3 : 1) * (PBR ? 1.45 : 1) * (gfxMode === 'phone' ? 1.16 : 1);
     sun.color.copy(SUN_N).lerp(SUN_D, day).lerp(SUN_K, dusk * .55); sun.intensity = ((LUXE ? .14 : 0) + .84 + .16 * day - .1 * rainA) * (PBR ? 1.32 : 1);
     scene.background.copy(BG_N).lerp(BG_D, day * (1 - .4 * rainA)); if (awayX(player.x)) scene.background.copy(BG_IN); scene.fog.color.copy(scene.background); if (ALLEY) ALLEY.night(1 - day); if (SKYT) SKYT(day);
-    if (moodMode === 'night') { hemi.intensity *= .6; hemi.groundColor.copy(HEMI_G).lerp(NEON_P, .25).multiplyScalar(.7); sun.intensity *= .5; sun.color.lerp(MOON_C, .55); if (!awayX(player.x)) scene.background.copy(NIGHT_BG); scene.fog.color.copy(scene.background); nightGlow(true); } else { hemi.groundColor.copy(HEMI_G); nightGlow(false); }
+    if (moodMode === 'night') { hemi.intensity *= .82; hemi.groundColor.copy(HEMI_G).lerp(NEON_P, .25).multiplyScalar(.7); sun.intensity *= .72; sun.color.lerp(MOON_C, .45); if (!awayX(player.x)) scene.background.copy(NIGHT_BG); scene.fog.color.copy(scene.background); nightGlow(true); } else { hemi.groundColor.copy(HEMI_G); nightGlow(false); }
     lampGlow.material.opacity = .55 * (1 - day); lampPool.material.opacity = .3 * (1 - day);
     if (bloom && !gfxLow) bloom.strength = .22 + .16 * (1 - day) + (moodMode === 'night' ? .18 : 0); if (typeof grade !== 'undefined' && grade && grade.uniforms.nite) grade.uniforms.nite.value += ((moodMode === 'night' ? 1 : moodMode === 'cycle' ? (1 - day) * .8 : 0) - grade.uniforms.nite.value) * Math.min(1, dt * 2); if (typeof grade !== 'undefined' && grade && grade.uniforms.eve) grade.uniforms.eve.value = LUXE ? Math.min(1, (1 - day) * .9 + dusk * .5) : 0;
     if (sn < 0 && dusk > .85 && !eveRush && shelvesBuilt().filter(Boolean).length >= 2) { eveRush = true; if (!rushOn()) { rushT = 0; toast('Evening rush: the block just got off work'); } } if (day > .95) eveRush = false;
@@ -5442,8 +5442,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   const setPref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} applyComfort(); };
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 81;
+  const GAME_VER = 82;
   const NEWS = [
+    ['Brighter nights', 'Night mode is brighter now so you can see people, products and details, while keeping the neon mood. From your Perf log: the iPhone now runs about 28 frames a second at full sharpness with no freezes.'],
     ['After Dark', 'The block now lives at night: a moody neon look with glowing light pools, neon tube signs on every storefront, spray-painted lettering, a concrete skate park wall, steam rising off the road, locals posted up on the sidewalk and signs that flicker. The camera sits lower at street level so you see walls, signs and cars, and drifts a little when you stand still. Settings has Camera (Street level or Classic top) and Time (Night, Day, or Day and night). On iPhone the Phone setting now trims shadows before it ever lowers sharpness, so the picture stays crisp.'],
     ['More street style', 'Every remaining icon got the graffiti street look: daily drops, boosts, legacy perks, casino games, event art, rival crews and all nine strains. The sneaker collection is redrawn as original designs, and spray-painted street pieces now cover the road, the sidewalks and the skate park floor.'],
     ['The Street Style drop', 'The whole game got a graffiti streetwear makeover: new menus, buttons and top bar with sticker labels and bold street type, upgrade bubbles that show the real art of what you are buying, and a louder unlock reveal with spinning rays, a STARTER / CUSTOM / LEGENDARY tag and a gold storm for legendary gear. New street-style art for every story chapter, achievement, collectible and city, plus spray-painted murals on the Motorwerks and basement walls.'],
