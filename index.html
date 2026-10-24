@@ -1808,7 +1808,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   const PG_LOGO = labelTex('PG', '#00000000', '#22f07c', 32, 32, 16);
   const SMILE_G = (() => { const g = new THREE.TorusGeometry(.05, .013, 6, 12, Math.PI); g.rotateZ(Math.PI); g.rotateY(Math.PI / 2); return g; })();
   const BLUSH_G = new THREE.CircleGeometry(.045, 14), BLUSH_M = new THREE.MeshBasicMaterial({ color: '#ff6f9a', transparent: true, opacity: .45, depthWrite: false });
-  const RIG_S = 1.13;
+  const RIG_S = 1.13, PGS = RIG_S * 1.15;
   // ---- shared helpers for the Mixamo cast: one skeleton naming, clips retargeted per character, cheap clones ----
   const PPL = { chars: {}, clips: {}, ready: false, list: [] };
   const boneKey = n => n.replace(/^mixamorig\d*:?/, '');
@@ -2549,7 +2549,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
 
   // ---------- player ----------
   let look = { cap: '#e8314f', hood: '#ffe23d', board: '#22f07c' };
-  const PG = person({ cap: look.cap, capBack: true, chain: true, hood: look.hood, pants: '#3557a8', shoes: '#f4f1ff', skin: '#e8b58a', board: look.board, logo: true, hair: '#2a1a14' }, true); PG.isPlayer = true;
+  const PG = person({ cap: look.cap, capBack: true, chain: true, hood: look.hood, pants: '#3557a8', shoes: '#f4f1ff', skin: '#e8b58a', board: look.board, logo: true, hair: '#2a1a14', h: PGS / RIG_S }, true); PG.isPlayer = true;
   scene.add(PG.root);
   const heroRing = (() => { const c = mk(128, 128), x = c.getContext('2d'); const g = x.createRadialGradient(64, 64, 30, 64, 64, 62); g.addColorStop(0, 'rgba(125,255,106,0)'); g.addColorStop(.62, 'rgba(125,255,106,.0)'); g.addColorStop(.78, LUXE ? 'rgba(240,206,140,.9)' : 'rgba(125,255,106,.9)'); g.addColorStop(.86, LUXE ? 'rgba(201,163,90,.5)' : 'rgba(34,240,124,.5)'); g.addColorStop(1, 'rgba(34,240,124,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, opacity: .55, blending: THREE.AdditiveBlending })); m.rotation.x = -Math.PI / 2; m.renderOrder = 2; m.userData.noMerge = true; scene.add(m); return m; })();
@@ -2628,6 +2628,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (kind === 'tour') { c.say = pick(['Is this the famous one?', 'Take our picture!', 'We came all the way here!', 'Is that THE Philly G?']); c.sayT = 3.5; c.x = rand(-1.6, 1.6); }
     if (RG) { c.want = want = RG.fav; c.qty = 2; c.path = [[0, 6.3], [PX[want] + rand(-.5, .5), SHELF_FRONT]]; c.say = regLine(RG, (S.regs || {})[RG.id] || {}); c.sayT = 4.5; }
     c.bub.material.map = bubbleFor(want, c.qty, vip);
+    if (vip && T - vipCamT > 150) { vipCamT = T; setTimeout(() => { try { if (customers.includes(c) && !anyModal()) { closeUp(c.x, c.z); c.say = pick(['Heard this is the spot.', 'Show me the best you got.', 'I only shop PG.']); c.sayT = 2.4; } } catch (e) {} }, 1400); }
     if (vip) { toast(`VIP: ${pick(VIP_NAMES)} just walked in. 5× payout`); SFX.build(); SFX.bell(); c.ent = []; for (let k = 0; k < (gfxLow ? 1 : 2); k++) { const L0 = randomLook(); L0.shades = Math.random() < .6; const EP = person(L0, false); scene.add(EP.root); c.ent.push({ P: EP, x: c.x + (k ? .7 : -.7), z: c.z + .8, t: Math.random() * 4, ox: k ? .75 : -.75, oz: .85 }); } }
     if (gold) { toast('A GOLDEN customer just walked in! 10× payout. Keep that shelf stocked'); SFX.build(); track('golden'); }
     customers.push(c);
@@ -3122,6 +3123,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
         if (c.kt > 2.4 / (1 + .3 * S.eq.kiosk)) { sale(c, KIOSK.x, KIOSK.z, true); kioskBusy = null; c.state = 'leave'; setTimeout(() => { c.bub.visible = false; }, 900); c.path = [[7.5, 1.3], [DOOR.x, DOOR.z], [rand(-2, 2), 12]]; }
       } else if (c.state === 'leave' && !c.path.length) { scene.remove(c.P.root); (c.ent || []).forEach(e => scene.remove(e.P.root)); try { c.bub.material.dispose(); } catch {} customers.splice(k, 1); continue; }
       c.P.root.position.set(c.x, 0, c.z);
+      if (c.emT > 0) c.emT -= dt; else if (!mv && running && Math.random() < dt * (S.vibe > 30 ? .06 : .035)) { c.emA = pick(['dance', 'dance', 'talk', 'look', 'inspect', 'cheer']); c.emT = rand(2.2, 3.6); if (Math.random() < .3) { const lines = { dance: ['This my song!', 'AYYY', 'Turn it up!'], cheer: ['LET’S GO!', 'PG!!', 'W shop'], talk: ['You seen the drop?', 'This spot is crazy', 'Grail season'], look: ['Fire.', 'Clean.', 'Drip check'], inspect: ['Hmm…', 'Need this', 'Is that new?'] }[c.emA]; if (lines && !c.say) { c.say = pick(lines); c.sayT = 2.2; } } }
+      c.P.forceAnim = !mv && c.cheer > 0 ? 'cheer' : !mv && c.emT > 0 ? c.emA : null;
       animPerson(c.P, c.t, mv, false);
       if (c.cheer > 0) { c.cheer = Math.max(0, c.cheer - dt * .9); const w = Math.sin(c.t * 14) * .25; c.P.armA.rotation.set(0, 0, 2.6 + w); c.P.armB.rotation.set(0, 0, 2.6 - w); c.P.root.position.y = Math.abs(Math.sin(c.cheer * Math.PI * 3)) * .12 * c.cheer; }
       if (c.ent) c.ent.forEach(e => { e.t += dt; const fa = c.P.root.rotation.y, tx = c.x + Math.cos(fa) * -e.oz * 0 + e.ox * Math.sin(fa), tz = c.z + e.oz; const dx = tx - e.x, dz = tz - e.z, d = Math.hypot(dx, dz), em = d > .15; if (em) { const sp0 = Math.min(d, c.speed * 1.1 * dt + d * dt * 1.5); e.x += dx / d * sp0; e.z += dz / d * sp0; faceTo(e.P, dx, dz); } else faceTo(e.P, c.x - e.x, c.z - e.z); e.P.root.position.set(e.x, 0, e.z); animPerson(e.P, e.t, em, false); if (e.cheer > 0) { e.cheer = Math.max(0, e.cheer - dt * .9); e.P.armA.rotation.set(0, 0, 2.5); } });
@@ -3153,12 +3156,13 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     updateExtras(dt);
     saveT -= dt; if (saveT <= 0) { saveT = 5; save(); }
   }
-  let CINE2 = null;
+  let CINE2 = null, vipCamT = -999;
+  function lbOn() { if (!$('lbTop')) { const a = document.createElement('div'); a.id = 'lbTop'; a.className = 'lbar'; const b = document.createElement('div'); b.id = 'lbBot'; b.className = 'lbar'; const f = document.createElement('div'); f.id = 'cineFlash'; stage.append(a, b, f); } document.body.classList.add('lbox'); }
   function grandOpen(crowd = true, dur = 3.8) { if (calm || RACE || cine || CINE2) return; const x = player.x, z = player.z; CINE2 = { t: 0, x, z, dur, ppl: [] };
-    if (!$('lbTop')) { const a = document.createElement('div'); a.id = 'lbTop'; a.className = 'lbar'; const b = document.createElement('div'); b.id = 'lbBot'; b.className = 'lbar'; const f = document.createElement('div'); f.id = 'cineFlash'; stage.append(a, b, f); }
-    document.body.classList.add('lbox'); const fl = $('cineFlash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+    lbOn(); const fl = $('cineFlash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
     if (crowd) try { for (let k = 0; k < 6; k++) { const sd = k % 2 ? 1 : -1, P = person(randomLook(), false); P.root.position.set(x + sd * (2.0 + Math.floor(k / 2) * .9), 0, z - .6 + Math.floor(k / 2) * .7 + rand(-.2, .2)); faceTo(P, x - P.root.position.x, z - P.root.position.z); P.forceAnim = k % 3 === 1 ? 'dance' : 'cheer'; scene.add(P.root); CINE2.ppl.push(P); } } catch (e) {}
     try { SFX.build(); } catch (e) {} }
+  function closeUp(x, z) { if (calm || RACE || cine || CINE2) return; CINE2 = { t: 0, x, z, dur: 2.4, ppl: [], close: true }; lbOn(); }
   function cineTick(dt) { if (!CINE2) return; const C = CINE2; C.t += dt; C.ppl.forEach((P, i) => animPerson(P, T + i, false, false));
     if (C.t >= C.dur) { C.ppl.forEach(P => scene.remove(P.root)); CINE2 = null; document.body.classList.remove('lbox'); } }
   function build(p) {
@@ -3464,8 +3468,8 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     idleCam = Math.hypot(player.vx, player.vz) < .2 && !calm ? Math.min(1, idleCam + dt * .25) : Math.max(0, idleCam - dt * 2); const drift = idleCam * .045 * Math.sin(T * .25);
     const syw = Math.sin(camYaw + drift), cyw = Math.cos(camYaw + drift), cEl = (window.__camEl || (camMode === 'street' ? 46 : 60)) * Math.PI / 180, cSE = Math.sin(cEl), cCE = Math.cos(cEl); camera.position.set(camX + syw * dist * cCE, dist * cSE, camZ + cyw * dist * cCE); camera.lookAt(camX - syw * .6, 0, camZ - cyw * .6); camLook.set(camX - syw * .6, 0, camZ - cyw * .6);
     if (shakeA > .002) { camera.position.x += (Math.random() - .5) * shakeA; camera.position.y += (Math.random() - .5) * shakeA * .6; shakeA *= Math.pow(.0005, dt); } else shakeA = 0;
-    if (CINE2) { const C = CINE2, k = Math.min(1, C.t / C.dur), w = Math.min(1, C.t / .7, Math.max(0, C.dur - C.t) / .8), ws = w * w * (3 - 2 * w), ang = -.75 + 1.5 * (k * k * (3 - 2 * k)), el = .42, dd = 8.5 - 2.2 * Math.sin(Math.PI * k);
-      const cp = new THREE.Vector3(C.x + Math.sin(ang) * dd * Math.cos(el), dd * Math.sin(el) + .4, C.z + Math.cos(ang) * dd * Math.cos(el)); camera.position.lerp(cp, ws); const lk = camLook.clone().lerp(new THREE.Vector3(C.x, 1.1, C.z), ws); camera.lookAt(lk); }
+    if (CINE2) { const C = CINE2, k = Math.min(1, C.t / C.dur), w = Math.min(1, C.t / (C.close ? .45 : .7), Math.max(0, C.dur - C.t) / (C.close ? .55 : .8)), ws = w * w * (3 - 2 * w), ang = C.close ? -.22 + .44 * k : -.75 + 1.5 * (k * k * (3 - 2 * k)), el = C.close ? .3 : .42, dd = C.close ? 4.4 - .6 * Math.sin(Math.PI * k) : 8.5 - 2.2 * Math.sin(Math.PI * k);
+      const cp = new THREE.Vector3(C.x + Math.sin(ang) * dd * Math.cos(el), dd * Math.sin(el) + .4, C.z + Math.cos(ang) * dd * Math.cos(el)); camera.position.lerp(cp, ws); const lk = camLook.clone().lerp(new THREE.Vector3(C.x, C.close ? 1.25 : 1.1, C.z), ws); camera.lookAt(lk); }
     sun.position.set(camX + 6, 16, camZ + 9); sun.target.position.set(camX, 0, camZ - 1);
   }
   function goalText() {
@@ -4278,7 +4282,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     beep(180, .09, 'square', .045, 2.2);
   }
   function updateTrick(dt) {
-    if (squash > 0) { squash = Math.max(0, squash - dt); const k = Math.sin(squash / .25 * Math.PI) * .18; PG.rig.scale.set(RIG_S * (1 + k), RIG_S * (1 - k), RIG_S * (1 + k)); }
+    if (squash > 0) { squash = Math.max(0, squash - dt); const k = Math.sin(squash / .25 * Math.PI) * .18; PG.rig.scale.set(PGS * (1 + k), PGS * (1 - k), PGS * (1 + k)); }
     if (!trick) return;
     trick.t += dt; const p = Math.min(1, trick.t / trick.dur), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2, a = e * TAU * (trick.big ? 2 : 1), hgt = Math.sin(p * Math.PI) * (trick.big ? 2.0 : .8) * (S.loc === 6 ? 1.7 : 1);
     PG.root.position.y = hgt; const b = PG.board.rotation; b.set(0, 0, 0);
@@ -4294,6 +4298,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     }
     PG.legA.rotation.z = PG.legB.rotation.z = -Math.sin(p * Math.PI) * .5; PG.armA.rotation.x = 1.2 * Math.sin(p * Math.PI); PG.armB.rotation.x = -1.2 * Math.sin(p * Math.PI);
     if (p >= 1) {
+      try { customers.forEach(c => { if (Math.hypot(c.x - player.x, c.z - player.z) < (big ? 9 : 5.5)) { c.cheer = Math.max(c.cheer || 0, big ? 1.8 : 1.1); if (big && !c.say && Math.random() < .4) { c.say = pick(['SHEESH', 'NO WAY', 'Do it again!', 'CLEAN']); c.sayT = 1.8; } } }); } catch (e) {}
       const n = trick.n, big = trick.big, tb = trick.bonus; trick = null; PG.root.position.y = 0; b.set(0, 0, 0); squash = .25; shockRing(player.x, player.z, big ? '#ffe23d' : '#7dff6a', big ? 1.5 : .9);
       if (big && contest && inBase(player.x)) { contest.n++; floatAt(player.x, 3.9, player.z, `CONTEST ${contest.n}/${contest.goal}`, '#ffcc3d'); }
       if (big) { const bonus = tb || Math.round(priceOf(1) * 3 * Math.max(1, S.eq.ramp)); S.cash += bonus; S.total += bonus; floatAt(player.x, 3.4, player.z, 'BIG AIR +' + money(bonus), '#ffb347'); coinToHud(player.x, 1.5, player.z); burst(player.x, .3, player.z, ['#ffb347', '#ffe23d', '#ffffff'], 30, 3.5); }
@@ -5474,8 +5479,9 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
   }
   const setPref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} applyComfort(); };
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 83;
+  const GAME_VER = 84;
   const NEWS = [
+    ['The crew comes alive', 'You are now a head taller than the crowd so you always stand out as the boss. Tap anyone in the shop or on the sidewalk for a quick close-up: they react, dance or hype you up. Shoppers now have moves of their own (dancing to the radio, daps, checking out the drip), the whole store cheers when you land a trick nearby, and VIPs get a camera moment when they walk the red carpet.'],
     ['Grand openings', 'Opening a new store is now an event: the screen goes widescreen, the camera swoops low around you, a flash goes off and the block comes out to cheer and dance. Maxing out gear gets a quick swoop too. The shop and PG Kicks got real street walls (painted brick, sticker-bombed trim, neon strip lights) and the grow lab front is cinder block with a spray tag. The crew is a bit bigger and gets a soft rim light at night so people pop in the dark.'],
     ['Brighter nights', 'Night mode is brighter now so you can see people, products and details, while keeping the neon mood. From your Perf log: the iPhone now runs about 28 frames a second at full sharpness with no freezes.'],
     ['After Dark', 'The block now lives at night: a moody neon look with glowing light pools, neon tube signs on every storefront, spray-painted lettering, a concrete skate park wall, steam rising off the road, locals posted up on the sidewalk and signs that flicker. The camera sits lower at street level so you see walls, signs and cars, and drifts a little when you stand still. Settings has Camera (Street level or Classic top) and Time (Night, Day, or Day and night). On iPhone the Phone setting now trims shadows before it ever lowers sharpness, so the picture stays crisp.'],
@@ -6658,6 +6664,7 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     if (visit || decor || !running) return false; const rc = cv.getBoundingClientRect(); tapN.set((cx - rc.left) / rc.width * 2 - 1, -((cy - rc.top) / rc.height) * 2 + 1); tapRay.setFromCamera(tapN, camera); if (castTap(tapRay.ray)) return true;
     let best = null, bd = 1e9; for (const a of anchors()) { if (Math.abs(a.x - player.x) > 26 || Math.abs(a.z - player.z) > 18) continue; if (!a.keys.some(k => keyRow(k))) continue; const d = tapRay.ray.distanceToPoint(tapV.set(a.x, a.y, a.z)); if (d < a.r && d < bd) { bd = d; best = a; } }
     if (best) { openCard(best); return true; }
+    if (tapPerson(tapRay.ray)) return true;
     if (tapA) { closeCard(); return true; }
     return false;
   }
@@ -6891,6 +6898,13 @@ html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color
     c.save(); c.textAlign = 'center'; c.font = '700 12px Outfit, sans-serif'; const w = c.measureText(k.n.toUpperCase()).width + 34; c.fillStyle = 'rgba(14,12,10,.88)'; c.beginPath(); c.roundRect ? c.roundRect(sx - w / 2, sy - 13, w, 24, 12) : c.rect(sx - w / 2, sy - 13, w, 24); c.fill(); c.strokeStyle = '#e9c77c'; c.lineWidth = 1.5; c.stroke();
     c.fillStyle = '#f3d38a'; c.fillText(k.n.toUpperCase(), sx + 7, sy + 4); c.fillStyle = '#e9c77c'; c.beginPath(); c.arc(sx - w / 2 + 13, sy - 1, 7, 0, TAU); c.fill(); c.fillStyle = '#14110e'; c.font = '800 11px Outfit, sans-serif'; c.fillText('!', sx - w / 2 + 13, sy + 3); c.restore();
   }
+  const TAP_LINES = ['Yo what’s good!', 'PG for life', 'Love this spot', 'You the man, G', 'Best shop on the block', 'Where the drip at?', 'Big moves only', 'Respect'];
+  function tapPerson(ray) { let best = null, bd = .55; const v = new THREE.Vector3();
+    const test = (P, x, z, c) => { if (!P || !P.root || !P.root.visible || Math.abs(x - player.x) > 14 || Math.abs(z - player.z) > 12) return; const d = ray.distanceToPoint(v.set(x, 1.05, z)); if (d < bd) { bd = d; best = { P, x, z, c }; } };
+    customers.forEach(c => test(c.P, c.x, c.z, c)); (typeof walkers !== 'undefined' ? walkers : []).forEach(w => test(w.P, w.x, w.z, null)); if (typeof hangers !== 'undefined' && hangers) hangers.forEach(P => test(P, P.root.position.x, P.root.position.z, null));
+    if (!best) return false; const b = best; closeUp(b.x, b.z); const em = pick(['dance', 'cheer', 'talk', 'dance']);
+    if (b.c) { b.c.emA = em; b.c.emT = 2.6; b.c.say = pick(TAP_LINES); b.c.sayT = 2.4; } else { b.P.forceAnim = em; setTimeout(() => { b.P.forceAnim = null; }, 2600); floatAt(b.x, 2.5, b.z, pick(TAP_LINES), '#ffffff'); }
+    try { SFX.pop ? SFX.pop() : SFX.ching(); } catch (e) {} return true; }
   function castTap(ray) { if (!castNPC) return false; const d = ray.distanceToPoint(tapV.set(castNPC.hx, 1.0, castNPC.hz)); if (d > .8) return false; openStory(castNPC.ch); return true; }
   // ---- first-time intro: a short night flyover with the setup, then straight into play ----
   var cine = null;
