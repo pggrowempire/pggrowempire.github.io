@@ -125,7 +125,7 @@ function dailyChart(rows, dList) {
   const act = dList.map(d => rows.filter(r => r.days.includes(d)).length), nw = dList.map(d => rows.filter(r => r.days[0] === d).length);
   const mx = niceMax(Math.max(1, ...act, ...nw)), x = i => L + (dList.length === 1 ? pw / 2 : i * pw / (dList.length - 1)), y = v => T + ph - v / mx * ph, bw = Math.max(3, Math.min(18, pw / dList.length * .55));
   let g = '';
-  for (let k = 0; k <= 4; k++) { const v = mx * k / 4, yy = y(v); g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${L - 8}" y="${yy + 4}" text-anchor="end">${fmt(v)}</text>`; }
+  const nt = mx < 4 ? mx : 4; for (let k = 0; k <= nt; k++) { const v = mx * k / nt, yy = y(v); g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${L - 8}" y="${yy + 4}" text-anchor="end">${fmt(v)}</text>`; }
   const step = Math.ceil(dList.length / 8);
   dList.forEach((d, i) => { if (i % step === 0 || i === dList.length - 1) g += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${d.slice(5).replace('-', '/')}</text>`; });
   dList.forEach((d, i) => { if (nw[i]) g += `<rect x="${x(i) - bw / 2}" y="${y(nw[i])}" width="${bw}" height="${Math.max(0, T + ph - y(nw[i]))}" rx="3" fill="var(--s2)" opacity=".85"/>`; });
@@ -150,7 +150,7 @@ function hbars(items, opt = {}) {
 function vbars(items, aria) {
   const W = 540, H = 200, L = 36, R = 8, T = 10, B = 28, pw = W - L - R, ph = H - T - B, mx = niceMax(Math.max(1, ...items.map(i => i.v))), bw = pw / items.length;
   let g = '';
-  for (let k = 0; k <= 4; k++) { const v = mx * k / 4, yy = T + ph - v / mx * ph; g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${L - 6}" y="${yy + 4}" text-anchor="end">${fmt(v)}</text>`; }
+  const nt = mx < 4 ? mx : 4; for (let k = 0; k <= nt; k++) { const v = mx * k / nt, yy = T + ph - v / mx * ph; g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${L - 6}" y="${yy + 4}" text-anchor="end">${fmt(v)}</text>`; }
   items.forEach((it, i) => { const h = it.v / mx * ph, x0 = L + i * bw + 3, yy = T + ph - h;
     g += `<g data-tip="${esc(it.tip || it.label + ': ' + it.v)}"><rect x="${L + i * bw}" y="${T}" width="${bw}" height="${ph}" fill="transparent"/><rect x="${x0}" y="${yy}" width="${bw - 6}" height="${h}" rx="4" fill="var(--s1)"/>${it.v ? `<text x="${x0 + (bw - 6) / 2}" y="${yy - 5}" text-anchor="middle" style="fill:var(--text);font-weight:600">${fmt(it.v)}</text>` : ''}<text x="${x0 + (bw - 6) / 2}" y="${H - 9}" text-anchor="middle">${esc(it.label)}</text></g>`; });
   g += `<line x1="${L}" x2="${W - R}" y1="${T + ph}" y2="${T + ph}" stroke="var(--axis)"/>`;
@@ -165,7 +165,7 @@ function render() {
   const dList = Array.from({ length: days }, (_, i) => addD(start, i));
   const P = ALL.filter(r => !plat || r.plat === plat);
   const R = P.filter(r => r.days[r.days.length - 1] >= start);
-  $('sub').textContent = `${fmt(P.length)} players tracked · ${fmt(R.length)} played in the last ${days} days · updated ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+  $('sub').textContent = `${fmt(P.length)} player${P.length === 1 ? '' : 's'} tracked · ${fmt(R.length)} played in the last ${days} days · updated ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
   if (!P.length) { $('main').innerHTML = `<div class="state">No players with analytics yet${plat ? ' on this platform' : ''}. Stats start arriving after players open version 88 or newer.</div>`; return; }
   const dau = P.filter(r => r.days.includes(today)).length, wau = P.filter(r => r.days.some(d => d >= addD(today, -6))).length, mau = P.filter(r => r.days.some(d => d >= addD(today, -29))).length;
   const c1 = P.filter(r => r.days[0] <= addD(today, -1)), d1 = c1.filter(r => r.days.includes(addD(r.days[0], 1))).length;
