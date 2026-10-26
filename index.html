@@ -651,6 +651,20 @@ html.hype #tapCard .tcp i.on { background: var(--hi) !important; }
 html.hype #tapCard .tch { font-family: var(--street) !important; color: var(--hi) !important; letter-spacing: .14em !important; }
 html.hype #tapCard .tcb:disabled { background: #222224 !important; color: #6f6d69 !important; border-color: #2c2c2f !important; box-shadow: none !important; }
 html.hype #tapCard .tcb:not(:disabled) { background: var(--hi) !important; color: #0b0b0b !important; border: 2px solid #0b0b0b !important; border-radius: 3px !important; box-shadow: 3px 3px 0 #000 !important; font: 400 15px var(--num) !important; letter-spacing: .05em; text-transform: uppercase; }
+/* ===== PC title screen ===== */
+#title { position: absolute; inset: 0; z-index: 9; display: flex; align-items: center; background: linear-gradient(90deg, rgba(8,7,12,.9) 0%, rgba(8,7,12,.6) 34%, rgba(8,7,12,0) 68%); }
+#title[hidden] { display: none; }
+#title .tbox { margin-left: 7vw; width: min(480px, 84vw); zoom: var(--uis, 1); }
+#title .crest { width: 120px; height: 120px; display: block; margin: 0 0 6px; filter: drop-shadow(0 6px 16px rgba(0,0,0,.6)); }
+#title h1 { font-family: "Sedgwick Ave Display", var(--marker); font-weight: 400; font-size: 66px; line-height: .92; margin: 0; color: #fff; text-shadow: 3px 3px 0 var(--pink, #ff2b3a), 6px 6px 0 #000; transform: rotate(-3deg); transform-origin: left; }
+#title .est { font: 400 15px/1 Anton, Impact, sans-serif; letter-spacing: .32em; color: #e9e4d6; margin: 16px 0 0 4px; }
+#title .tbtns { display: grid; gap: 10px; width: 300px; margin-top: 30px; }
+#title .tbtns .btn { justify-self: stretch; text-align: left; padding: 13px 18px; font-size: 18px; }
+#title .tbtns .btn.ghost { background: rgba(13,11,18,.72); color: #f4f1ff; border-color: #000; }
+#title .tbtns .btn:hover, #title .tbtns .btn:focus-visible { transform: translateX(6px); outline: none; }
+#title .tmeta { color: #cfc9bb; font-size: 14px; margin: 16px 0 0 2px; min-height: 1.2em; }
+#title .tfoot { position: absolute; right: 22px; bottom: 16px; color: rgba(255,255,255,.75); text-shadow: 0 1px 3px #000; font-size: 12px; zoom: var(--uis, 1); }
+body.titleOn .hud, body.titleOn .bar, body.titleOn .guide, body.titleOn #toast, body.titleOn .banner, body.titleOn .lvlup, body.titleOn .review { visibility: hidden; }
 /* ===== PC: UI grows with the monitor, wide pause menu, controls card ===== */
 html.desk .hud, html.desk .bar, html.desk .guide, html.desk .toast, html.desk .banner, html.desk .lvlup, html.desk .review, html.desk .modal > .box { zoom: var(--uis, 1); }
 html.desk #buzzBtn { display: none !important; }
@@ -690,6 +704,8 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
       <button class="ib" id="boardBtn" aria-label="Leaderboard and settings"><svg viewBox="0 0 24 24" fill="#ffe23d"><path d="M4 13h4v8H4zM10 7h4v14h-4zM16 10h4v11h-4z"/></svg></button>
     </div>
   </div>
+  <div id="title" hidden><div class="tbox"><img class="crest" id="titleCrest" alt=""><h1>Philly G's<br>Grow Empire</h1><p class="est">EST. 215 · STAY LIFTED</p>
+    <div class="tbtns"><button class="btn" id="tGo">Continue</button><button class="btn ghost" id="tSet">Settings</button><button class="btn ghost" id="tKeys">Controls</button><button class="btn ghost" id="tQuit" hidden>Quit</button></div><p class="tmeta" id="tMeta"></p></div><div class="tfoot" id="tFoot"></div></div>
   <div class="toast" id="toast" hidden></div>
   <div class="guide" id="guide" hidden><b id="guideHead"></b><span id="guideTxt"></span><button id="guideBtn">Skip</button></div>
   <div class="review" id="review" hidden></div>
@@ -2691,7 +2707,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { sfxOn = localStorage.getItem('pgGrowSfx') !== '0'; musicOn = localStorage.getItem('pgShopMusic') !== '0'; } catch {}
   const labels = () => { $('musicBtn').textContent = 'Music: ' + (musicOn ? 'on' : 'off'); $('sfxBtn').textContent = 'Sound: ' + (sfxOn ? 'on' : 'off'); };
   labels();
-  function audio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state !== 'running') ac.resume(); sndLoad(); } catch {} return ac; }
+  function audio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state !== 'running') (ac.resume() || Promise.resolve()).catch(() => {}); sndLoad(); } catch {} return ac; }
   // recorded sound effects (Kenney.nl, CC0). The synth sounds stay as the fallback until these decode
   const VOL = (() => { const g = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : Math.max(0, Math.min(1, +v)); } catch (e) { return d; } }; return { m: g('pgVolM', .8), s: g('pgVolS', .9) }; })();
   const SND = {}; let sndInit = false, sndBus = null;
@@ -3057,7 +3073,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     SFX.ching();
     if (c.gold) { S.gems += 5; S.golden = (S.golden || 0) + 1; banner('GOLDEN CUSTOMER', 'PAID 10× · +5 GOLD LEAVES'); fireworks(4); }
     if (S.stats.served === 0 && !visit) { banner('FIRST SALE', 'YOUR EMPIRE STARTS NOW'); fireworks(3); SFX.reveal(); }
-    S.stats.sold[c.want] += c.qty; S.stats.served++; track('sale1'); react(c); if (c.want === specialI()) S.specialSold = (S.specialSold || 0) + c.qty; if (c.vip) { S.stats.vip++; shake(.22); hitStop(.08); burst(x, 1.6, z, ['#ffcc3d', '#ffffff'], 30, 3.5); }
+    S.stats.sold[c.want] += c.qty; S.stats.served++; if (c.want === 0 && S.ct && !S.ct.done && ctMatch()) { S.ct.p = Math.min(S.ct.qty, (S.ct.p || 0) + c.qty); if (S.ct.p >= S.ct.qty && !S.ct.told) { S.ct.told = 1; banner('CONTRACT READY', 'CLAIM IT IN MISSIONS'); } } track('sale1'); react(c); if (c.want === specialI()) S.specialSold = (S.specialSold || 0) + c.qty; if (c.vip) { S.stats.vip++; shake(.22); hitStop(.08); burst(x, 1.6, z, ['#ffcc3d', '#ffffff'], 30, 3.5); }
     addXP(c.qty * (c.vip ? 8 : 1));
     floatAt(x, 1.8, z, '+' + money(amt)); burst(x + .5, 1.3, z, ['#7dff6a', '#ffe23d', '#ffffff'], 14, 2.2);
     let v = quick ? 5 : 4; if (T - (c.qT || T) > 14) v = 3; if (trashArr.length >= 4) v = Math.max(1, v - 1); rateShop(v);
@@ -3515,6 +3531,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   const shake = a => { if (!reduceMotion && !calm) shakeA = Math.max(shakeA, a); }, hitStop = s => { hitT = Math.max(hitT, s); };
   const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   function updateCamera(dt) {
+    if (typeof TITLE !== 'undefined' && TITLE) { if (running && !anyModal()) running = false; yawT = Math.sin(performance.now() / 1000 * .11) * .62; }
     if (cine) { updateIntro(dt); return; }
     if (RACE) { raceCam(dt); return; }
     const a = cssW / cssH, port = a < 1, fov = port ? 44 : 34;
@@ -3742,7 +3759,11 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let awayAmtNow = 0;
   function offline() {
     const away = Math.min((perk('night') ? 4 : 3) * 3600, (Date.now() - S.t) / 1000);
-    if (away < 90 || !has('cashier')) return false;
+    if (away < 90) return false;
+    if (!has('cashier')) { if (away < 600 || S.tut !== 99) return false; const amt = Math.round(Math.min(150 * (1 + (S.level || 1)), away / 60 * Math.max(1, priceOf(0)) * .35)); if (amt < 5) return false;
+      S.reg += amt; S.t = Date.now(); save(); const h = Math.floor(away / 3600), m = Math.floor(away % 3600 / 60);
+      $('awayTxt').textContent = `You were out ${h ? h + 'h ' : ''}${m}m. Grandma minded the counter. Hire a cashier and the crew earns way more while you're gone.`; $('awayAmt').textContent = money(amt); $('awayBreak').textContent = '';
+      const today = new Date().toDateString(), canDbl = S.dblDay !== today; awayAmtNow = amt; $('awayDbl').hidden = !canDbl; $('awayDbl').disabled = false; $('awayDbl').textContent = `Double it · +${money(amt)} · once a day`; $('away').hidden = false; return true; }
     let rate = 0; PRODUCTS.forEach((_, i) => { if (has('run' + i) && has('shelf' + i)) rate += priceOf(i) / prodTime(i); });
     rate = Math.min(rate, priceOf(0) * 2 * (2 + S.lv.hype)) * .5 + (streetRate('snack') + streetRate('cart') + (S.eq.decks ? priceOf(4) * .03 * S.eq.decks : 0)) * .5;
     const eq0 = k => S.eq[k] || 0, iceRate = has('jeweler') ? (400 + 250 * eq0('watches') + 200 * eq0('grillz')) * locMult() / Math.max(3, 10.5 - 1.4 * eq0('icelight') - .7 * eq0('watches')) * .3 : 0, motoRate = has('motorwerks') ? (1200 + 700 * eq0('bays') + 900 * eq0('showroom')) * locMult() / Math.max(4, 14 - 1.8 * eq0('mneon') - eq0('showroom')) * .3 : 0;
@@ -3763,7 +3784,20 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   $('awayDbl').addEventListener('click', () => { const today = new Date().toDateString(); if (S.dblDay === today || awayAmtNow <= 0) return; S.dblDay = today; S.reg += awayAmtNow; $('awayAmt').textContent = money(awayAmtNow * 2); $('awayDbl').disabled = true; $('awayDbl').textContent = 'Doubled! Come back tomorrow'; try { HAP(30); } catch (e) {} fireworks(2); save(); });
   $('awayOk').addEventListener('click', () => { $('away').hidden = true; running = !anyModal(); audio(); musicStart(); setTimeout(checkDaily, 400); });
   if (visit) { $('intro').hidden = true; running = true; stage.classList.add('visiting'); $('visitBar').hidden = false; $('visitName').textContent = `VISITING ${String(visit.nick || 'A FRIEND').toUpperCase()}'S SHOP`; }
-  else if (returning) { $('intro').hidden = true; if (!offline()) { running = true; setTimeout(checkDaily, 800); } }
+  const TITLE_ON = DESK && !visit && (!!window.PG_APP || /[?&]title\b/.test(location.search));
+  var TITLE = false;
+  function titleShow(ret) { TITLE = true; running = false; document.body.classList.add('titleOn'); $('intro').hidden = true; const t = $('title'); t.hidden = false;
+    const crest = () => { try { const c = $('introCrest').src; if (c && c.startsWith('data:')) $('titleCrest').src = c; else setTimeout(crest, 200); } catch (e) {} }; crest();
+    $('tGo').textContent = ret ? 'Continue' : 'New game'; $('tQuit').hidden = !(window.PG_APP && PG_APP.quit);
+    $('tMeta').textContent = ret ? `Level ${S.level || 1} · ${money(S.total || 0)} in lifetime sales${S.loc ? ' · ' + (S.loc + 1) + ' spots' : ''}` : 'A new shop is waiting on the corner.';
+    setTimeout(() => { try { $('tFoot').textContent = 'v' + GAME_VER + ' · Enter to play · H for controls'; } catch (e) {} }, 0);
+    const go = () => { if (!TITLE) return; TITLE = false; t.hidden = true; document.body.classList.remove('titleOn'); try { audio(); musicStart(); } catch (e) {}
+      if (ret) { if (!offline()) { running = true; setTimeout(checkDaily, 800); } } else { $('intro').hidden = false; } };
+    $('tGo').onclick = go; $('tSet').onclick = () => $('boardBtn').click(); $('tKeys').onclick = () => { try { keysCard(); } catch (e) {} }; $('tQuit').onclick = () => { try { save(); } catch (e) {} setTimeout(() => PG_APP.quit(), 150); };
+    const kd = e => { if (!TITLE) { removeEventListener('keydown', kd); return; } if ((e.code === 'Enter' || e.code === 'Space' || e.code === 'NumpadEnter') && !anyModal()) { e.preventDefault(); e.stopImmediatePropagation(); go(); } }; addEventListener('keydown', kd, true);
+    setTimeout(() => { try { $('tGo').focus(); } catch (e) {} }, 300); }
+  if (returning && !visit) { $('intro').hidden = true; if (TITLE_ON) titleShow(true); else if (!offline()) { running = true; setTimeout(checkDaily, 800); } }
+  else if (!visit && TITLE_ON) titleShow(false);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { save(); musicStop(); submitScore(); try { ac && ac.suspend(); } catch {} } else { if (ac) audio(); if (running && !anyModal()) { if (!visit && offline()) running = false; else musicStart(); } } });
   window.addEventListener('pagehide', save);
 
@@ -4529,6 +4563,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     { id: 'fest', t: '420 Fest', cost: 20, cap: '#2fae45', hood: '#7dff6a', board: '#2fae45', pants: '#1d1a24', season: '420' },
     { id: 'og215', t: 'Secret: OG 215', cost: 0, cap: '#0d0b12', hood: '#22f07c', board: '#ffe23d', pants: '#0d0b12', drop: true },
     { id: 'mudda', t: CW('Secret: Mudda Special'), cost: 0, cap: '#ff6ad5', hood: '#ffe23d', board: '#ff6ad5', pants: '#3557a8', drop: true },
+    { id: 'opening', t: 'Opening Week Jacket', cost: 0, cap: '#0d0b12', hood: '#e9c77c', board: '#e8314f', pants: '#0d0b12', drop: true },
     { id: 'crew215', t: 'Crew 215', cost: 0, cap: '#22f07c', hood: '#0d0b12', board: '#22f07c', pants: '#22f07c', drop: true },
     { id: 'drop_camo', t: 'Weekly Drop: Green Camo', cost: 0, cap: '#4a6b3a', hood: '#7a9a5a', board: '#22f07c', pants: '#3a4a2a', drop: true },
     { id: 'drop_jersey', t: 'Weekly Drop: 215 Jersey', cost: 0, cap: '#004c54', hood: '#a5acaf', board: '#004c54', pants: '#1d1a24', drop: true },
@@ -4560,7 +4595,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   }
   $('dClaim').addEventListener('click', () => {
     if (!dailyPending) return; const r = DAILY[dailyPending.idx];
-    const wk = 1 + .5 * Math.min(4, Math.floor((dailyPending.streak - 1) / 7)); if (r.fit) { const own = SKINS_LIST.filter(s0 => (s0.drop || s0.season) && !S.skins.includes(s0.id) && (!s0.season || s0.season === HOL)); if (own.length) { const f0 = pick(own); S.skins.push(f0.id); setTimeout(() => banner('DAY 7 JACKPOT', 'NEW FIT: ' + f0.t.toUpperCase()), 600); } }
+    const wk = 1 + .5 * Math.min(4, Math.floor((dailyPending.streak - 1) / 7)); if (r.fit) { const own = SKINS_LIST.filter(s0 => (s0.drop || s0.season) && s0.id !== 'opening' && !S.skins.includes(s0.id) && (!s0.season || s0.season === HOL)); if (own.length) { const f0 = pick(own); S.skins.push(f0.id); setTimeout(() => banner('DAY 7 JACKPOT', 'NEW FIT: ' + f0.t.toUpperCase()), 600); } }
     if (r.cash) S.cash += r.cash * locMult() * wk; if (r.gems) S.gems += Math.round(r.gems * wk); if (r.boost) S.boostUntil = Math.max(Date.now(), S.boostUntil) + 300000;
     S.daily = { last: dailyPending.today, streak: dailyPending.streak }; dailyPending = null; save();
     $('p-daily').hidden = true; running = true; if (window.PG_ICONS && window.PG_ICONS[dailyIk(r)]) upgradeReveal(player.x, player.z, { t: dailyLabel(r), k: 'DAY ' + (S.daily.streak) + ' DROP', d: S.daily.streak >= 7 ? 'Week ' + Math.ceil(S.daily.streak / 7) + ' streak · drops keep growing' : 'Come back tomorrow for day ' + (S.daily.streak + 1), ik: dailyIk(r), you: true, objs: [] }); else { SFX.build(); toast(`Daily drop claimed: ${dailyLabel(r)}`); } burst(player.x, 1.5, player.z, ['#ffe23d', '#7dff6a'], 30, 3.5);
@@ -4790,8 +4825,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     { t: matchMedia('(pointer: fine)').matches ? 'Press Space (or tap the screen) to pop a skate trick.' : 'Tap the screen (don’t drag) to pop a skate trick.', done: () => S.stats.tricks > tutBase.tricks },
     { t: 'Tap Missions at the bottom for goals and rewards.', hl: 'missions', done: () => tutMissions },
   ];
+  setInterval(() => { try { if (S.tut === 99 && !visit) { owSetup(); const mb = document.querySelector('.bar button[data-p="missions"]'); if (mb && owReady() && openP !== 'missions') mb.classList.add('hl'); } } catch (e) {} }, 3000);
   function finishTut(reward) {
-    track('tutdone'); S.tut = 99; document.querySelectorAll('.bar button.hl').forEach(b => b.classList.remove('hl')); guideTarget = null;
+    track('tutdone'); S.tut = 99; try { owSetup(); setTimeout(() => toast('OPENING WEEK is on: 7 days of rewards in Missions. New tasks every day.'), 7000); } catch (e) {} document.querySelectorAll('.bar button.hl').forEach(b => b.classList.remove('hl')); guideTarget = null;
     setTimeout(() => { if (!anyModal()) checkDaily(); }, 3200);
     if (reward) { S.cash += 150; S.gems += 5; banner("YOU'RE IN BUSINESS", '+$150 · +5 GOLD LEAVES · STORY UNLOCKED'); fireworks(4); SFX.build(); }
     save();
@@ -5020,7 +5056,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const R0 = rival; R0.P.root.position.y = Math.abs(Math.sin(T * 6)) * .12; animPerson(R0.P, T, false, false); R0.P.armA.rotation.set(0, 0, 1.9 + Math.sin(T * 8) * .1); faceTo(R0.P, 0, 1);
     if (!R0.leaving) {
       R0.t -= dt; if (soldTotal() - R0.base >= R0.need) endRival(true); else if (R0.t <= 0) endRival(false);
-      if ((R0.wT -= dt) <= 0 && R0.walkers.length < 3) { R0.wT = rand(1.8, 3); const P = person(randomLook(), false); scene.add(P.root); const sx = pick([-13, 13]); R0.walkers.push({ P, x: sx, z: rand(9.6, 10.6), t: 0 }); }
+      if ((R0.wT -= dt) <= 0 && R0.walkers.length < (DESK && gfxMode === 'ultra' ? 6 : 3)) { R0.wT = rand(1.8, 3); const P = person(randomLook(), false); scene.add(P.root); const sx = pick([-13, 13]); R0.walkers.push({ P, x: sx, z: rand(9.6, 10.6), t: 0 }); }
     } else { R0.leaving += dt; R0.g.position.x += dt * (2 + R0.leaving * 4); R0.P.root.position.x += dt * 5; if (R0.leaving > 6) { scene.remove(R0.g); scene.remove(R0.P.root); R0.walkers.forEach(w => scene.remove(w.P.root)); rival = null; return; } }
     for (let k = R0.walkers.length - 1; k >= 0; k--) { const w = R0.walkers[k]; w.t += dt; const done = moveTo(w, -4.5 + (k - 1) * .6, 12.1, 2.4, dt); w.P.root.position.set(w.x, 0, w.z); animPerson(w.P, w.t, !done, false); if (done) { scene.remove(w.P.root); R0.walkers.splice(k, 1); } }
   }
@@ -5590,7 +5626,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   ];
   const twist = () => TWISTS[Math.min(S.loc, TWISTS.length - 1)];
   try { applyLook(); (S.place || []).forEach(buildPiece); } catch (e) { S.place = []; }
-  if (!visit && S.loc > 0 && S.twistSeen !== S.loc) { S.twistSeen = S.loc; setTimeout(() => { if (window.PG_ICONS && window.PG_ICONS['c:' + S.loc] && !anyModal()) upgradeReveal(player.x, player.z, { t: LOC().name, k: 'WELCOME TO', d: twist().t + ' · ' + twist().d, ik: 'c:' + S.loc, you: true, objs: [] }); else banner('WELCOME TO ' + LOC().name.toUpperCase(), twist().t.toUpperCase() + ' · ' + twist().d.toUpperCase()); }, 4000); }
+  if (!visit && S.loc > 0 && S.twistSeen !== S.loc) { S.twistSeen = S.loc; const twW = () => { if (typeof TITLE !== 'undefined' && TITLE || bootHold) { setTimeout(twW, 1500); return; } if (window.PG_ICONS && window.PG_ICONS['c:' + S.loc] && !anyModal()) upgradeReveal(player.x, player.z, { t: LOC().name, k: 'WELCOME TO', d: twist().t + ' · ' + twist().d, ik: 'c:' + S.loc, you: true, objs: [] }); else banner('WELCOME TO ' + LOC().name.toUpperCase(), twist().t.toUpperCase() + ' · ' + twist().d.toUpperCase()); }; setTimeout(twW, 4000); }
   // ---------- social: share card, crates for friends, weekly crew goal ----------
   function shareCard() {
     if (composer && !gfxLow) composer.render(); else renderer.render(scene, camera);
@@ -5646,8 +5682,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 88;
+  const GAME_VER = 89;
   const NEWS = [
+    ['Opening Week + Celebrity Contracts', 'NEW PLAYERS: Opening Week is a 7-day starter quest in Missions, three quick tasks a day with bigger prizes each day and an exclusive jacket on day 7. Before you hire a cashier, Grandma now minds the counter while you are away. LEVEL 10+: Celebrity Contracts. Famous clients want Kush with exact effects (like Euphoric + Glowing) on a clock. Cook it at the Mix Station, sell it, get paid big. Smoother start too: no more freeze when the first customers walk in.'],
     ['Help shape the game', 'The game now sends anonymous play stats (how far you get, how long you play, how smooth it runs on your device) so Philly G can fix the slow spots and the parts where people get stuck. No names, no contacts, no location. Turn it off any time in Settings: Analytics.'],
     ['PC ready', 'Playing on a computer? The HUD now scales up with your monitor, Esc opens the pause menu, F11 goes fullscreen and H shows every control (keyboard, mouse and controller). The mouse wheel zooms out further, and Settings has Fullscreen and Controls buttons.'],
     ['House brands', 'Every watch, car and sneaker in the game now carries our own house brands: Crownline, Pavane and Aurel on the wrist, Brawler, Widebody Works and Monarch in the garage, and fresh PG grails on the kicks wall. NEW in Settings: Language: Clean swaps the rougher wall tags and fit names for tame ones (the game reloads to repaint the walls).'],
@@ -5851,9 +5888,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let phBadgeT = 0;
   function updateLife(dt) { try { nightLife(dt); } catch (e) {} try { phoneTick(dt); if ((phBadgeT -= dt) <= 0) { phBadgeT = 2; phoneBadge(); } } catch (e) {}
     if (locsReady && (LOC2.soldQ != null || LOC2.custOut) && carT > 1.2) carT = 1.2;
-    if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if (cars.length < (PHONE || !TRAF ? 4 : TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4)) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
+    if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1) / (DESK && gfxMode === 'ultra' ? 1.7 : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if (cars.length < (PHONE || !TRAF ? 4 : TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4)) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
     for (let k = cars.length - 1; k >= 0; k--) { const c = cars[k]; c.g.position.x += c.dir * c.sp * dt; if (c.g.userData.rider) animPerson(c.g.userData.rider, T, false, false); if (c.g.userData.hl) c.g.userData.hl.material.opacity = .08 + .3 * (1 - (typeof skyD !== 'undefined' ? skyD.material.opacity : 0)); if (c.g.userData.beam) c.g.userData.beam.material.opacity = .32 * (1 - skyD.material.opacity); if (Math.abs(c.g.position.x) > 36) { scene.remove(c.g); if (c.g.userData.rivTag) c.g.userData.rivTag.material.dispose(); cars.splice(k, 1); } }
-    if ((walkT -= dt) <= 0) { walkT = rand(3, 8); if (walkers.length < (PHONE ? 2 : 3) && !(typeof party !== 'undefined' && party)) { const dir = Math.random() < .5 ? 1 : -1, P = person(randomLook(), false); scene.add(P.root); holidayHat(P); walkers.push({ P, dir, x: dir > 0 ? -21 : 33.5, z: rand(10.15, 10.45), sp: rand(1.4, 2.1), t: Math.random() * 5 }); } }
+    if ((walkT -= dt) <= 0) { const pcx = DESK && gfxMode === 'ultra'; walkT = pcx ? rand(1.4, 3.5) : rand(3, 8); if (walkers.length < (PHONE ? 2 : pcx ? 7 : 3) && !(typeof party !== 'undefined' && party)) { const dir = Math.random() < .5 ? 1 : -1, P = person(randomLook(), false); scene.add(P.root); holidayHat(P); walkers.push({ P, dir, x: dir > 0 ? -21 : 33.5, z: rand(10.15, 10.45), sp: rand(1.4, 2.1), t: Math.random() * 5 }); } }
     for (let k = walkers.length - 1; k >= 0; k--) { const w = walkers[k]; w.t += dt; w.x += w.dir * w.sp * dt; w.P.root.position.set(w.x, 0, w.z); faceTo(w.P, w.dir, 0); animPerson(w.P, w.t, true, false); if (w.x < -22 || w.x > 33.8) { scene.remove(w.P.root); walkers.splice(k, 1); } }
   }
   // ---------- perk picks: every 3 levels choose one of two upgrades that shape how your shop plays ----------
@@ -5927,7 +5964,57 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     if (sk && !S.skins.includes(fit)) { S.skins.push(fit); msg += ' · NEW FIT: ' + sk.t.toUpperCase(); } else { S.gems += 10; msg += ' · +10 BONUS'; }
     banner('WEEKLY DROP CLAIMED', msg); fireworks(6); SFX.build(); track('weekly'); save(); renderPanel(true);
   }
-  function weekRow(L) {
+  // ---------- Celebrity Contracts: from level 10, a client texts for Kush with exact effects; cook it at the Mix Station, sell it, get paid big ----------
+  const CT_WHO = [['Lil Lifted', 'for the tour bus'], ['DJ Hazey', 'for the after-party'], ['Velvet Monroe', 'for her album release'], ['Coach Big Tone', 'for the championship cookout'], ['Rico Suave', 'for the yacht weekend'], ['Mama Coco', 'for the gallery opening'], ['Saint Sativa', 'for the music video set'], ['The Twins', 'for their birthday bash']];
+  const ctMatch = () => { if (!S.ct || S.ct.done) return false; const st = S.strains[S.active]; if (!st) return false; const f = fxOf(st); return S.ct.fx.every(x => f.includes(x)); };
+  function ctNew() { const pool = [...new Set(ingrOpen().map(g => g.add))].filter(f => f !== 'gold' || (S.level || 1) >= 16); if (pool.length < 2) return null;
+    const n = (S.level || 1) >= 15 ? 3 : 2, fx = []; while (fx.length < n && fx.length < pool.length) { const f = pick(pool); if (!fx.includes(f)) fx.push(f); }
+    const who = pick(CT_WHO), qty = 8 + Math.floor(Math.random() * 5) + n * 2, mins = 30 + n * 10, val = fx.reduce((a, f) => a + FX[f].v, 0);
+    return { who: who[0], why: who[1], fx, qty, p: 0, ends: Date.now() + mins * 6e4, cash: Math.round(Math.max(priceOf(0) * qty * (10 + val * 20), Math.pow(S.level || 10, 2) * (300 + val * 150) * locMult())), gems: 6 + n * 3, done: 0 }; }
+  function ctTick() { if (visit || S.tut !== 99 || (S.level || 1) < 10) return; const now = Date.now();
+    if (S.ct && !S.ct.done && now > S.ct.ends) { toast(`${S.ct.who}'s contract ran out. Another client will reach out soon.`); S.ct = null; S.ctNext = now + 10 * 6e4; save(); return; }
+    if ((!S.ct || S.ct.done) && now >= (S.ctNext || 0) && running && !anyModal()) { const c = ctNew(); if (!c) return; S.ct = c; S.ctNext = now + 15 * 6e4; save();
+      banner('CELEBRITY CONTRACT', `${c.who.toUpperCase()} WANTS ${c.qty} KUSH · ${c.fx.map(f => FX[f].n.toUpperCase()).join(' + ')} · ${money(c.cash)}`); try { SFX.bell && SFX.bell(); } catch (e) {} track('ct_offer'); } }
+  setInterval(() => { try { ctTick(); } catch (e) {} }, 5000);
+  function ctClaim() { const c = S.ct; if (!c || c.done || c.p < c.qty) return; c.done = 1; S.cash += c.cash; S.gems += c.gems; S.ctWins = (S.ctWins || 0) + 1; S.ctNext = Date.now() + 12 * 6e4;
+    banner('CONTRACT COMPLETE', `${c.who.toUpperCase()} PAID ${money(c.cash)} · +${c.gems} GOLD LEAVES`); fireworks(6); SFX.build(); try { passXP(20); } catch (e) {} track('ct_win'); save(); renderPanel(true); }
+  function ctRows(L) { const c = S.ct; if (!c || visit) return; const h = document.createElement('div'); h.className = 'sec';
+    const left = Math.max(0, c.ends - Date.now()), mm = Math.ceil(left / 6e4); h.textContent = c.done ? 'CELEBRITY CONTRACT · PAID' : `CELEBRITY CONTRACT · ${mm} MIN LEFT`; L.append(h); if (c.done) return;
+    const ok = ctMatch(), need = c.fx.map(f => FX[f].n).join(' + ');
+    const r1 = itemRow(`${c.who}: ${c.qty} Kush, ${need}`, ok ? `Your ${S.strains[S.active].n} has it. Sell ${c.qty} Kush ${c.why}. Pays ${money(c.cash)} + ${c.gems} gold leaves` : `Your strain is missing ${c.fx.filter(f => !fxOf(S.strains[S.active]).includes(f)).map(f => FX[f].n).join(' + ')}. Cook it at the Mix Station. Pays ${money(c.cash)} + ${c.gems} gold leaves`, c.p / c.qty, c.p >= c.qty ? 'Claim' : ok ? `${c.p}/${c.qty}` : 'Mix it', c.p >= c.qty ? ctClaim : () => { try { openPanel('lab'); } catch (e) {} }, c.p < c.qty && ok, c.p >= c.qty);
+    r1.classList.add('weekly'); L.append(r1); }
+  // ---------- Opening Week: three quick tasks a day for a new player's first 7 days; tomorrow's prize is always on show ----------
+  const OW = [
+    { gems: 3, cash: 300, t: [['served', 15, 'Ring up 15 customers'], ['tricks', 10, 'Land 10 skate tricks'], ['builds', 2, 'Build or unlock 2 things']] },
+    { gems: 5, t: [['served', 40, 'Ring up 40 customers'], ['earn', 2000, 'Make $2,000 in sales'], ['level', 3, 'Reach level 3']] },
+    { gems: 4, cash: 1500, t: [['served', 60, 'Ring up 60 customers'], ['combo', 5, 'Land a 5-trick combo'], ['earn', 5000, 'Make $5,000 in sales']] },
+    { gems: 6, boost: 1, t: [['level', 5, 'Reach level 5'], ['served', 80, 'Ring up 80 customers'], ['earn', 10000, 'Make $10K in sales']] },
+    { gems: 8, t: [['served', 100, 'Ring up 100 customers'], ['tags', 1, 'Spray a tag spot'], ['earn', 20000, 'Make $20K in sales']] },
+    { gems: 6, cash: 5000, t: [['earn', 40000, 'Make $40K in sales'], ['level', 7, 'Reach level 7'], ['tricks', 30, 'Land 30 skate tricks']] },
+    { gems: 20, fit: 'opening', t: [['earn', 75000, 'Make $75K in sales'], ['served', 150, 'Ring up 150 customers'], ['level', 8, 'Reach level 8']] },
+  ];
+  const owBuilt = () => Object.keys(S.built || {}).length;
+  const owNow = () => ({ served: S.stats.served || 0, tricks: S.stats.tricks || 0, earn: S.total || 0, builds: owBuilt() });
+  const owDayNo = () => { if (!S.ow) return 0; const a = new Date(S.ow.start), b = new Date(); a.setHours(0, 0, 0, 0); b.setHours(0, 0, 0, 0); return Math.min(6, Math.round((b - a) / 864e5)); };
+  function owSetup() { if (visit || S.ow || S.tut !== 99) return; if ((S.level || 1) >= 8) { S.ow = { start: Date.now(), d: 7, done: 1 }; return; } S.ow = { start: Date.now(), d: 0, base: owNow() }; track('ow_start'); }
+  function owUnlocked() { return S.ow && !S.ow.done && S.ow.d <= owDayNo(); }
+  function owTaskProg(tk) { const [k, n] = tk, b = S.ow.base || owNow(), now = owNow(); const v = k === 'level' ? (S.level || 1) : k === 'combo' ? (S.bestCombo || 0) : k === 'tags' ? (S.tags || []).length : (now[k] || 0) - (b[k] || 0); return Math.max(0, Math.min(n, v)); }
+  function owReady() { if (!owUnlocked()) return false; const D = OW[S.ow.d]; return D && D.t.every(tk => owTaskProg(tk) >= tk[1]); }
+  const owPrize = D => [D.cash ? money(D.cash * locMult()) : '', D.gems ? D.gems + ' gold leaves' : '', D.boost ? 'a 5-minute boost' : '', D.fit ? 'the Opening Week fit' : ''].filter(Boolean).join(' + ');
+  const owUntil = () => { const t = new Date(S.ow.start); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + S.ow.d); const ms = Math.max(0, t - Date.now()), h = Math.floor(ms / 36e5), m = Math.ceil(ms % 36e5 / 6e4); return h ? `${h}h ${m}m` : `${m}m`; };
+  function owClaim() { if (!owReady()) return; const D = OW[S.ow.d];
+    if (D.cash) S.cash += D.cash * locMult(); if (D.gems) S.gems += D.gems; if (D.boost) S.boostUntil = Math.max(Date.now(), S.boostUntil || 0) + 300000;
+    let msg = owPrize(D).toUpperCase(); if (D.fit && !S.skins.includes('opening')) { S.skins.push('opening'); }
+    track('ow' + (S.ow.d + 1)); S.ow.d++; S.ow.base = owNow();
+    if (S.ow.d >= 7) { S.ow.done = 1; banner('OPENING WEEK COMPLETE', msg); fireworks(10); }
+    else { banner('OPENING WEEK · DAY ' + S.ow.d + ' DONE', msg); fireworks(4); setTimeout(() => toast(`Day ${S.ow.d + 1} unlocks tomorrow: ${owPrize(OW[S.ow.d])}. Pull up!`), 2600); }
+    SFX.build(); save(); renderPanel(true); }
+  function owRows(L) { owSetup(); if (!S.ow || S.ow.done || visit) return; const D = OW[S.ow.d]; if (!D) return;
+    const h = document.createElement('div'); h.className = 'sec'; h.textContent = `OPENING WEEK · DAY ${S.ow.d + 1} OF 7`; L.append(h);
+    if (!owUnlocked()) { const r0 = itemRow(`Day ${S.ow.d + 1} unlocks in ${owUntil()}`, 'Come back tomorrow. Reward: ' + owPrize(D), 0, 'Tomorrow', () => {}, true, false); r0.classList.add('weekly'); L.append(r0); return; }
+    D.t.forEach(tk => { const p = owTaskProg(tk), lab = tk[0] === 'earn' ? `${money(p)}/${money(tk[1])}` : `${p}/${tk[1]}`; L.append(itemRow(tk[2], p >= tk[1] ? 'Done' : 'Opening Week task', p / tk[1], p >= tk[1] ? 'Done' : lab, () => {}, true, p >= tk[1])); });
+    const ok = owReady(), rc = itemRow(`Day ${S.ow.d + 1} reward`, (S.ow.d === 6 ? 'Finish the week: ' : '') + owPrize(D), ok ? 1 : D.t.filter(tk => owTaskProg(tk) >= tk[1]).length / 3, ok ? 'Claim' : 'Locked', owClaim, !ok, ok); rc.classList.add('weekly'); L.append(rc); }
+  function weekRow(L) { ctRows(L); owRows(L);
     weeklySetup(); if (!S.week) return; const w = S.week, p = weekProg(), done = p >= w.goal, d = Math.max(1, Math.ceil((weekEnds() - Date.now()) / 864e5));
     const h = document.createElement('div'); h.className = 'sec'; h.textContent = `WEEKLY DROP · ENDS IN ${d} DAY${d > 1 ? 'S' : ''}`; L.append(h);
     const fit = SKINS_LIST.find(s => s.id === DROP_FITS[w.id % DROP_FITS.length]);
@@ -6928,7 +7015,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     for (let k = S.orders.length - 1; k >= 0; k--) { const o = S.orders[k]; if (oProg(o) < o.qty && now > o.ends) { S.orders.splice(k, 1); S.rating = Math.max(1, (S.rating || 4) - .15); toast(`${CAST[o.who].n}'s order ran out of time. Your rating took a hit`); S.orderNext = now + 20 * 60e3; } }
     const slots = 1 + (S.level >= 6 ? 1 : 0) + (S.level >= 12 ? 1 : 0);
     if (S.orders.length < slots && now >= (S.orderNext || 0)) { const o = orderGen(); if (o) { S.orders.push(o); S.orderNext = now + 10 * 60e3; banner('BIG ORDER IN', `${CAST[o.who].n.toUpperCase()} WANTS ${o.qty} ${PRODUCTS[o.i].short.toUpperCase()} · ${o.hrs}H · ${money(o.cash)}`); SFX.bell && SFX.bell(); } }
-    const ready = S.orders.some(o => oProg(o) >= o.qty), mb = document.querySelector('.bar button[data-p="missions"]'); if (mb) mb.classList.toggle('hl', ready && openP !== 'missions');
+    const ready = S.orders.some(o => oProg(o) >= o.qty), mb = document.querySelector('.bar button[data-p="missions"]'); if (mb) mb.classList.toggle('hl', (ready || owReady() || (S.ct && !S.ct.done && S.ct.p >= S.ct.qty)) && openP !== 'missions');
   }
   function ordersRows(L) {
     S.orders = S.orders || []; if (S.level < 2 || !has('cashier')) return;
@@ -9293,7 +9380,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const parts = () => [hdReady || !HD_ON(), !!window.__pgLoaded && propsPending <= 0, !!window.__pgLoaded && (gfxLow || !window.PG_PEOPLE || !THREE.GLTFLoader || PPL.ready)];
     const reveal = () => { bootHold = false; try { paintMurals(); } catch (e) {} if (!bt) return; bp(1, 'Ready'); setTimeout(() => { bt.style.opacity = '0'; setTimeout(() => bt.remove(), 450); }, 120); };
     const warm = () => { bp(.97, 'Warming up the lights…'); setTimeout(() => { try { if (!gfxLow && PBR) { scene.updateMatrixWorld(true); AOB.sig = aoSig(); AOB.last = performance.now(); bakeAO(); } } catch (e) { console.warn('warm ao', e.message); } try { // compile every prop's shaders now, behind the loading screen, so building something later (the lounge sofas, the silk pouf) never freezes the game
-      const pre = new THREE.Group(); pre.position.set(0, -60, 0); for (const k in PROPS) pre.add(PROPS[k].scene.clone(true)); scene.add(pre);
+      const pre = new THREE.Group(); pre.position.set(0, -60, 0); for (const k in PROPS) pre.add(PROPS[k].scene.clone(true));
+      try { if (PPL.ready) Object.keys(PPL.chars).forEach((nm, k) => { const o = pplCloneSkinned(PPL.chars[nm].scene); o.position.set(k * 1.5, 0, 0); pre.add(o); const o2 = pplCloneSkinned(PPL.chars[nm].scene); try { pplTintFit(o2, { hood: '#22f07c' }, '#22f07c'); } catch (e) {} o2.position.set(k * 1.5, 0, 3); pre.add(o2); }); } catch (e) {} // every crowd character's skinned shader compiles here too, not when the first shopper walks in
+      scene.add(pre);
       linScene(); deglare(); LMG.n = 0; lightPick(); renderer.compile(scene, camera); scene.remove(pre); } catch (e) {}
       try { warmRooms(); } catch (e) { console.warn('warm rooms', e.message); } requestAnimationFrame(() => requestAnimationFrame(reveal)); }, 30); };
     const tick = () => { const p = parts(), n = p.filter(Boolean).length, el = performance.now() - t0; window.__bootP = p;
