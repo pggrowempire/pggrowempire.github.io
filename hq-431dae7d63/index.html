@@ -183,6 +183,12 @@ function render() {
   const qc = new Map(); gone.forEach(r => { let last = 'Before tutorial'; MILESTONES.forEach(([k, l]) => { if (r.ev && r.ev[k] != null) last = l; }); qc.set(last, (qc.get(last) || 0) + 1); });
   const qOrder = ['Before tutorial', ...MILESTONES.map(m => m[1])].filter(l => qc.has(l)).map(l => ({ label: l, v: qc.get(l), tip: `<b>${esc(l)}</b><br>${qc.get(l)} players stopped here (${pct(qc.get(l), gone.length)} of quitters)` }));
   html += card('Where players stopped', `Players not seen for 3+ days, by the last milestone they reached (${gone.length} players).`, gone.length ? hbars(qOrder, { aria: 'Last milestone before quitting', color: 'var(--s2)', left: 130 }) : empty('Nobody has dropped off yet.'));
+  // opening week + contracts
+  const owS = P.filter(r => r.ev && r.ev.ow_start != null);
+  const owItems = [1, 2, 3, 4, 5, 6, 7].map(d => { const n = owS.filter(r => r.ev['ow' + d] != null).length; return { label: 'Day ' + d, v: owS.length ? n / owS.length * 100 : 0, sub: pct(n, owS.length), tip: `<b>Opening Week day ${d}</b><br>${n} of ${owS.length} players claimed it (${pct(n, owS.length)})` }; });
+  const cto = P.filter(r => r.ev && r.ev.ct_offer != null).length, ctw = P.filter(r => r.ev && r.ev.ct_win != null).length;
+  html += card('Opening Week', `Share of new players (${owS.length} started the week, v89+) who claimed each day. Day 2 is your next-day return rate.`, owS.length ? hbars(owItems, { max: 100, aria: 'Opening Week days claimed', left: 70 }) : empty('No players have started Opening Week yet.'));
+  html += card('Celebrity Contracts', 'Level 10+ players offered a contract, and how many finished at least one.', hbars([{ label: 'Got an offer', v: cto, tip: `<b>${cto}</b> players got a contract offer` }, { label: 'Finished one', v: ctw, tip: `<b>${ctw}</b> players finished a contract (${pct(ctw, cto)} of those offered)` }], { aria: 'Contracts offered and finished', left: 110 }));
   // platform + device
   const cnt = (arr, f) => { const m = new Map(); arr.forEach(r => { const k = f(r) || 'Unknown'; m.set(k, (m.get(k) || 0) + 1); }); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
   const pl = cnt(R, r => PLAT[r.plat] || r.plat).map(([l, v]) => ({ label: l, v, tip: `<b>${esc(l)}</b><br>${v} players (${pct(v, R.length)})` }));
