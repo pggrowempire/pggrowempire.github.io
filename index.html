@@ -2818,8 +2818,8 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     if (e.target !== fx && e.target !== cv && e.target !== stage) return;
     if (document.querySelector('.modal:not([hidden])')) return;
     if (decor) { decorTap(e); return; }
-    if (joy.on && e.pointerId !== joy.id) { taps.set(e.pointerId, performance.now()); return; } // second finger = trick tap, joystick keeps steering
-    joy.on = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = 0; joy.y = 0; joy.t0 = performance.now(); joy.maxL = 0; audio(); musicStart();
+    if (joy.on && e.pointerId !== joy.id) { taps.set(e.pointerId, e.timeStamp || performance.now()); return; } // second finger = trick tap, joystick keeps steering
+    joy.on = true; joy.id = e.pointerId; joy.ox = e.clientX; joy.oy = e.clientY; joy.x = 0; joy.y = 0; joy.t0 = e.timeStamp || performance.now(); joy.maxL = 0; audio(); musicStart();
   });
   window.addEventListener('pointermove', e => { if (joy.on && e.pointerId === joy.id) { let dx = e.clientX - joy.ox, dy = e.clientY - joy.oy, l = Math.hypot(dx, dy); joy.maxL = Math.max(joy.maxL || 0, l); if (l > 70) { joy.ox += dx / l * (l - 70); joy.oy += dy / l * (l - 70); dx = e.clientX - joy.ox; dy = e.clientY - joy.oy; l = 70; } const m = l < 7 ? 0 : Math.pow(Math.min(1, (l - 7) / 48), 1.15), k = m / (l || 1); joy.x = dx * k; joy.y = dy * k; } });
   const taps = new Map();
@@ -2837,7 +2837,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   // a ring under your thumb while you steer
   const joyRing = (() => { const d = document.createElement('div'); d.id = 'joyRing'; d.innerHTML = '<i></i>'; d.hidden = true; document.body.appendChild(d); return d; })();
   function joyRingTick() { const on = joy.on && (joy.maxL || 0) > 9 && running; if (joyRing.hidden === on) joyRing.hidden = !on; if (!on) return; joyRing.style.transform = `translate(${joy.ox - 50}px, ${joy.oy - 50}px)`; joyRing.firstChild.style.transform = `translate(${joy.x * 32}px, ${joy.y * 32}px)`; }
-  const endJoy = e => { if (taps.has(e.pointerId)) { if (e.type === 'pointerup' && performance.now() - taps.get(e.pointerId) < 300) doTrick(); taps.delete(e.pointerId); return; } if (e.pointerId === joy.id) { if (e.type === 'pointerup' && performance.now() - joy.t0 < 260 && (joy.maxL || 0) < 14 && TRIM) { trimTap(); } else if (e.type === 'pointerup' && performance.now() - joy.t0 < 260 && (joy.maxL || 0) < 14) { const prevA = tapA, hit = window.__pgTap && window.__pgTap(e.clientX, e.clientY); if (hit) { if (tapA && tapA !== prevA) walkNear(tapA.x, tapA.z); else if (!tapA && prevA) tapWalk(e.clientX, e.clientY); } else if (!tapWalk(e.clientX, e.clientY)) doTrick(); } joy.on = false; joy.x = joy.y = 0; } };
+  const endJoy = e => { const now = e.timeStamp || performance.now(); if (taps.has(e.pointerId)) { if (e.type === 'pointerup' && now - taps.get(e.pointerId) < 300) doTrick(); taps.delete(e.pointerId); return; } if (e.pointerId === joy.id) { if (e.type === 'pointerup' && now - joy.t0 < 260 && (joy.maxL || 0) < 14 && TRIM) { trimTap(); } else if (e.type === 'pointerup' && now - joy.t0 < 420 && (joy.maxL || 0) < 20) { const prevA = tapA, hit = window.__pgTap && window.__pgTap(e.clientX, e.clientY); if (hit) { if (tapA && tapA !== prevA) walkNear(tapA.x, tapA.z); else if (!tapA && prevA) tapWalk(e.clientX, e.clientY); } else if (!tapWalk(e.clientX, e.clientY)) doTrick(); } joy.on = false; joy.x = joy.y = 0; } };
   window.addEventListener('pointerup', endJoy); window.addEventListener('pointercancel', endJoy);
   window.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; keys.add(e.code); if (e.code.startsWith('Arrow')) e.preventDefault(); if (e.code === 'Space' && !e.repeat) { e.preventDefault(); doTrick(); } if (e.code === 'KeyQ') yawT = Math.max(-.75, yawT - .25); if (e.code === 'KeyE') yawT = Math.min(.75, yawT + .25); if (e.code === 'KeyR') yawT = 0; });
   window.addEventListener('keyup', e => keys.delete(e.code));
@@ -4657,7 +4657,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   function renderPanel(force) {
     if (!openP) return;
     const sig = openP + '|' + S.gems + '|' + S.ach.length + '|' + (openP === 'lab' ? S.strains.length + ':' + S.active + ':' + labA + ':' + labB + ':' + (S.cash >= crossCost()) + ':' + Math.floor(Math.log2(1 + S.cash)) + (MIX ? MIX.add.join() : '') : openP === 'phone' ? phoneSig() : '') + S.pup + S.skin + S.skins.length + '|' + (openP === 'missions' ? S.ms.map(m => mProg(m) + ':' + m.goal).join(',') : '') + '|' + (openP === 'boosts' ? (Date.now() >= S.freeHypeAt) + ':' + Math.ceil((S.freeHypeAt - Date.now()) / 60000) : '') + '|' + S.loc + has('shelf4') + S.level + (openP === 'empire' ? '|' + charter().map(r => Math.floor(Math.min(1, r.v() / r.n) * 40)).join() : '') + (openP === 'brand' ? '|' + brDropOn() + brStock() + Math.ceil((((S.brand && S.brand.dropAt) || 0) - Date.now()) / 6e4) : '');
-    const sig2 = sig + (openP === 'style' ? '|' + (S.floor || '') + (S.wallCol || '') + (S.place || []).length + (S.floors || []).length : '') + (openP === 'upgrade' ? '|' + S.st.join() + S.strain + S.decor.join() + S.sprinkler + S.pestCtl + S.strains.length + JSON.stringify(S.eq) + S.lv.grow + upgradeRows().map(r => r.cost <= S.cash).join() : '');
+    const sig2 = sig + (openP === 'style' ? '|' + (S.floor || '') + (S.wallCol || '') + (S.place || []).length + (S.floors || []).length : '') + (openP === 'upgrade' ? '|' + S.st.join() + S.strain + S.decor.join() + S.sprinkler + S.pestCtl + S.strains.length + JSON.stringify(S.eq) + S.lv.grow + upgradeRows().map(r => r.cost <= S.cash).join() + Object.keys(S.built).length + '|' + menuAffordSig() : '');
     const sig3 = sig2 + (openP === 'hire' ? '|' + PADS.filter(isStaff).map(p => has(p.id) + ':' + hireOpen(p) + ':' + (S.cash >= hireCost(p))).join() : ''); if (sig3 === panelSig && force !== true) return; panelSig = sig3;
     if (openP === 'event') { const L = $('evList'); L.textContent = ''; evRows(L); hoistClaims(L, 1); }
     else if (openP === 'missions') {
@@ -4692,6 +4692,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
       L.append(itemRow('PG Pup', S.pup ? (S.pup === 1 ? 'Rolling with you. Sniffs out trash nearby' : 'Chilling at home') : 'Your loyal pup. Rolls with you and cleans up trash. 25 gold leaves', null, S.pup ? (S.pup === 1 ? 'Send home' : 'Bring along') : '25 ◆', () => { if (!S.pup) { if (S.gems < 25) return; S.gems -= 25; S.pup = 1; toast('PG Pup joined the crew'); SFX.build(); } else S.pup = S.pup === 1 ? 2 : 1; save(); renderPanel(true); }, !S.pup && S.gems < 25, S.pup === 1));
     } else if (openP === 'upgrade') {
       const L = $('uList'); L.textContent = ''; let lastSec = '';
+      try { menuFloorRows(L); } catch (e) { console.warn('floor rows', e.message); }
       upgradeRows().forEach(r => {
         if (r.sec !== lastSec) { lastSec = r.sec; const h = document.createElement('div'); h.className = 'sec'; h.textContent = r.sec; L.append(h); }
         L.append(itemRow(r.t, r.d, null, r.open ? 'Open' : r.done ? r.doneTxt : money(r.cost), () => { if (r.open) { r.open(); return; } if (r.done || !(S.cash >= r.cost)) return; S.cash -= r.cost; r.buy(); SFX.build(); burst(player.x, 1.4, player.z, ['#ff8a3d', '#ffe23d'], 22, 3); save(); renderPanel(true); }, !r.open && (r.done || !(S.cash >= r.cost)), r.done, r.ik));
@@ -4963,9 +4964,12 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     if (S.strains.length >= 40) { const lowI = S.strains.map((x, i) => [x.mult, i]).filter(([, i]) => i !== S.active).sort((a, b) => a[0] - b[0])[0]; if (lowI) S.strains.splice(lowI[1], 1); }
     S.strains.push({ n, col: '#' + cc.getHexString(), mult, sp: base.sp, r: rr, fx, mix: 1 }); S.active = S.strains.length - 1; LINC(BUD_M, BUD_M.color.set(budCol(S.strains[S.active].col))); MIX = null; if (inp) inp.value = '';
     try { passXP(10); } catch (e) {}
-    $('p-lab').hidden = true; openP = null; running = true; upgradeReveal(player.x, player.z, { t: n, k: fresh ? 'NEW RECIPE DISCOVERED' : 'FRESH BATCH', d: `${fx.map(f => FX[f].n).join(' · ')} · ${mult}× price${gl ? ' · +' + gl + ' gold leaves' : ''}`, ik: strainIk('#' + cc.getHexString()), you: true, objs: [] }); save(); }
+    MIX_LAST = { n, fresh, fx: fx.slice(), mult, gl, col: '#' + cc.getHexString(), t: Date.now() }; SFX.build && SFX.build(); try { HAP(20); } catch (e) {} if (fresh) try { fireworks(2); } catch (e) {}
+    toast((fresh ? 'New recipe! ' : 'Fresh batch: ') + n + ' · ' + mult + '× price' + (gl ? ' · +' + gl + ' gold leaves' : '') + '. Now growing it.'); save(); renderPanel(true); }
+  let MIX_LAST = null;
   function renderMix() { const box = $('mixBox'); if (!box) return; box.textContent = ''; if (!MIX) mixStart(); const base = S.strains[MIX.base] || S.strains[S.active];
     const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'MIX STATION'; box.append(h);
+    if (MIX_LAST && Date.now() - MIX_LAST.t < 120000) { const lc = document.createElement('div'); lc.className = 'mixlast'; lc.style.cssText = `border:2px solid ${MIX_LAST.col};border-radius:12px;padding:8px 10px;margin:2px 0 6px;background:rgba(0,0,0,.25);text-align:left;font-size:13px`; lc.innerHTML = `<b style="color:${MIX_LAST.col}">${MIX_LAST.cross ? 'NEW STRAIN' : MIX_LAST.fresh ? 'NEW RECIPE' : 'COOKED'}: ${MIX_LAST.n.replace(/[<>&]/g, '')}</b><br>${MIX_LAST.cross ? MIX_LAST.cross : MIX_LAST.fx.map(f => FX[f].n).join(' · ')} · sells for ${MIX_LAST.mult}×${MIX_LAST.gl ? ' · +' + MIX_LAST.gl + ' gold leaves' : ''} · now growing in the Grow Room. Keep mixing or head back.`; box.append(lc); }
     const top = document.createElement('div'); top.className = 'mixtop'; const bb = document.createElement('button'); bb.className = 'pick'; bb.textContent = 'Base: ' + base.n; bb.addEventListener('click', () => { if (MIX.add.length) { toast('Finish or reset this mix first'); return; } S.active = (MIX.base + 1) % S.strains.length; mixStart(); renderPanel(true); }); top.append(bb); box.append(top);
     const fxw = document.createElement('div'); fxw.className = 'fxw'; MIX.fx.forEach(f => { const p = document.createElement('span'); p.className = 'fxp'; p.style.setProperty('--fc', FX[f].c); p.textContent = FX[f].n; fxw.append(p); }); box.append(fxw);
     const val = document.createElement('p'); val.className = 'mixval'; val.innerHTML = `Sells for <b>${mixMult(base, MIX.fx)}×</b> · ${MIX.fx.length}/6 effects${MIX.spent ? ' · spent ' + money(MIX.spent) : ''}${(S.recipes || {})[MIX.fx.slice().sort().join('+')] ? ' · known recipe' : MIX.add.length ? ' · <b>new recipe!</b>' : ''}`; box.append(val);
@@ -4996,7 +5000,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const cc = new THREE.Color(A.col).lerp(new THREE.Color(B.col), .5); cc.offsetHSL(rand(-.12, .12), .1, rr >= 3 ? .05 : 0);
     let n, tries = 0; do { n = pick(NAMES_A) + ' ' + pick(NAMES_B); } while (S.strains.some(x => x.n === n) && tries++ < 60);
     S.strains.push({ n, col: '#' + cc.getHexString(), mult, sp, r: rr }); S.gems += RAR[rr].g;
-    { const ik = strainIk('#' + cc.getHexString()); if (window.PG_ICONS && window.PG_ICONS[ik]) { $('p-lab').hidden = true; openP = null; running = true; upgradeReveal(player.x, player.z, { t: n, k: 'NEW ' + RAR[rr].n.toUpperCase() + ' STRAIN', d: `${mult}× price · ${sp}× growth${RAR[rr].g ? ' · +' + RAR[rr].g + ' gold leaves' : ''}`, ik, you: true, objs: [] }); } else banner(n.toUpperCase(), `${RAR[rr].n.toUpperCase()} · ${mult}× PRICE · ${sp}× GROWTH${RAR[rr].g ? ' · +' + RAR[rr].g + ' ◆' : ''}`); } SFX.build(); if (rr >= 2) fireworks(3);
+    { const ik = strainIk('#' + cc.getHexString()); MIX_LAST = { n, fresh: true, fx: [], mult, gl: RAR[rr].g || 0, col: '#' + cc.getHexString(), t: Date.now(), cross: RAR[rr].n + ' strain · ' + sp + '× growth' }; SFX.build && SFX.build(); toast('New ' + RAR[rr].n + ' strain: ' + n + ' · ' + mult + '× price'); if (0) banner(n.toUpperCase(), `${RAR[rr].n.toUpperCase()} · ${mult}× PRICE · ${sp}× GROWTH${RAR[rr].g ? ' · +' + RAR[rr].g + ' ◆' : ''}`); } SFX.build(); if (rr >= 2) fireworks(3);
     burst(player.x, 1.4, player.z, ['#' + cc.getHexString(), '#ffffff', RAR[rr].c], 40, 3.5); save(); renderPanel(true);
   });
 
@@ -5682,8 +5686,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 89;
+  const GAME_VER = 90;
   const NEWS = [
+    ['Easier buying', 'The Upgrades tab now lists everything you can buy on the floor: new stations, shelves, rooms and your board, backpack and price upgrades, with buy buttons right there. Locked items say exactly what they need. The floating upgrade circles are easier to tap: the whole circle works now, quick taps register even when the game stutters, and the card stays open while you skate over. The Mix Station keeps you on the station after each mix, so you can keep cooking.'],
     ['Opening Week + Celebrity Contracts', 'NEW PLAYERS: Opening Week is a 7-day starter quest in Missions, three quick tasks a day with bigger prizes each day and an exclusive jacket on day 7. Before you hire a cashier, Grandma now minds the counter while you are away. LEVEL 10+: Celebrity Contracts. Famous clients want Kush with exact effects (like Euphoric + Glowing) on a clock. Cook it at the Mix Station, sell it, get paid big. Smoother start too: no more freeze when the first customers walk in.'],
     ['Help shape the game', 'The game now sends anonymous play stats (how far you get, how long you play, how smooth it runs on your device) so Philly G can fix the slow spots and the parts where people get stuck. No names, no contacts, no location. Turn it off any time in Settings: Analytics.'],
     ['PC ready', 'Playing on a computer? The HUD now scales up with your monitor, Esc opens the pause menu, F11 goes fullscreen and H shows every control (keyboard, mouse and controller). The mouse wheel zooms out further, and Settings has Fullscreen and Controls buttons.'],
@@ -6853,6 +6858,24 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     studioPad = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(pc), transparent: true, opacity: .5, depthWrite: false })); studioPad.rotation.x = -Math.PI / 2; studioPad.position.set(STUDIO.x, .02, STUDIO.z); studioPad.userData.noMerge = true; studioPad.visible = false; scene.add(studioPad); }
 
   // ======================= TAP TO UPGRADE: tap the thing itself (or its glowing +) instead of skating over floor pads =======================
+  // everything the floor circles sell, as menu rows (so nothing is tap-only)
+  function menuBuy(k) { const r = keyRow(k); if (!r || !r.ok || r.cost === null) return;
+    if (r.quiet) { r.buy(); save(); renderPanel(true); return; }
+    if (!(S.cash >= r.cost)) { toast('Need ' + money(r.cost - S.cash) + ' more'); return; }
+    S.cash -= r.cost; r.buy(); SFX.build && SFX.build(); HAP(18); try { track('tap_' + k); } catch (e) {} burst(player.x, 1.4, player.z, ['#ff8a3d', '#ffe23d'], 18, 3);
+    const inf = r.info ? r.info() : {}; toast((inf.k ? inf.k.charAt(0) + inf.k.slice(1).toLowerCase() + ': ' : 'Done: ') + (inf.t || r.t)); save(); renderPanel(true); }
+  function menuAffordSig() { let n = ''; PADS.forEach(p => { const rr = keyRow('p:' + p.id); if (rr) n += rr.ok && S.cash >= rr.cost ? 1 : 0; }); anchors().forEach(a => a.keys.forEach(k => { const rr = k[0] !== 'p' && keyRow(k); if (rr && rr.cost !== null) n += S.cash >= rr.cost ? 1 : 0; })); return n; }
+  function menuFloorRows(L) { const seen = new Set(), titles = new Set(upgradeRows().map(q => String(q.t).split(' · ')[0])), keys = [];
+    PADS.forEach(p => { if (!isStaff(p)) keys.push('p:' + p.id); }); anchors().forEach(a => a.keys.forEach(k => keys.push(k)));
+    const build = [], other = [];
+    keys.forEach(k => { if (seen.has(k) || k === 'x:strat') return; seen.add(k); const rr = keyRow(k); if (!rr || rr.cost === null) return; if (!k.startsWith('p:') && titles.has(rr.t)) return; (k.startsWith('p:') ? build : other).push(rr); });
+    const why = rr => { const p = PADS.find(q => 'p:' + q.id === rr.k); if (!p) return rr.sub; if (p.lvl && S.level < p.lvl) return 'Unlocks at level ' + p.lvl; const miss = p.need.filter(n => !has(n)).map(n => { const q = PADS.find(z => z.id === n); return q ? q.label.replace(/^Unlock /, '') : n; }); return miss.length ? 'Needs ' + miss.join(' + ') + ' first' : rr.sub; };
+    const row = (rr, lock) => { if (lock) rr = Object.assign({}, rr, { sub: why(rr) }); const lvTxt = rr.lv != null && rr.max ? ` · LV ${rr.lv}/${rr.max}` : '', btn = lock ? 'Locked' : rr.fix ? 'Fix ' + money(rr.cost) : money(rr.cost);
+      const el = itemRow(rr.t + lvTxt, rr.sub || '', null, btn, () => menuBuy(rr.k), lock || !(S.cash >= rr.cost), false, rr.k.startsWith('p:') ? undefined : undefined); if (lock) el.classList.add('locked'); return el; };
+    const avail = build.filter(q => q.ok).sort((a, b) => a.cost - b.cost), locked = build.filter(q => !q.ok).sort((a, b) => a.cost - b.cost).slice(0, 4);
+    if (avail.length || locked.length) { const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'BUILD & UNLOCK'; L.append(h); avail.forEach(q => L.append(row(q, false))); locked.forEach(q => L.append(row(q, true))); }
+    const oth = other.filter(q => q.ok).sort((a, b) => a.cost - b.cost);
+    if (oth.length) { const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'BOARD, BACKPACK & PRICES'; L.append(h); oth.forEach(q => L.append(row(q, false))); } }
   function keyRow(k) {
     const [ty, id] = k.split(':');
     if (ty === 'p') { const p = PADS.find(q => q.id === id); if (!p || has(p.id) || isStaff(p) || !p.cost) return null; const ok = p.need.every(has) && (!p.lvl || S.level >= p.lvl);
@@ -6921,6 +6944,12 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   const tapRay = new THREE.Raycaster(), tapV = new THREE.Vector3(), tapN = new THREE.Vector2();
   function tapSelect(cx, cy) {
     if (visit || decor || !running) return false; const rc = cv.getBoundingClientRect(); tapN.set((cx - rc.left) / rc.width * 2 - 1, -((cy - rc.top) / rc.height) * 2 + 1); tapRay.setFromCamera(tapN, camera); if (castTap(tapRay.ray)) return true;
+    // the floating circles: a tap anywhere on a visible circle opens its card (they hover above the thing they upgrade)
+    { const A = anchors(), byKey = new Map(); A.forEach(a => { const k = a.x.toFixed(1) + ',' + a.z.toFixed(1); if (!byKey.has(k)) byKey.set(k, a); }); let hit = null, hd = 1e9; const v = new THREE.Vector3(), u = new THREE.Vector3();
+      marks.forEach((m, key) => { const a = byKey.get(key); if (!a || !m.visible) return; v.copy(m.position).project(camera); if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) return; const sx = (v.x + 1) / 2 * rc.width + rc.left, sy = (1 - v.y) / 2 * rc.height + rc.top;
+        u.copy(m.position).addScaledVector(camera.up.clone().applyQuaternion(camera.quaternion), (m.userData.sc || 1.5) * .5).project(camera); const rad = Math.max(22, Math.hypot(((u.x + 1) / 2 * rc.width + rc.left) - sx, ((1 - u.y) / 2 * rc.height + rc.top) - sy)) * 1.1, d = Math.hypot(cx - sx, cy - sy);
+        if (d < rad && d / rad < hd) { hd = d / rad; hit = a; } });
+      if (hit && hit.keys.some(k => keyRow(k))) { openCard(hit); return true; } }
     let best = null, bd = 1e9; for (const a of anchors()) { if (Math.abs(a.x - player.x) > 26 || Math.abs(a.z - player.z) > 18) continue; if (!a.keys.some(k => keyRow(k))) continue; const d = tapRay.ray.distanceToPoint(tapV.set(a.x, a.y, a.z)); if (d < a.r && d < bd) { bd = d; best = a; } }
     if (best) { openCard(best); return true; }
     if (tapPerson(tapRay.ray)) return true;
@@ -6993,7 +7022,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     marks.forEach((m, key) => { if (!seen.has(key)) { scene.remove(m); marks.delete(key); } });
   }
   let tapHinted = false;
-  function updateTap(dt) { updateMarks(dt); if (tapA) { renderCard(); if (Math.hypot(player.vx, player.vz) > 2.5 && tapA.keys[0] !== 'u:speed' && Math.hypot(player.x - tapA.x, player.z - tapA.z) > 6) closeCard(); }
+  function updateTap(dt) { updateMarks(dt); if (tapA) { renderCard(); if (!walkTo && Math.hypot(player.vx, player.vz) > 2.5 && tapA.keys[0] !== 'u:speed' && Math.hypot(player.x - tapA.x, player.z - tapA.z) > 6) closeCard(); }
     if (!tapHinted && running && S.tut >= 90 && T > 6) { tapHinted = true; if (!S.tapHint) { S.tapHint = 1; toast('New: tap anything with a gold arrow or + to upgrade it. Tap your skater for board upgrades'); } } }
 
   // ======================= BIG ORDERS · PHILLY MAP · PRICING STRATEGY =======================
