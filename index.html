@@ -1155,7 +1155,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
         c *= mix(vec3(1.0), vec3(1.045, 1.0, .95), smoothstep(.45, 1.0, l));
         vec2 d = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0));
         c *= 1.0 - ${LUXE ? '.14' : '.46'} * smoothstep(.35, 1.0, length(d) * 1.15);
-        c *= mix(vec3(1.0), vec3(1.12, .98, .82), eve * smoothstep(.1, .8, l)); c *= 1.0 - .12 * eve * smoothstep(.35, 1.0, length(vUv - .5) * 1.4); c += vec3(-.004, .012, .009) * eve * (1.0 - smoothstep(0.0, .4, l)); c = mix(c, c * c * (3.0 - 2.0 * c), .12 * eve);
+        c *= mix(vec3(1.0), vec3(1.06, .99, .91), eve * smoothstep(.1, .8, l)); c *= 1.0 - .12 * eve * smoothstep(.35, 1.0, length(vUv - .5) * 1.4); c += vec3(-.004, .012, .009) * eve * (1.0 - smoothstep(0.0, .4, l)); c = mix(c, c * c * (3.0 - 2.0 * c), .12 * eve);
         if (nite > 0.0) { float L = dot(c, vec3(.299, .587, .114)); float keep = smoothstep(.22, .8, L); vec3 dark = c * vec3(.7, .73, .88) + vec3(.008, .01, .03); vec3 lit = c * mix(vec3(1.0), vec3(1.03, 1.0, .97), keep);
           c = mix(c, mix(dark, lit, keep), nite); float sat = dot(c, vec3(.299, .587, .114)); c = mix(vec3(sat), c, 1.0 + .25 * nite); vec2 dd = (vUv - .5) * vec2(max(asp, 1.0), max(1.0 / asp, 1.0)); c *= 1.0 - .16 * nite * smoothstep(.35, 1.0, length(dd) * 1.2); }
         c *= .965; c = c / (1.0 + max(c - .74, 0.0) * .75);
@@ -2876,6 +2876,11 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
       stage.append(m); m.querySelector('[data-close]').addEventListener('click', () => { m.hidden = true; try { SFX.ui('close'); } catch (e) {} }); m.addEventListener('click', e => { if (e.target === m) m.hidden = true; }); }
     m.hidden = !m.hidden; }
   if (DESK) { try {
+      const tapRe = /\b(tap|Tap|TAP)(s|S|ped|PED|ping|PING)?\b/g, tapFix = t => t.replace(tapRe, (m, w, suf) => (w === 'TAP' ? 'CLICK' : w === 'Tap' ? 'Click' : 'click') + (suf ? ({ s: 's', S: 'S', ped: 'ed', PED: 'ED', ping: 'ing', PING: 'ING' })[suf] : ''));
+      const fixNode = n => { if (n.nodeType === 3) { if (/tap/i.test(n.nodeValue) && !(n.parentNode && /^(INPUT|TEXTAREA|SCRIPT|STYLE)$/.test(n.parentNode.nodeName))) { const v = tapFix(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } return; } if (n.nodeType === 1 && !/^(SCRIPT|STYLE|CANVAS)$/.test(n.nodeName)) { if (n.title && /tap/i.test(n.title)) n.title = tapFix(n.title); if (n.placeholder && /tap/i.test(n.placeholder)) n.placeholder = tapFix(n.placeholder); n.childNodes.forEach(fixNode); } };
+      fixNode(document.body); new MutationObserver(ms => { for (const m of ms) { if (m.type === 'characterData') fixNode(m.target); else m.addedNodes.forEach(fixNode); } }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    } catch (e) {} }
+  if (DESK) { try {
     $('fsBtn').hidden = false; $('keysBtn').hidden = false; $('fsBtn').addEventListener('click', toggleFS); $('keysBtn').addEventListener('click', keysCard);
     // PC: the app downloads game updates in the background; a restart puts them in
     if (window.PG_APP && PG_APP.onUpdate) { const ub = document.createElement('button'); ub.className = $('quitBtn').className; ub.id = 'updBtn'; ub.hidden = true; $('quitBtn').before(ub); ub.addEventListener('click', () => { try { save(); } catch (e) {} setTimeout(() => PG_APP.restart(), 200); });
@@ -3060,7 +3065,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     if (t < .45) { x.fillStyle = `rgba(214,226,216,${(.95 * (1 - t / .45)).toFixed(3)})`; x.beginPath(); x.arc(200, 200, 150 + t * 120, 0, TAU); x.fill(); }
     for (const p of PIC.puffs) { const age = t - p.dl; if (age < 0) continue; const a = Math.max(0, 1 - age / 1.5); if (a <= 0) continue; const rr = p.r * (1 + age * 1.1), px = p.x + p.vx * age, py = p.y + p.vy * age;
       const g = x.createRadialGradient(px, py, 0, px, py, rr); const c = p.g ? '170,255,190' : '232,236,232'; g.addColorStop(0, `rgba(${c},${(.85 * a * a).toFixed(3)})`); g.addColorStop(.55, `rgba(${c},${(.4 * a * a).toFixed(3)})`); g.addColorStop(1, `rgba(${c},0)`); x.fillStyle = g; x.beginPath(); x.arc(px, py, rr, 0, TAU); x.fill(); } }
-  function cardLeaves() { const st = stage.getBoundingClientRect(), el = $('reveal'), r = el.getBoundingClientRect(), cx = r.left - st.left + r.width / 2, cy = r.top - st.top + r.height / 2 || st.height * .25;
+  function cardLeaves() { if (domLeaves.length > 30) return; const st = stage.getBoundingClientRect(), el = $('reveal'), r = el.getBoundingClientRect(), cx = r.left - st.left + r.width / 2, cy = r.top - st.top + r.height / 2 || st.height * .25;
     for (let k = 0; k < 22; k++) { const im = document.createElement('img'); im.src = LEAF_IMG; im.className = 'leafc'; const sz = 14 + Math.random() * 18; im.style.width = im.style.height = sz + 'px'; stage.append(im);
       const a = -Math.PI / 2 + (Math.random() - .5) * 2.6, sp = 260 + Math.random() * 380; domLeaves.push({ im, x: cx + (Math.random() - .5) * 120, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: Math.random() * 360, vr: rand(-420, 420), t: 0, life: 1.6 + Math.random() * .8, ph: Math.random() * TAU }); } }
   function leafTick(dt) { for (let k = domLeaves.length - 1; k >= 0; k--) { const L = domLeaves[k]; L.t += dt; L.vy += 700 * dt; L.vx *= Math.pow(.4, dt); if (L.vy > 160) L.vy = 160; L.x += (L.vx + Math.sin(L.t * 5 + L.ph) * 40) * dt; L.y += L.vy * dt; L.r += L.vr * dt;
@@ -3624,6 +3629,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   function resize() {
     const r = stage.getBoundingClientRect(); cssW = Math.max(1, r.width); cssH = Math.max(1, r.height);
     DPR = GFX_MAX ? Math.min(2.6, Math.max(1.5, (window.devicePixelRatio || 1) * 1.5)) : Math.min(window.devicePixelRatio || 1, gfxLow ? 1.25 : gfxMode === 'phone' ? 1.7 : gfxMode === 'ultra' ? (PHONE ? 2.0 : 2.3) : gfxMode === 'high' ? 2.0 : (PBR && matchMedia('(pointer: coarse)').matches ? 1.8 : 2));
+    if (!PHONE) { const px = cssW * cssH, budget = gfxLow ? 1.4e6 : GFX_MAX ? 5.2e6 : gfxMode === 'ultra' ? 3.7e6 : gfxMode === 'high' ? 2.8e6 : 2.1e6; if (px * DPR * DPR > budget) DPR = Math.max(1, Math.sqrt(budget / px)); }
     renderer.setPixelRatio(DPR * prScale); renderer.setSize(cssW, cssH, false);
     camera.aspect = cssW / cssH; camera.updateProjectionMatrix();
     OUTLINE.uniforms.th.value = 4.2 / cssW; OUTLINE.uniforms.asp.value = cssW / cssH;
@@ -3652,7 +3658,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   function lightPick() {
     if (gfxLow || !PBR) return; LMG.n++;
     if (LMG.dirty && LMG.n % 20 === 1 || !LMG.KP) { LMG.dirty = 0; LMG.pts = []; LMG.dirs = []; scene.traverse(o => { if (!o.isLight || o.userData.lmDummy) return; if (o.isPointLight || o.isSpotLight) { lmOwn(o); LMG.pts.push(o); } else if (o.isDirectionalLight && !o.castShadow) { lmOwn(o); LMG.dirs.push(o); } else if (o._lm) o._sel = true; });
-      const KP = gfxMode === 'phone' ? 3 : PHONE ? 6 : 18, KD = 10;
+      const KP = gfxMode === 'phone' ? 3 : PHONE ? 6 : 8, KD = PHONE ? 10 : 3;
       while (LMG.dumP.length < KP) { const d = new THREE.PointLight('#000000', 0, .01, 2); d._sel = true; d.position.set(0, -500, 0); d.userData.lmDummy = 1; d.userData.noMerge = true; scene.add(d); LMG.dumP.push(d); }
       while (LMG.dumD.length < KD) { const d = new THREE.DirectionalLight('#000000', 0); d._sel = true; d.position.set(0, -500, 0); d.userData.lmDummy = 1; d.userData.noMerge = true; scene.add(d); LMG.dumD.push(d); }
       LMG.KP = KP; LMG.KD = KD; }
@@ -4434,7 +4440,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let trick = null, combo = 0, lastLand = -9, squash = 0;
   function doTrick() {
     if (TRIM && trimTap()) return;
+    if (grind && running) { endGrind(); return; } // trick again while grinding = hop off
     if (trick || grind || !running || document.querySelector('.modal:not([hidden])')) return;
+    { const n = railNear(); if (n) { startGrind(n); return; } } // next to a rail: the trick button hops you onto it
     const pool = Math.min(TRICKS.length, 3 + Math.floor(S.level / 2));
     trick = { n: Math.floor(Math.random() * pool), t: 0, dur: .62 };
     beep(180, .09, 'square', .045, 2.2);
@@ -5376,7 +5384,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let lastTotal = S.total;
   if (HOL && !visit) setTimeout(() => toast(HOL === 'thanks' ? 'Thanksgiving week: autumn leaves on the block, families tipping with plates and the Harvest Fit in Style' : HOL === 'newyear' ? 'New Year countdown: fireworks over the block, confetti and the Midnight Gold fit in Style' : HOL === 'halloween' ? 'Spooky szn at the shop. Grab the limited Pumpkin King fit in Style' : HOL === 'xmas' ? 'Holiday szn. The Santa G fit is in Style for a limited time' : '420 Fest is live: everything sells for 20% more'), 4000);
   // ---------- playtest tracker: records how far each player gets so Philly G can see where people get stuck ----------
-  function track(ev) { if (visit) return; S.fun = S.fun || { s: 0, p: 0, ev: {} }; if (!S.fun.ev) S.fun.ev = {}; if (S.fun.ev[ev] === undefined) S.fun.ev[ev] = Math.round(S.fun.p / 6) / 10; }
+  function track(ev) { if (visit) return; S.fun = S.fun || { s: 0, p: 0, ev: {} }; if (!S.fun.ev) S.fun.ev = {}; if (S.fun.ev[ev] === undefined) S.fun.ev[ev] = Math.round(S.fun.p / 6) / 10; if (S.fun.ev.up1 === undefined && /^(tap_|b_)/.test(ev)) S.fun.ev.up1 = S.fun.ev[ev]; }
   if (!visit) { S.fun = Object.assign({ s: 0, p: 0, ev: {} }, S.fun || {}); S.fun.s++; S.fun.last = Date.now(); }
   // session lengths + where each session ended, so the report can show where people stop
   const sessP0 = (S.fun && S.fun.p) || 0; let sessLogged = false;
@@ -5625,15 +5633,13 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
       player.x += grind.dir * sp * dt * .35; player.z = rl.z; player.vz = 0; player.vx = grind.dir * sp;
       grind.t += dt; if ((grind.tick -= dt) <= 0) { grind.tick = .3; grind.pts += 1; S.stats.grindT = (S.stats.grindT || 0) + .3; if (skate) skate.pts += 60 * Math.max(1, combo); }
       if ((grindFxT -= dt) <= 0) { grindFxT = .05; sparks.push({ x: player.x - grind.dir * .3, y: .45, z: rl.z, vx: -grind.dir * rand(1, 3), vy: rand(.5, 2), vz: rand(-1, 1), life: .4, g: 7, c: new THREE.Color(Math.random() < .5 ? '#ffe23d' : '#ffffff') }); }
-      if ((grind.dir > 0 && player.x >= rl.x1) || (grind.dir < 0 && player.x <= rl.x0) || (Math.abs(joy.y) > .8 && Math.hypot(joy.x, joy.y) > .5)) endGrind(); return;
-    }
-    if (trick) return;
-    const sp = Math.hypot(player.vx, player.vz); if (sp < 2.6 || Math.abs(player.vx) < sp * .82) return;
-    for (const rl of RAILS) {
-      if (rl.base && !has('basement')) continue;
-      if (Math.abs(player.z - rl.z) < .42 && player.x > rl.x0 - .1 && player.x < rl.x1 + .1) { const dir = Math.sign(player.vx); if ((dir > 0 && player.x < rl.x1 - .6) || (dir < 0 && player.x > rl.x0 + .6)) { grind = { rl, dir, t: 0, tick: .3, pts: 0 }; beep(220, .25, 'sawtooth', .025, 1.4); floatAt(player.x, 2.6, player.z, '50-50 GRIND', '#3de0ff'); track('grind'); return; } }
+      let gx = joy.x + pad.ix, gz = joy.y + pad.iz; if (keys.has('ArrowUp') || keys.has('KeyW')) gz -= 1; if (keys.has('ArrowDown') || keys.has('KeyS')) gz += 1; if (keys.has('ArrowLeft') || keys.has('KeyA')) gx -= 1; if (keys.has('ArrowRight') || keys.has('KeyD')) gx += 1;
+      const steerOff = grind.t > .25 && (Math.abs(gz) > .55 || gx * grind.dir < -.55); // push up/down or back the other way to hop off
+      if ((grind.dir > 0 && player.x >= rl.x1) || (grind.dir < 0 && player.x <= rl.x0) || steerOff) { if (steerOff && Math.abs(gz) > .55) { player.z += Math.sign(gz) * .5; player.vz = Math.sign(gz) * 3; } endGrind(); } return;
     }
   }
+  function railNear() { const sp = Math.abs(player.vx); for (const rl of RAILS) { if (rl.base && !has('basement')) continue; if (Math.abs(player.z - rl.z) < 1.1 && player.x > rl.x0 - .6 && player.x < rl.x1 + .6) { const dir = sp > .6 ? Math.sign(player.vx) : (player.x < (rl.x0 + rl.x1) / 2 ? 1 : -1); if ((dir > 0 && player.x < rl.x1 - .6) || (dir < 0 && player.x > rl.x0 + .6)) return { rl, dir }; } } return null; }
+  function startGrind(n) { grind = { rl: n.rl, dir: n.dir, t: 0, tick: .3, pts: 0 }; player.x = Math.max(n.rl.x0, Math.min(n.rl.x1, player.x)); beep(220, .25, 'sawtooth', .025, 1.4); floatAt(player.x, 2.6, player.z, '50-50 GRIND', '#3de0ff'); track('grind'); }
   function endGrind() {
     const g = grind; grind = null; PG.root.position.y = 0;
     combo = T - lastLand < 2.5 ? combo + 1 : 1; lastLand = T; S.stats.tricks++; S.bestCombo = Math.max(S.bestCombo || 0, combo); S.grinds = (S.grinds || 0) + 1;
@@ -5803,8 +5809,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 95;
+  const GAME_VER = 96;
   const NEWS = [
+    ['Overnight crop', 'NEW: plant a free overnight crop in Missions before you put the game down. Six hours later it pays out cash plus 3 gold leaves, then plant the next one. Opening Week now tells you when a day opens and when its reward is ready to claim.'],
     ['PC updates itself', 'The PC version now downloads new updates on its own in the background. When one is ready you get a message, and the next time you start the game (or hit Restart to update in the pause menu) you are on the newest version. Your save is untouched.'],
     ['PC power-ups', 'MAX GRAPHICS (PC): a new top setting above Ultra with supersampled edges, wet streets that reflect the neon when it rains, heavier rain, a sun that slowly moves so shadows swing across the block, stronger neon glow and bigger crowds. SIDE PANELS: menus now open on the right so the shop keeps running and you can still click the world (switch back in the menu). HOTKEYS: P photo, F free camera, V showcase tour, U hide UI, M map, T time, C camera. Hover any upgrade circle to see what it does and what it costs. Drag your showpieces around with the mouse, R turns them.'],
     ['Premium grows, seasons, your skyline', 'PREMIUM GROWS (level 6+): plant special strains in the Genetics Lab that grow in real time, 2 to 8 hours. Tend them halfway for +25%, harvest before they go overripe. SEASONS: every month has a theme, three season goals in Missions and an exclusive fit you can only get that month. YOUR SKYLINE: the Empire tab now shows your city at night, every business you open adds a lit tower and every neighborhood you hold lights up the blocks behind it.'],
@@ -5919,7 +5926,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let hintT = 0;
   function hintTick(dt) {
     if (visit || (hintT -= dt) > 0) return; hintT = .5;
-    if (RAILS.some(rl => (!rl.base || has('basement')) && Math.abs(player.z - rl.z) < 3 && player.x > rl.x0 - 3 && player.x < rl.x1 + 3)) hint('rail', 'Grind rail! Skate straight along it with some speed to grind it');
+    if (RAILS.some(rl => (!rl.base || has('basement')) && Math.abs(player.z - rl.z) < 3 && player.x > rl.x0 - 3 && player.x < rl.x1 + 3)) hint('rail', typeof DESK !== 'undefined' && DESK ? 'Grind rail! Skate next to it and press Space to hop on. Space again or steer away to hop off' : 'Grind rail! Skate next to it and tap your skater to hop on. Tap again or steer away to hop off');
     if (S.level >= 4 && S.gems >= 6) hint('decor', 'New: make the shop yours. Style → floors, wall paint and showpieces');
     const rg = customers.find(c => c.reg); if (rg) { const R = REGULARS.find(r => r.id === rg.reg); hint('reg', `That's ${R.n}, one of your regulars. Keep their favorite stocked and they'll get loyal`); }
     if (S.level >= 2 && T > 40) hint('zoom', 'Tip: pinch with two fingers to zoom in and out');
@@ -6015,7 +6022,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let phBadgeT = 0;
   function updateLife(dt) { try { nightLife(dt); } catch (e) {} try { phoneTick(dt); if ((phBadgeT -= dt) <= 0) { phBadgeT = 2; phoneBadge(); } } catch (e) {}
     if (locsReady && (LOC2.soldQ != null || LOC2.custOut) && carT > 1.2) carT = 1.2;
-    if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1) / (DESK && gfxMode === 'ultra' ? 1.7 : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if (cars.length < (PHONE || !TRAF ? 4 : (TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4) + (GFX_MAX ? 2 : 0))) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
+    if ((carT -= dt) <= 0) { carT = rand(4, 11) / (TRAF ? TRAF[Math.min(S.loc || 0, 6)] : 1) / (DESK && gfxMode === 'ultra' ? 1.7 : 1); const parked = (typeof rival !== 'undefined' && rival) || (typeof celeb !== 'undefined' && celeb); const dir = parked ? -1 : (Math.random() < .5 ? 1 : -1); if ((locsReady || !LUXE || gfxLow) && cars.length < (PHONE || !TRAF ? 4 : (TRAF[Math.min(S.loc || 0, 6)] > 1.4 ? 6 : 4) + (GFX_MAX ? 2 : 0))) { const g = makeCar(dir); if (!parked && S.level >= 4 && Math.random() < .12) rivalCar(g); cars.push({ g, dir, sp: rand(5, 9) }); } }
     for (let k = cars.length - 1; k >= 0; k--) { const c = cars[k]; c.g.position.x += c.dir * c.sp * dt; if (c.g.userData.rider) animPerson(c.g.userData.rider, T, false, false); if (c.g.userData.hl) c.g.userData.hl.material.opacity = .08 + .3 * (1 - (typeof skyD !== 'undefined' ? skyD.material.opacity : 0)); if (c.g.userData.beam) c.g.userData.beam.material.opacity = .32 * (1 - skyD.material.opacity); if (Math.abs(c.g.position.x) > 36) { scene.remove(c.g); if (c.g.userData.rivTag) c.g.userData.rivTag.material.dispose(); cars.splice(k, 1); } }
     if ((walkT -= dt) <= 0) { const pcx = DESK && gfxMode === 'ultra'; walkT = pcx ? (GFX_MAX ? rand(.8, 2.2) : rand(1.4, 3.5)) : rand(3, 8); if (walkers.length < (PHONE ? 2 : pcx ? (GFX_MAX ? 12 : 7) : 3) && !(typeof party !== 'undefined' && party)) { const dir = Math.random() < .5 ? 1 : -1, P = person(randomLook(), false); scene.add(P.root); holidayHat(P); walkers.push({ P, dir, x: dir > 0 ? -21 : 33.5, z: rand(10.15, 10.45), sp: rand(1.4, 2.1), t: Math.random() * 5 }); } }
     for (let k = walkers.length - 1; k >= 0; k--) { const w = walkers[k]; w.t += dt; w.x += w.dir * w.sp * dt; w.P.root.position.set(w.x, 0, w.z); faceTo(w.P, w.dir, 0); animPerson(w.P, w.t, true, false); if (w.x < -22 || w.x > 33.8) { scene.remove(w.P.root); walkers.splice(k, 1); } }
@@ -6170,7 +6177,27 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     if (!owUnlocked()) { const r0 = itemRow(`Day ${S.ow.d + 1} unlocks in ${owUntil()}`, 'Come back tomorrow. Reward: ' + owPrize(D), 0, 'Tomorrow', () => {}, true, false); r0.classList.add('weekly'); L.append(r0); return; }
     D.t.forEach(tk => { const p = owTaskProg(tk), lab = tk[0] === 'earn' ? `${money(p)}/${money(tk[1])}` : `${p}/${tk[1]}`; L.append(itemRow(tk[2], p >= tk[1] ? 'Done' : 'Opening Week task', p / tk[1], p >= tk[1] ? 'Done' : lab, () => {}, true, p >= tk[1])); });
     const ok = owReady(), rc = itemRow(`Day ${S.ow.d + 1} reward`, (S.ow.d === 6 ? 'Finish the week: ' : '') + owPrize(D), ok ? 1 : D.t.filter(tk => owTaskProg(tk) >= tk[1]).length / 3, ok ? 'Claim' : 'Locked', owClaim, !ok, ok); rc.classList.add('weekly'); L.append(rc); }
-  function weekRow(L) { try { seasonRows(L); } catch (e) { console.warn('season', e.message); } ctRows(L); owRows(L);
+  // ---------- overnight crop: plant before you leave, collect the next day ----------
+  const NIGHT_H = 6;
+  const nightPay = () => Math.round(Math.max(400 * Math.pow(S.level || 1, 1.6) * locMult(), (S.total || 0) * .0015));
+  const nightState = () => { if (!S.night || !S.night.t) return null; const ms = Date.now() - S.night.t; return { ready: ms >= NIGHT_H * 36e5, left: Math.max(0, NIGHT_H * 36e5 - ms) }; };
+  const nightLeft = ms => { const h = Math.floor(ms / 36e5), m = Math.ceil(ms % 36e5 / 6e4); return h ? `${h}h ${m}m` : `${m}m`; };
+  function nightPlant() { if (visit || S.tut !== 99 || nightState()) return; S.night = { t: Date.now() }; track('night_plant'); banner('OVERNIGHT CROP PLANTED', `READY IN ${NIGHT_H} HOURS · COME BACK TOMORROW`); SFX.build(); save(); renderPanel(true); }
+  function nightCollect() { const st = nightState(); if (!st || !st.ready) return; const v = nightPay(); S.cash += v; S.total += v; S.gems += 3; S.night = null; S.nightN = (S.nightN || 0) + 1; track('night_collect');
+    banner('OVERNIGHT CROP HARVESTED', '+' + money(v) + ' · +3 GOLD LEAVES'); try { fireworks(4); } catch (e) {} SFX.ching && SFX.ching(); save(); renderPanel(true); }
+  function nightRows(L) { if (visit || S.tut !== 99) return; const st = nightState(), h = document.createElement('div'); h.className = 'sec'; h.textContent = 'OVERNIGHT CROP'; L.append(h);
+    let row; if (!st) row = itemRow('Plant tonight’s crop', `Free. Ready in ${NIGHT_H} hours: about ${money(nightPay())} + 3 gold leaves. Plant it before you put the game down`, 0, 'Plant', nightPlant, false, true);
+    else if (st.ready) row = itemRow('Your overnight crop is ready', `Harvest ${money(nightPay())} + 3 gold leaves, then plant the next one`, 1, 'Harvest', nightCollect, false, true);
+    else row = itemRow('Overnight crop growing', `Ready in ${nightLeft(st.left)}. Worth about ${money(nightPay())} + 3 gold leaves`, 1 - st.left / (NIGHT_H * 36e5), nightLeft(st.left), () => {}, true, false);
+    row.classList.add('weekly'); L.append(row); }
+  // reminders: tell returning players what is waiting, and nudge a planting before they leave
+  let nightNudged = false, nightNudged2 = false, owTold = -1;
+  setTimeout(() => { try { if (visit || S.tut !== 99) return; const st = nightState(); if (st && st.ready) { const go = () => { if (typeof TITLE !== 'undefined' && TITLE || anyModal()) { setTimeout(go, 2500); return; } toast('Your overnight crop is ready. Harvest it in Missions'); }; setTimeout(go, 6000); } } catch (e) {} }, 3000);
+  setInterval(() => { try { if (visit || S.tut !== 99 || !running) return; const mb = document.querySelector('.bar button[data-p="missions"]');
+      const st = nightState(); if (mb && openP !== 'missions' && ((!st && T > 360 && !nightNudged2) || (st && st.ready))) mb.classList.add('hl'); if (openP === 'missions') nightNudged2 = true;
+      if (!st && !nightNudged && T > 360 && !anyModal()) { nightNudged = true; toast('Before you go: plant tonight’s free crop in Missions. Ready in 6 hours'); }
+      if (S.ow && !S.ow.done && owTold !== S.ow.d && !anyModal()) { if (owReady()) { owTold = S.ow.d; banner('OPENING WEEK · DAY ' + (S.ow.d + 1) + ' REWARD READY', 'CLAIM IT IN MISSIONS'); } else if (owUnlocked() && T > 20 && T < 40) { owTold = S.ow.d; toast(`Opening Week day ${S.ow.d + 1} is open: ${OW[S.ow.d].t.map(tk => tk[2]).join(', ')}`); } } } catch (e) {} }, 5000);
+  function weekRow(L) { owRows(L); nightRows(L); try { seasonRows(L); } catch (e) { console.warn('season', e.message); } ctRows(L);
     weeklySetup(); if (!S.week) return; const w = S.week, p = weekProg(), done = p >= w.goal, d = Math.max(1, Math.ceil((weekEnds() - Date.now()) / 864e5));
     const h = document.createElement('div'); h.className = 'sec'; h.textContent = `WEEKLY DROP · ENDS IN ${d} DAY${d > 1 ? 'S' : ''}`; L.append(h);
     const fit = SKINS_LIST.find(s => s.id === DROP_FITS[w.id % DROP_FITS.length]);
