@@ -108,6 +108,8 @@ async function load() {
     const j = await r.json(); out.push(...j); if (j.length < 1000) break; off += 1000;
   }
   ALL = out.map(r => Object.assign({ id: r.id.replace(/_an_bk$/, '') }, r.data || {})).filter(r => Array.isArray(r.days) && r.days.length);
+  // older game versions only logged 'First upgrade' for floor pads; count the first circle/menu purchase or build too
+  ALL.forEach(r => { if (!r.ev || r.ev.up1 != null) return; const t = Object.entries(r.ev).filter(([k]) => /^(tap_|b_)/.test(k)).map(([, v]) => v); if (t.length) r.ev.up1 = Math.min(...t); });
 }
 
 // ---------- tooltip ----------
