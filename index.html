@@ -1879,7 +1879,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   const PG_LOGO = labelTex('PG', '#00000000', '#22f07c', 32, 32, 16);
   const SMILE_G = (() => { const g = new THREE.TorusGeometry(.05, .013, 6, 12, Math.PI); g.rotateZ(Math.PI); g.rotateY(Math.PI / 2); return g; })();
   const BLUSH_G = new THREE.CircleGeometry(.045, 14), BLUSH_M = new THREE.MeshBasicMaterial({ color: '#ff6f9a', transparent: true, opacity: .45, depthWrite: false });
-  const RIG_S = 1.13, PGS = RIG_S * 1.15;
+  const RIG_S = 1.0, PGS = RIG_S * 1.15;
   // ---- shared helpers for the Mixamo cast: one skeleton naming, clips retargeted per character, cheap clones ----
   const PPL = { chars: {}, clips: {}, ready: false, list: [] };
   const boneKey = n => n.replace(/^mixamorig\d*:?/, '');
@@ -3599,7 +3599,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     let h = $('tourHint'); if (!h) { h = document.createElement('div'); h.id = 'tourHint'; stage.append(h); } h.textContent = 'SHOWCASE TOUR · PRESS ANY KEY TO STOP'; h.style.opacity = '1'; h.hidden = false; setTimeout(() => { if (h) h.style.opacity = '0'; }, 3500); track('tour'); }
   function stopShow() { if (!SHOW) return; const was = SHOW.photo; SHOW = null; stage.classList.remove('tour'); if (!was) stage.classList.remove('photo'); const h = $('tourHint'); if (h) h.hidden = true; }
   function freeCam(on) { if (on === undefined) on = !FREECAM; if (on && !FREECAM) { FREECAM = { x: camX, z: camZ }; toast('Free camera: WASD to fly (Shift = fast), Q/E turn, Z/X tilt, wheel zoom. F to return'); } else if (!on && FREECAM) { FREECAM = null; window.__camEl = 0; yawT = 0; } const b = $('phFree'); if (b) b.classList.toggle('green', !!FREECAM); }
-  let camZoom = 1, userZoom = 1, zoomT = 1; try { userZoom = zoomT = Math.max(.7, Math.min(2.3, +localStorage.getItem('pgZoom') || 1)); } catch {}
+  let camZoom = 1, userZoom = 1, zoomT = 1; try { userZoom = zoomT = Math.max(.7, Math.min(2.3, +localStorage.getItem('pgZoom') || (!PHONE && (window.PG_APP || matchMedia('(pointer: fine)').matches) ? 1.25 : 1))); } catch {}
   let shakeA = 0, hitT = 0, coinStreak = 0, coinLast = 0, cashPrev = S.cash;
   const shake = a => { if (!reduceMotion && !calm) shakeA = Math.max(shakeA, a); }, hitStop = s => { hitT = Math.max(hitT, s); };
   const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -5823,7 +5823,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 97;
+  const GAME_VER = 98;
   const NEWS = [
     ['Street look, smoother PC', 'The game now starts in the Street look (switch any time in Settings). On PC: clicking no longer walks your skater, so click anything freely. Hold the mouse and drag to look around the map; skate and the camera comes back to you. The mouse wheel scrolls menus, every menu has an X to close it, you can zoom out further, the loading picture shows in full, and PC graphics run much lighter on high-resolution screens.'],
     ['Overnight crop', 'NEW: plant a free overnight crop in Missions before you put the game down. Six hours later it pays out cash plus 3 gold leaves, then plant the next one. Opening Week now tells you when a day opens and when its reward is ready to claim.'],
@@ -7226,7 +7226,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
       const fixr = rows.find(r => r.fix), fresh = fixr ? null : rows.find(r => !r.quiet && r.ok && r.cost !== null && (r.k.startsWith('p:') || r.lv === 0)), afford = rows.find(r => !r.quiet && r.ok && r.cost !== null && S.cash >= r.cost);
       const show = fixr || fresh || afford; if (!show) continue; used.add(show.k); const plus = !!fresh, txt = fresh ? money(fresh.cost) : '', key = a.x.toFixed(1) + ',' + a.z.toFixed(1); if (seen.has(key)) continue; seen.add(key);
       let m = marks.get(key); const tex0 = markTex(show.k, show.fix ? 'FIX ' + money(show.cost) : plus ? txt : money(show.cost), plus); if (!m) { m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex0, depthTest: false, transparent: true })); m.renderOrder = 6; m.userData.ph = Math.random() * 6; scene.add(m); marks.set(key, m); }
-      if (m.material.map !== tex0) m.material.map = tex0; const sc = (port0 ? 1.15 : 1) * (plus ? 1.8 : 1.5); m.userData.sc = sc; m.scale.set(sc, sc * 312 / 256, 1); m.userData.y = a.y + (plus ? 1.15 : 1.45); m.position.set(a.x, m.userData.y, a.z); m.material.opacity = plus && fresh.cost > S.cash ? .55 : 1; }
+      if (m.material.map !== tex0) m.material.map = tex0; const sc = (port0 ? 1.15 : 1) * (plus ? 1.8 : 1.5) * (typeof DESK !== 'undefined' && DESK ? .72 : 1); m.userData.sc = sc; m.scale.set(sc, sc * 312 / 256, 1); m.userData.y = a.y + (plus ? 1.15 : 1.45); m.position.set(a.x, m.userData.y, a.z); m.material.opacity = plus && fresh.cost > S.cash ? .55 : 1; }
     marks.forEach((m, key) => { if (!seen.has(key)) { scene.remove(m); marks.delete(key); } });
   }
   let tapHinted = false;
