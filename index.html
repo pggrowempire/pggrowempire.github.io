@@ -868,7 +868,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     { name: 'PG Hoodies', short: 'Hoodies', price: 150, time: 7, col: '#22f07c' },
   ];
   const PX = [-6.4, -3.3, -0.2, 2.9, 6.0];             // producer + shelf columns
-  const PROD_Z = -4.5, PILE_Z = -3.1, SHELF_Z = -.4, SHELF_FRONT = .9;
+  let PROD_Z = -4.5, PILE_Z = -3.1, SHELF_Z = -.4, SHELF_FRONT = .9; let LAYD = 0; const LAY_DZ = 2.4, LAY_CUT = 1.3; // LAYD: how far the back of the shop was pushed back (set once the world is built)
   const REG = { x: 6.2, z: 3.4, sx: 6.2, sz: 2.3 };     // counter centre, cashier spot
   const QY = 4.65;                                       // queue line z
   const DOOR = { x: 0, z: 6.9 };
@@ -1911,7 +1911,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   }
   function pplPrepClip(key, gltf) { const clip = gltf.animations[0]; let hipY = 1; gltf.scene.traverse(b => { if (b.isBone && boneKey(b.name) === 'Hips') hipY = b.position.y; }); PPL.clips[key] = { clip, hipY }; }
   function person(c, skater) {
-    inPerson++; try { const P = personBuild(c, skater); P.look = c; P.skater = !!skater; if (c.mask) P.runner = true; PPL.list.push(P); return P; } finally { inPerson--; }
+    inPerson++; try { const P = personBuild(c, skater); P.root.userData.lay = 1; P.look = c; P.skater = !!skater; if (c.mask) P.runner = true; PPL.list.push(P); return P; } finally { inPerson--; }
   }
   // ---------- people 3.0: realistic proportions, smooth limbs with knees and elbows, sculpted faces ----------
   const pGeo = new Map(), pMat = new Map();
@@ -2952,19 +2952,48 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { if (matchMedia('(pointer: fine)').matches && !localStorage.getItem('pgDeskHint')) { localStorage.setItem('pgDeskHint', '1'); setTimeout(() => toast('Keyboard: WASD or arrows to skate · Space for tricks · 1–6 menus · Esc to close'), 4500); } } catch {}
 
   // ---------- collision boxes ----------
+  // ---- layout: push the back half of the shop (shelves, stations, back rooms, back wall) back by LAY_DZ ----
+  // Anything fully behind the shelf line moves back; the floor, side walls and anything crossing the line get longer instead.
+  const _layB = new THREE.Box3(), _layV = new THREE.Vector3();
+  function layConsider(o) { const B = _layB, v = _layV, D = LAY_DZ, CUT = LAY_CUT;
+    const bbox = o => { o.updateMatrixWorld(true); B.setFromObject(o); if (B.isEmpty()) { o.getWorldPosition(v); B.min.copy(v); B.max.copy(v); } return B; };
+    const move = o => { o.getWorldPosition(v); v.z -= D; if (o.parent) o.parent.worldToLocal(v); o.position.copy(v); o.updateMatrixWorld(true); };
+    const grow = (o, b) => { const len = b.max.z - b.min.z, front = b.max.z; if (len < .05) { move(o); return; } const f = (len + D) / len, e = o.matrixWorld.elements; let k = -1, best = 0;
+      for (let i = 0; i < 3; i++) { const c = [e[i * 4], e[i * 4 + 1], e[i * 4 + 2]], n = Math.hypot(c[0], c[1], c[2]) || 1, zc = Math.abs(c[2]) / n; if (zc > best) { best = zc; k = i; } }
+      if (best < .9) { move(o); return; } o.scale.setComponent(k, o.scale.getComponent(k) * f); o.getWorldPosition(v); v.z = front + (v.z - front) * f; if (o.parent) o.parent.worldToLocal(v); o.position.copy(v); o.updateMatrixWorld(true); };
+    const consider = o => {
+      if (o.userData.lay || o.userData.piece || o.isPoints || o.isLine || o.isInstancedMesh || o.isCamera || (o.isLight && o.userData.lmDummy)) return;
+      if (o === sun || o === (sun && sun.target)) return;
+      const b = bbox(o), cx = (b.min.x + b.max.x) / 2; if (!isFinite(cx) || cx < -9.3 || cx > 9.3 || b.min.z >= CUT) return;
+      if (b.max.z <= CUT) { const wall = b.max.z - b.min.z > 3 && b.max.x - b.min.x < .9 && Math.abs(cx) > 8.6; if (wall) grow(o, bbox(o)); else move(o); return; }
+      if (!o.isMesh && !o.isSprite && o.children.length) { [...o.children].forEach(consider); return; }
+      grow(o, bbox(o)); };
+    consider(o); }
+  function layoutDeepen() {
+    if (LAYD) return; const D = LAY_DZ, CUT = LAY_CUT; [...scene.children].forEach(layConsider);
+    LAYD = D; PROD_Z -= D; PILE_Z -= D; SHELF_Z -= D; SHELF_FRONT -= D; KIOSK.z -= D;
+    ZONES.forEach(z => { if (z.id !== 'back' && z.id !== 'lab') return; z.z0 -= D; z.z1 -= D; z.edges.forEach(e => { e[1] -= D; e[3] -= D; }); });
+    PADS.forEach(p => { if ((p.id === 'zone_back' || p.id === 'zone_lab') && p.z !== undefined) { p.z -= D; const o = padObjs.get(p.id); if (o && o.g) o.g.position.z -= D; } });
+    EQUIP.forEach(e => { if (Math.abs(e.x) < 9.3 && e.z < CUT) e.z -= D; });
+    TAGS.forEach(t => { if (Math.abs(t.pos[0]) < 9.3 && t.pos[2] < CUT) { t.pos[2] -= D; if (t.stand) t.stand[1] -= D; } });
+    MGR_WP.forEach(w => { if (Math.abs(w[0]) < 9.3 && w[1] < CUT) w[1] -= D; });
+    if (typeof PROP_SOLIDS !== 'undefined') PROP_SOLIDS.forEach(q => { if (Math.abs(q[0]) < 9.3 && q[1] < CUT) q[1] -= D; });
+    SCENE_DIRTY = 1; LMG.dirty = 1; }
+  // props that finish loading after the layout pass land in the right place too
+  const _propInstRaw = propInst; propInst = function (name, o = {}) { if (LAYD && o && o.z !== undefined && Math.abs(o.x || 0) < 9.3 && o.z < LAY_CUT && !o.noLay) o = Object.assign({}, o, { z: o.z - LAYD }); return _propInstRaw(name, o); };
   function solids() {
-    const out = [[REG.x, REG.z, 1.25, .55], [0, -5.9, 9.2, .3]];
+    const out = [[REG.x, REG.z, 1.25, .55], [0, -5.9 - LAYD, 9.2, .3]];
     PRODUCTS.forEach((_, i) => { if (i && has('prod' + i)) out.push([PX[i], PROD_Z, 1.25, .62]); if (has('shelf' + i)) out.push([PX[i], SHELF_Z, .95, .5]); });
     beds.forEach(b => out.push([b.x, b.z, 1.25, .62]));
-    out.push([-5, 7.1, 3.2, .35], [5, 7.1, 3.2, .35], [8.2, -2.2, .65, .3]);
-    out.push([-9.15, (-6.9 + DOORZ0) / 2, .3, (DOORZ0 + 6.9) / 2], [-9.15, (DOORZ1 + 7.0) / 2, .3, (7.0 - DOORZ1) / 2], [-20.75, -3.0, .3, 1.05]);
+    out.push([-5, 7.1, 3.2, .35], [5, 7.1, 3.2, .35], [8.2, -2.2 - LAYD, .65, .3]);
+    out.push([-9.15, (-6.9 - LAYD + DOORZ0) / 2, .3, (DOORZ0 + 6.9 + LAYD) / 2], [-9.15, (DOORZ1 + 7.0) / 2, .3, (7.0 - DOORZ1) / 2], [-20.75, -3.0, .3, 1.05]);
     if (S.eq.hydro) out.push([-20.4, .8, .55, .55]); if (S.eq.hydro >= 3) out.push([-19.2, .8, .55, .55]);
     if (S.eq.climate) out.push([-15, -4.3, .28, .28], [-15, -1.2, .28, .28]); if (S.eq.climate >= 3) out.push([-11.0, -4.9, .35, .3]);
     if (S.eq.food >= 4) out.push([-20.15, -4.95, .8, .35]);
     if (S.eq.kiosk) out.push([KIOSK.x, KIOSK.z, .3, .35]);
     zoneSolids(out); if (typeof pieceSolids === 'function') pieceSolids(out);
     if (has('basement')) { out.push([45.5, 1.6, .22, .22], [52.5, 1.6, .22, .22], [TILL.x, TILL.z, .5, .3], [BAR.x, BAR.z, .5, S.eq.lounge ? 1.3 : .4]); const rp = S.eq.ramps || 0; if (rp >= 1) out.push([43.6, -4.45, 1.6, .82], [48.4, -4.45, 1.6, .82]); if (rp >= 3) out.push([51.9, -2.45, 1.1, .82], [51.9, .05, 1.1, .82]); if (rp >= 5) out.push([39.6, -3.4, 1.3, 2.0]); }
-    out.push([9.15, (-6.9 + KDZ0) / 2, .3, (KDZ0 + 6.9) / 2], [9.15, (KDZ1 + 7.45) / 2, .3, (7.45 - KDZ1) / 2], [(8.9 + KFX0) / 2, 6.9, (KFX0 - 8.9) / 2, .3], [(KFX1 + 22.3) / 2, 6.9, (22.3 - KFX1) / 2, .3]);
+    out.push([9.15, (-6.9 - LAYD + KDZ0) / 2, .3, (KDZ0 + 6.9 + LAYD) / 2], [9.15, (KDZ1 + 7.45) / 2, .3, (7.45 - KDZ1) / 2], [(8.9 + KFX0) / 2, 6.9, (KFX0 - 8.9) / 2, .3], [(KFX1 + 22.3) / 2, 6.9, (22.3 - KFX1) / 2, .3]);
     if (kicksReady) kicksSolids(out);
     if (window.__propSolids) for (const q of window.__propSolids) out.push(q); if (window.__locSolids) for (const q of window.__locSolids) out.push(q);
     if (S.eq.snack) out.push([-8.0, 9.35, .55, .4]); if (S.eq.snack >= 3) out.push([-9.15, 9.35, .55, .4]); if (S.eq.cart) out.push([8.1, 9.3, .9, .45]);
@@ -2978,7 +3007,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     }
     { const RZ = remoteZ(o.x); if (RZ) { o.x = Math.max(RZ.x0 + .45, Math.min(RZ.x1 - .45, o.x)); o.z = Math.max(RZ.z0 + .5, Math.min(RZ.z1 - .45, o.z)); return; } }
     if (inGrow(o.x)) { o.x = Math.max(GR.x0 + .62, o.x); o.z = Math.max(-5.4, Math.min(4.15, o.z)); }
-    else { o.z = Math.max(-5.4, Math.min(9.8, o.z)); if (o.x > 21.5 && o.z > 6.6) o.z = Math.max(7.5, o.z); const lim = o.z > 7.4 ? 36.6 : has('zone_kicks') ? KZ.x1 - .42 : 8.6; o.x = Math.min(lim, Math.max(o.z > 7.4 ? -11 : (o.z > DOORZ0 && o.z < DOORZ1 ? -9.6 : -8.6), o.x)); }
+    else { o.z = Math.max(o.x > -9.2 && o.x < 9.3 ? -5.4 - LAYD : -5.4, Math.min(9.8, o.z)); if (o.x > 21.5 && o.z > 6.6) o.z = Math.max(7.5, o.z); const lim = o.z > 7.4 ? 36.6 : has('zone_kicks') ? KZ.x1 - .42 : 8.6; o.x = Math.min(lim, Math.max(o.z > 7.4 ? -11 : (o.z > DOORZ0 && o.z < DOORZ1 ? -9.6 : -8.6), o.x)); }
   }
 
   // ---------- core loop ----------
@@ -3617,7 +3646,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const lead = .3, spd = Math.hypot(player.vx, player.vz);
     const limR = player.z > 7.2 ? Math.max(0, 37.6 - wantW / 2) : lim; let tx = Math.max(-lim, Math.min(limR, player.x + player.vx * lead));
     if (inGrow(player.x)) { const lo = GR.x0 + wantW / 2 - 1, hi = GR.x1 - wantW / 2 + 2.5; tx = lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, player.x)); }
-    let tz = Math.max(-2.2, Math.min(inGrow(player.x) ? -2.2 : 6.6, player.z + player.vz * lead * .7));
+    let tz = Math.max(inGrow(player.x) ? -2.2 : -2.2 - LAYD, Math.min(inGrow(player.x) ? -2.2 : 6.6, player.z + player.vz * lead * .7));
     if (inKicks(player.x, player.z) && has('zone_kicks')) { const lo = KZ.x0 + wantW / 2 - 2.5, hi = KZ.x1 - wantW / 2 + 1; tx = lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, player.x + player.vx * lead)); tz = Math.max(-2.4, Math.min(port ? 3.2 : 4.0, player.z + player.vz * lead * .7)); }
     { const RZ = remoteZ(player.x); if (RZ) { const lo = RZ.x0 + wantW / 2 - 1, hi = RZ.x1 - wantW / 2 + 1; tx = lo > hi ? (lo + hi) / 2 : Math.max(lo, Math.min(hi, player.x)); tz = Math.max(RZ.z0 + 2.6, Math.min(port ? RZ.z1 - 6.6 : RZ.z1 - 5.2, player.z)); } }
     if (FREECAM) { tx = FREECAM.x; tz = FREECAM.z; }
@@ -3932,6 +3961,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     } else if (id === 'mural') {
       for (const x of [-5.5, 0, 5.5]) { g.add(box(.35, .2, .3, '#1d1a24', x, 4.05, -5.4, .05)); const gl = glowSprite('#fff1c8', 4.5, .22); gl.position.set(x, 2.6, -5.5); g.add(gl); }
     }
+    if (LAYD) [...g.children].forEach(layConsider);
     shadowify(g); outline(g);
     if (animate) { pop(g); burst(g.position.x || 0, 1.2, g.position.z || 0, ['#22f07c', '#3de0ff', '#7dff6a'], 30, 3.5); }
     return g;
@@ -4912,7 +4942,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     { t: 'Head back to the shop and roll past the Kush shelf to stock it.', at: () => [PX[0], SHELF_FRONT], done: () => tutStocked },
     { t: 'Post up at the register. Customers who grabbed something pay you here.', at: () => [REG.sx, REG.sz], done: () => S.stats.served > tutBase.served },
     { t: 'Stay put to scoop the cash off the counter.', at: () => [REG.sx, REG.sz], done: () => tutCollected || S.reg <= 0 },
-    { t: 'Your shop starts small. Tap the glowing + in the middle of the floor to unlock the Back Room.', at: () => [-1.75, 1.7], done: () => has('zone_back') },
+    { t: 'Your shop starts small. Tap the glowing + in the middle of the floor to unlock the Back Room.', at: () => [-1.75, 1.7 - LAYD], done: () => has('zone_back') },
     { t: 'Tap the glowing + by the back wall to build the Rolling Table. Tap any station later to upgrade it.', at: () => [PX[1], PROD_Z + 1.2], done: () => has('prod1') },
     { t: matchMedia('(pointer: fine)').matches ? 'Press Space (or tap the screen) to pop a skate trick.' : 'Tap the screen (don’t drag) to pop a skate trick.', done: () => S.stats.tricks > tutBase.tricks },
     { t: 'Tap Missions at the bottom for goals and rewards.', hl: 'missions', done: () => tutMissions },
@@ -5712,7 +5742,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let decor = null; // { mode: 'place'|'move', id, pc }
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundP = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitV = new THREE.Vector3();
   function floorHit(e) { const r = cv.getBoundingClientRect(); ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1); ray.setFromCamera(ndc, camera); return ray.ray.intersectPlane(groundP, hitV) ? hitV : null; }
-  const placeOK = (x, z) => x > -8.2 && x < 8.2 && z > -5 && z < 6.4 && !(Math.abs(x - REG.x) < 2 && Math.abs(z - REG.z) < 1.3) && !solids().some(([cx, cz, hx, hz]) => Math.abs(x - cx) < hx + .5 && Math.abs(z - cz) < hz + .5) && Math.hypot(x - DOOR.x, z - DOOR.z) > 1.4;
+  const placeOK = (x, z) => x > -8.2 && x < 8.2 && z > -5 - LAYD && z < 6.4 && !(Math.abs(x - REG.x) < 2 && Math.abs(z - REG.z) < 1.3) && !solids().some(([cx, cz, hx, hz]) => Math.abs(x - cx) < hx + .5 && Math.abs(z - cz) < hz + .5) && Math.hypot(x - DOOR.x, z - DOOR.z) > 1.4;
   function decorTap(e) {
     if (decor.mode === 'pick') { // tap a placed piece to move it
       const pc = pieceAt(e); if (!pc) { toast('Tap one of your pieces to move it, or tap Done'); return; }
@@ -5823,8 +5853,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 98;
+  const GAME_VER = 99;
   const NEWS = [
+    ['A bigger shop', 'The shop floor is bigger: the shelves, stations, Back Room and Lab Wing moved back, so there is a lot more open floor between the shelves and the counter for customers, your crew and you. Everyone is life-size now too, and on PC the upgrade circles are smaller and the camera starts further out. Your save, stock and upgrades carry over as they were.'],
     ['Street look, smoother PC', 'The game now starts in the Street look (switch any time in Settings). On PC: clicking no longer walks your skater, so click anything freely. Hold the mouse and drag to look around the map; skate and the camera comes back to you. The mouse wheel scrolls menus, every menu has an X to close it, you can zoom out further, the loading picture shows in full, and PC graphics run much lighter on high-resolution screens.'],
     ['Overnight crop', 'NEW: plant a free overnight crop in Missions before you put the game down. Six hours later it pays out cash plus 3 gold leaves, then plant the next one. Opening Week now tells you when a day opens and when its reward is ready to claim.'],
     ['PC updates itself', 'The PC version now downloads new updates on its own in the background. When one is ready you get a message, and the next time you start the game (or hit Restart to update in the pause menu) you are on the newest version. Your save is untouched.'],
@@ -6858,7 +6889,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   syncTiers(false);
   // ---- manager: walks the floor, sweeps every till into your pocket ----
   let manager = null;
-  const MGR_WP = [[-4.2, 2.4], [2.8, 2.2], [5.2, 1.0], [-1.0, 4.2], [-6.6, -2.6], [1.4, -2.4]];
+  const MGR_WP = [[-4.2, 2.4], [2.8, 2.2], [5.2, 1.0], [-1.0, 4.2], [-6.6, -2.6], [1.4, -2.4]]; // back-of-shop points move with the layout (see layoutDeepen)
   function makeManager() { if (manager) return; const P = person({ cap: null, hood: '#1d1a24', pants: '#1d1a24', shoes: '#0d0b12', chain: true, shades: true, skin: pick(SKINS), hairStyle: 'short', hair: '#1a1210', beard: 'stubble' }, false); scene.add(P.root);
     const cb = new THREE.Group(); cb.add(box(.2, .26, .02, '#8a6440', 0, 0, 0, .01)); cb.add(box(.17, .2, .005, '#f4efe4', 0, -.01, .012, .002)); cb.position.set(0, -.18, .06); if (P.handA) P.handA.add(cb);
     manager = { P, x: -4.2, z: 2.4, wp: 0, t: 0, wait: 2, sweep: 12 }; }
@@ -7088,7 +7119,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const A = [], add = (x, y, z, keys, r = 1.05) => A.push({ x, y, z, keys, r });
     add(player.x, 1.0, player.z, ['u:speed', 'u:carry'], .75);
     add(REG.x, 1.1, REG.z, ['x:strat', 'e:pos', 'u:price']); add(0, 1.0, 7.4, ['e:front', 'u:hype']); add(KIOSK.x, 1.0, KIOSK.z, ['e:kiosk']);
-    add(-7.6, 1.1, -4.3, ['e:cases', 'e:pos', 'e:kiosk', 'e:front'], 1.2);
+    add(-7.6, 1.1, -4.3 - LAYD, ['e:cases', 'e:pos', 'e:kiosk', 'e:front'], 1.2);
     PRODUCTS.forEach((_, i) => { if (!i) return; add(PX[i], 1.1, PROD_Z, ['f:' + i, 'p:prod' + i, 's:' + i], 1.25); add(PX[i], .9, SHELF_Z, ['p:shelf' + i, 'e:cases'], 1.0); });
     BEDS.forEach(([x, z]) => add(x, 1.1, z, ['s:0', 'e:grow', 'e:food', 'e:hydro', 'e:climate', 'e:beds'], 1.35)); add(BIN.x, .8, BIN.z, ['s:0', 'e:food']);
     PADS.forEach(p => { if (p.kind === 'zone' || p.kind === 'build') { const [x, z] = padPos(p); add(x, .7, z, ['p:' + p.id], 1.1); } });
@@ -9675,7 +9706,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   { const bt = document.getElementById('boot'), t0 = performance.now(); let bpMax = 0; const bp = (f, t) => { f = Math.max(f, bpMax); bpMax = f; try { window.__bp && window.__bp(f, t); } catch {} };
     const parts = () => [hdReady || !HD_ON(), !!window.__pgLoaded && propsPending <= 0, !!window.__pgLoaded && (gfxLow || !window.PG_PEOPLE || !THREE.GLTFLoader || PPL.ready)];
     const reveal = () => { bootHold = false; try { paintMurals(); } catch (e) {} if (!bt) return; bp(1, 'Ready'); setTimeout(() => { bt.style.opacity = '0'; setTimeout(() => bt.remove(), 450); }, 120); };
-    const warm = () => { bp(.9, 'Baking the lighting · step 1 of 3'); setTimeout(() => { try { if (!gfxLow && PBR) { scene.updateMatrixWorld(true); AOB.sig = aoSig(); AOB.last = performance.now(); bakeAO(); } } catch (e) { console.warn('warm ao', e.message); } bp(.93, 'Building the shaders · step 2 of 3'); setTimeout(() => { try { // compile every prop's shaders now, behind the loading screen, so building something later (the lounge sofas, the silk pouf) never freezes the game
+    const warm = () => { try { layoutDeepen(); } catch (e) { console.warn('layout', e.message); } bp(.9, 'Baking the lighting · step 1 of 3'); setTimeout(() => { try { if (!gfxLow && PBR) { scene.updateMatrixWorld(true); AOB.sig = aoSig(); AOB.last = performance.now(); bakeAO(); } } catch (e) { console.warn('warm ao', e.message); } bp(.93, 'Building the shaders · step 2 of 3'); setTimeout(() => { try { // compile every prop's shaders now, behind the loading screen, so building something later (the lounge sofas, the silk pouf) never freezes the game
       const pre = new THREE.Group(); pre.position.set(0, -60, 0); for (const k in PROPS) pre.add(PROPS[k].scene.clone(true));
       try { if (PPL.ready) Object.keys(PPL.chars).forEach((nm, k) => { const o = pplCloneSkinned(PPL.chars[nm].scene); o.position.set(k * 1.5, 0, 0); pre.add(o); const o2 = pplCloneSkinned(PPL.chars[nm].scene); try { pplTintFit(o2, { hood: '#22f07c' }, '#22f07c'); } catch (e) {} o2.position.set(k * 1.5, 0, 3); pre.add(o2); }); } catch (e) {} // every crowd character's skinned shader compiles here too, not when the first shopper walks in
       scene.add(pre);
