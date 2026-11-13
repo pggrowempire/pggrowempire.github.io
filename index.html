@@ -1132,7 +1132,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
 
   // ---------- renderer ----------
   const stage = $('stage'), cv = $('gl'), fx = $('fx'), fctx = fx.getContext('2d');
-  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' }); renderer.info.autoReset = false; const FRC = { r: 0, c: 0, t: 0 }; function gpuName() { try { const gl = renderer.getContext(), e = gl.getExtension('WEBGL_debug_renderer_info'); return String(e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)).slice(0, 140); } catch (e) { return 'unknown'; } }
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   // graphics 3.0: physically based materials lit in linear space, encoded to sRGB on the way out (Low keeps the old toon path)
   const PBR = (() => { try { const m = localStorage.getItem('pgGfx') || 'auto'; if (m === 'low') return false; if (m === 'auto') { const pf = JSON.parse(localStorage.getItem('pgPerf') || 'null'); if (pf && pf.low) return false; } return true; } catch { return true; } })();
@@ -2651,7 +2651,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   // ---------- Ultra: live mirror reflection of the shop in the polished store floor ----------
   const reflRT = new THREE.WebGLRenderTarget(64, 64, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
   const mirCam = new THREE.PerspectiveCamera(); const camLook = new THREE.Vector3(), _up = new THREE.Vector3();
-  const REFL = { tex: { value: reflRT.texture }, m: { value: new THREE.Matrix4() }, k: { value: 0 } }, REFL_BG = new THREE.Color(0, 0, 0), REFL_FOG = new THREE.Fog('#000000', 1e4, 2e4); let reflN = 0;
+  const REFL = { tex: { value: reflRT.texture }, m: { value: new THREE.Matrix4() }, k: { value: 0 } }, REFL_BG = new THREE.Color(0, 0, 0), REFL_FOG = new THREE.Fog('#000000', 1e4, 2e4); let reflN = 0, reflEma = 0;
   floor.material.onBeforeCompile = sh => {
     sh.uniforms.reflTex = REFL.tex; sh.uniforms.reflM = REFL.m; sh.uniforms.reflK = REFL.k;
     sh.vertexShader = 'uniform mat4 reflM; varying vec4 vRefl;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vRefl = reflM * modelMatrix * vec4(transformed, 1.0);');
@@ -2666,11 +2666,11 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   if (GFX_MAX) setTimeout(() => { try { wetInit(); } catch (e) { console.warn('wet', e.message); } }, 0);
   function renderRefl() {
     if (gfxMode !== 'ultra' || gfxLow || PHONE || player.x > 37) { REFL.k.value = 0; WETK.value = 0; return; } // phones skip the mirror pass: it cost about 20 ms a frame on iPhone
-    if (PHONE && (++reflN & 1) && booted) return; const rs = PHONE ? .32 : GFX_MAX ? .85 : KING ? .62 : .5, w = Math.max(64, Math.round(cssW * DPR * rs)), h = Math.max(64, Math.round(cssH * DPR * rs)); if (reflRT.width !== w || reflRT.height !== h) reflRT.setSize(w, h);
+    if (booted && (PHONE || reflEma > .024) && (++reflN & 1)) return; const rs = PHONE ? .32 : GFX_MAX ? .85 : KING ? .62 : .5, w = Math.max(64, Math.round(cssW * DPR * rs)), h = Math.max(64, Math.round(cssH * DPR * rs)); if (reflRT.width !== w || reflRT.height !== h) reflRT.setSize(w, h);
     mirCam.copy(camera); mirCam.position.y = -camera.position.y; _up.set(0, 1, 0).applyQuaternion(camera.quaternion); _up.y = -_up.y; mirCam.up.copy(_up); mirCam.lookAt(camLook); mirCam.updateMatrixWorld(); mirCam.projectionMatrix.copy(camera.projectionMatrix);
     REFL.m.value.set(.5, 0, 0, .5, 0, .5, 0, .5, 0, 0, .5, .5, 0, 0, 0, 1).multiply(mirCam.projectionMatrix).multiply(mirCam.matrixWorldInverse);
     const fv = floor.visible, hv = heroRing.visible, au = renderer.shadowMap.autoUpdate, bg = scene.background, fg = scene.fog; floor.visible = false; heroRing.visible = false; renderer.shadowMap.autoUpdate = false; scene.background = REFL_BG; scene.fog = REFL_FOG;
-    renderer.setRenderTarget(reflRT); renderer.clear(); renderer.render(scene, mirCam); renderer.setRenderTarget(null);
+    const hid = GFX_MAX ? [] : scene.children.filter(o => o.visible && !o.isLight && (o.position.z > 9.5 || Math.abs(o.position.x) > 14)); for (const o of hid) o.visible = false; renderer.setRenderTarget(reflRT); renderer.clear(); renderer.render(scene, mirCam); renderer.setRenderTarget(null); for (const o of hid) o.visible = true;
     renderer.shadowMap.autoUpdate = au; floor.visible = fv; heroRing.visible = hv; scene.background = bg; scene.fog = fg; REFL.k.value = KING && (S.floor || 'concrete') === 'concrete' ? (GFX_MAX ? .7 : .58) : GFX_MAX ? .38 : .3; WETK.value = GFX_MAX ? .4 * (typeof rainA !== 'undefined' ? rainA : 0) : 0;
   }
   const player = { x: -4.6, z: 1.8, vx: 0, vz: 0, stack: [], t: 0 };
@@ -3740,7 +3740,7 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   let capLast = 0;
   function frame(now) {
     if (gfxMode === 'phone' && !bootHold && now - capLast < 31) { requestAnimationFrame(frame); return; } capLast = now; // Phone mode: a steady 30 frames a second instead of a jumpy 15-25
-    const dt = Math.min(.05, (now - last) / 1000); last = now; cashGuard(); let _pt = performance.now();
+    const dt = Math.min(.05, (now - last) / 1000); last = now; cashGuard(); let _pt = performance.now(); renderer.info.reset(); reflEma += (dt - reflEma) * .05;
     try { padPoll(); } catch {}
     if (booted && (dgT -= dt) <= 0) { dgT = 2.5; if (DG_DIRTY || !(++dgN % 4)) { DG_DIRTY = 0; try { deglare(); } catch (e) {} } }
     if (bootHold) { plSkip(); requestAnimationFrame(frame); return; } // the loading screen covers everything: give the CPU to the loaders
@@ -3754,10 +3754,10 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     hudT -= dt; if (hudT <= 0) { hudT = .2; hud(); }
     cardTick(dt); leafTick(dt); joyRingTick(); walkMarkTick(dt); _pt = plSeg('hud', _pt);
     if (grade) grade.uniforms.gt.value = (now % 10000) / 37;
-    ++linN; if (!booted || (SCENE_DIRTY && !(linN & 3)) || !(linN % 120)) { SCENE_DIRTY = 0; linScene(); } renderRefl();
+    ++linN; if (!booted || (SCENE_DIRTY && !(linN & 3)) || !(linN % 120)) { SCENE_DIRTY = 0; linScene(); } renderRefl(); FRC.r = renderer.info.render.calls;
     itemSync(); _pt = plSeg('lin', _pt);
-    if ((gfxMode !== 'ultra' || PHONE) && !gfxLow) { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = (gfxMode === 'phone' && phLvl >= 1 ? !(linN & (phLvl >= 3 ? 15 : 3)) : !(linN & 1)) || !booted; }
-    lightPick(); if (composer && !gfxLow) composer.render(); else renderer.render(scene, camera); _pt = plSeg('ren', _pt);
+    if (gfxMode === 'ultra' && !PHONE && !gfxLow && reflEma <= .024) renderer.shadowMap.autoUpdate = true; else if (!gfxLow) { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = (gfxMode === 'phone' && phLvl >= 1 ? !(linN & (phLvl >= 3 ? 15 : 3)) : !(linN & 1)) || !booted; }
+    lightPick(); if (composer && !gfxLow) composer.render(); else renderer.render(scene, camera); FRC.c = renderer.info.render.calls; FRC.t = renderer.info.render.triangles; _pt = plSeg('ren', _pt);
     drawFx(); drawTrim(); plFrame(plSeg('fx', _pt));
     perfT += dt; perfN++; if (running && !document.hidden && dt < .5) { anFr++; anFt += dt; }
     if (perfN >= 90) { const avg = perfT / perfN, perfSpan = (now - (perfW0 || now)) / 1000; perfW0 = now; perfN = 0; perfT = 0; if (PHONE && gfxMode === 'ultra' && running && !bootHold && !document.hidden) { if (avg > 1 / 24) { if ((ultraBad += perfSpan) >= 30) { ultraBad = 0; setGfx('phone'); toast('Switched to Phone graphics (smooth 30) to keep it smooth'); } } else ultraBad = Math.max(0, ultraBad - perfSpan); } if (gfxMode === 'phone') { if (running && !bootHold) { if (avg > 1 / 27 && phLvl < 3) { phLvl++; if (phLvl === 2) { sun.shadow.mapSize.set(512, 512); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } } } else if (avg > 1 / 27 && prScale > (LUXE ? .6 : .8)) { prScale = Math.max(LUXE ? .6 : .8, prScale - (LUXE ? .07 : .05)); resize(); } else if (avg < 1 / 29.5 && prScale < 1) { prScale = Math.min(1, prScale + .03); resize(); } } } else if (gfxMode === 'high' || gfxMode === 'ultra') { if (running && !gfxLow && !bootHold) { if (avg > 1 / 45 && prScale > .6) { prScale = Math.max(.6, prScale - .07); resize(); } else if (avg < 1 / 57 && prScale < 1) { prScale = Math.min(1, prScale + .04); resize(); } } } else if (gfxLow || !running) {} else if (avg > 1 / 40) { if (bloom && bloom.enabled) bloom.enabled = false; else if (tiltH && tiltH.enabled) tiltH.enabled = tiltV.enabled = false; else if (sun.shadow.mapSize.x > 1024) { sun.shadow.mapSize.set(1024, 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } } else if (prScale > .75) { prCap = prScale; prScale -= .12; resize(); } else if (sun.castShadow) { sun.castShadow = false; } else if (prScale > .55) { prCap = prScale; prScale -= .15; resize(); } else if (gfxMode === 'auto') setGfx('low', true); perfSave(); } else if (avg < 1 / 57 && prScale + .1 < prCap) { prScale = Math.min(1, prScale + .1); resize(); perfSave(); } }
@@ -5879,8 +5879,9 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
   try { const ab = $('anBtn'), al = () => { ab.textContent = 'Analytics: ' + (anOn ? 'on' : 'off'); }; al(); ab.addEventListener('click', () => { anOn = !anOn; try { localStorage.setItem('pgAnOff', anOn ? '0' : '1'); } catch (e) {} al(); toast(anOn ? 'Thanks! Anonymous stats help make the game better.' : 'Analytics off. Nothing more is sent.'); }); } catch (e) {}
   try { const cb = $('cleanBtn'); cb.textContent = 'Language: ' + (CLEAN ? 'Clean' : 'Street'); cb.addEventListener('click', () => { try { localStorage.setItem('pgClean', CLEAN ? '0' : '1'); } catch (e) {} try { save(); } catch (e) {} cb.textContent = 'Language: ' + (CLEAN ? 'Street' : 'Clean') + ' · reloading…'; setTimeout(() => location.reload(), 500); }); } catch (e) {}
   // ---------- what's new + one-time hints so players actually find the new stuff ----------
-  const GAME_VER = 102;
+  const GAME_VER = 103;
   const NEWS = [
+    ['Smoother PC', 'The mirror floor now costs about half as much on PCs that are running slow, and the performance log records more detail so slow PCs can be fixed properly.', 103],
     ['PC showcase, smoother phones', 'ON PC (High, Ultra and Max): the Kingpin shop now has real emerald and gold lights that shine on people and furniture, a sharper mirror-polished marble floor, and glow around the neon. ON PHONES: Kingpin and Luxe now trade a little sharpness for a steady frame rate on older phones. Street is still the fastest look on a phone.', 102],
     ['Kingpin, round two', 'The Kingpin look got darker and richer: the room is now lit by emerald neon and gold instead of flat light, the shelves are black-and-gold display cases with lit glass and green underglow, the counter is black lacquer with gold bands, the walls have gold caps and neon door frames, and the street outside stays slick so it mirrors the lights.', 101],
     ['The Kingpin look', 'A new look is the default: KINGPIN. Polished black marble with gold veins, matte black walls with gold trim, emerald neon, a gold crest on the floor, a framed graffiti mural on the back wall and an emerald velvet couch. Street on the outside, money on the inside. Switch between Kingpin, Street and Luxe any time in Settings › Style.', 100],
@@ -9362,13 +9363,13 @@ html.desk #menu .artcred { font-size: 11px; max-height: 64px; overflow-y: auto; 
     const n = Math.max(1, PL.n), s = PL.seg, ri = renderer.info.render, mem = performance.memory, m = document.querySelector('.modal:not([hidden])');
     PL.samples.push({ t: Math.round((Date.now() - PL.t0) / 1000), fps: +(1000 * PL.n / PL.wT).toFixed(1), avg: +(PL.ft / n).toFixed(1), worst: Math.round(PL.worst), slow: PL.slow,
       js: { upd: +(s.upd / n).toFixed(1), cam: +(s.cam / n).toFixed(1), hud: +(s.hud / n).toFixed(1), lin: +(s.lin / n).toFixed(1), ren: +(s.ren / n).toFixed(1), fx: +(s.fx / n).toFixed(1) }, sub: Object.fromEntries(Object.entries(PL.sub).filter(e => e[1] / n > .2).map(e => [e[0], +(e[1] / n).toFixed(1)])),
-      area: plArea(), gfx: gfxMode + (gfxLow ? '/low' : '') + (phLvl ? '/p' + phLvl : ''), pr: +prScale.toFixed(2), calls: ri.calls, tris: ri.triangles, tex: renderer.info.memory.textures, geo: renderer.info.memory.geometries,
+      area: plArea(), gfx: gfxMode + (gfxLow ? '/low' : '') + (phLvl ? '/p' + phLvl : ''), pr: +prScale.toFixed(2), calls: FRC.c, tris: FRC.t, rcalls: FRC.r, tex: renderer.info.memory.textures, geo: renderer.info.memory.geometries,
       cash: Math.round(S.cash), tot: Math.round(S.total), lv: S.level, ppl: typeof PPL !== 'undefined' ? PPL.list.length : 0, vis: typeof PPL !== 'undefined' ? PPL.vis || 0 : 0, modal: m ? m.id : '', run: running ? 1 : 0, heap: mem ? Math.round(mem.usedJSHeapSize / 1048576) : null });
     if (PL.samples.length > 240) PL.samples.shift();
     PL.n = 0; PL.ft = 0; PL.worst = 0; PL.slow = 0; PL.wT = 0; for (const k in s) s[k] = 0; PL.sub = {}; PL.fseg = null; PL.fsub = null;
     plBeat(); if (PL.on && Date.now() - PL.saveT > 30000) plSave(); }
   function plSession() { const sm = PL.samples, run = sm.filter(q => q.run), fp = run.map(q => q.fps).sort((a, b) => a - b);
-    return { sid: PL.sid, v: GAME_VER, at: new Date(PL.t0).toISOString(), last: Date.now(), mins: Math.round((Date.now() - PL.t0) / 60000), ua: navigator.userAgent, scr: screen.width + 'x' + screen.height + '@' + (devicePixelRatio || 1),
+    return { sid: PL.sid, v: GAME_VER, at: new Date(PL.t0).toISOString(), last: Date.now(), mins: Math.round((Date.now() - PL.t0) / 60000), ua: navigator.userAgent, gpu: gpuName(), scr: screen.width + 'x' + screen.height + '@' + (devicePixelRatio || 1),
       app: !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches), loc: S.loc || 0, lvl: S.level, style: THEME,
       sum: { fps: fp.length ? +(fp.reduce((a, b) => a + b, 0) / fp.length).toFixed(1) : null, low: fp.length ? fp[Math.floor(fp.length * .1)] : null, hitches: PL.hitches.length },
       econ: S.econ ? { pt: Math.round(S.econ.pt), m: S.econ.m.slice(-120) } : null, samples: sm, hitches: PL.hitches, events: PL.events, errs: typeof BUGLOG !== 'undefined' ? BUGLOG.slice() : [] }; }
